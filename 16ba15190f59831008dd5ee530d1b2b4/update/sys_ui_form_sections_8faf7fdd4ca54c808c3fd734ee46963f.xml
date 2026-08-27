@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_form_sections form_id="8faf7fdd4ca54c808c3fd734ee46963f" sys_domain="global" table="x_snc_habitat_demande_mobilite" version="3">
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>4f342e64303a4388922c8ed943ed467b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_habitat_demande_mobilite" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">8faf7fdd4ca54c808c3fd734ee46963f</sys_ui_form>
+            <sys_ui_section caption="Suivi de la demande" display_value="Suivi de la demande" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">1dea966feead4db7899a07716b643e4d</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>1</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>e09f8b0acb4b4aebb35ac908cdf2e3ff</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_habitat_demande_mobilite" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">8faf7fdd4ca54c808c3fd734ee46963f</sys_ui_form>
+            <sys_ui_section caption="Le demandeur" display_value="Le demandeur" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">dc6c67a6ac0c4ced8095ce88ebc6ec20</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>2</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>162814ba4d9a4de7880a09be1ae42345</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_habitat_demande_mobilite" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">8faf7fdd4ca54c808c3fd734ee46963f</sys_ui_form>
+            <sys_ui_section caption="Mobilité" display_value="Mobilité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">7fd5c9104b0042cfb925287c92f09713</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>3</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>489d8b8e2dd84d938e40e769ce1b1fda</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_habitat_demande_mobilite" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">8faf7fdd4ca54c808c3fd734ee46963f</sys_ui_form>
+            <sys_ui_section caption="Besoins exprimés" display_value="Besoins exprimés" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">fbd9f2ed929c44699139e337cfc71867</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>4</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>74b2dbea09c444c3a5fdbacb2bffb743</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_habitat_demande_mobilite" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">8faf7fdd4ca54c808c3fd734ee46963f</sys_ui_form>
+            <sys_ui_section caption="État interne" display_value="État interne" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">9b0c14bb5d4c454d9cc4f9ae72914284</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>5</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>d61f3fb324c34c8a9e14dbb6be3ab046</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_habitat_demande_mobilite" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">8faf7fdd4ca54c808c3fd734ee46963f</sys_ui_form>
+            <sys_ui_section caption="Dossiers métier associés" display_value="Dossiers métier associés" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">8db919e2a7fd453182f6918a71aca93f</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>6</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>15439de1ff344be4b57a2d11e0defd1e</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_habitat_demande_mobilite" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">8faf7fdd4ca54c808c3fd734ee46963f</sys_ui_form>
+            <sys_ui_section caption="Activité" display_value="Activité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">52afc322b8594906b5f2f5e7a50bdb55</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form action="INSERT_OR_UPDATE">
+            <name>x_snc_habitat_demande_mobilite</name>
+            <roles/>
+            <sys_class_name>sys_ui_form</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 21:00:45</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>8faf7fdd4ca54c808c3fd734ee46963f</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_habitat_demande_mobilite</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+            <sys_update_name>sys_ui_form_sections_8faf7fdd4ca54c808c3fd734ee46963f</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 21:00:45</sys_updated_on>
+            <sys_user/>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_form>
+    </sys_ui_form_sections>
+</record_update>

@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_lib_source_script">
+    <sys_ux_lib_source_script action="INSERT_OR_UPDATE">
+        <config_option/>
+        <engine>18</engine>
+        <externals/>
+        <inner_components/>
+        <name>DSFR Marianne - Thème DIADÈME CND</name>
+        <script><![CDATA[
+/* ============================================================================
+   DIADÈME — CSS DSFR (Design System de l'État Français)
+   Police Marianne + Variables CSS + Overrides composants Next Experience
+   
+   Conformité : RGAA 4.1 / WCAG 2.1 niveau AA
+   Auteur     : Équipe CND — Centre Numérique de la Défense
+   
+   RÈGLE FONDAMENTALE :
+   Le Bleu France (#000091) est EXCLUSIVEMENT réservé aux éléments interactifs.
+   Les titres non cliquables restent TOUJOURS en #161616.
+   ============================================================================ */
+
+/* ============================================================================
+   1. @FONT-FACE — POLICE MARIANNE
+   ----------------------------------------------------------------------------
+   Déclarations des graisses utilisées dans le DSFR :
+     - Regular (400) : corps de texte
+     - Medium  (500) : sous-titres, labels
+     - Bold    (700) : titres principaux, boutons
+   
+   Les fichiers WOFF2 sont servis depuis le CDN officiel du DSFR.
+   En cas d'indisponibilité, le fallback Arial est activé (métriques proches).
+   
+   NOTE : Si votre instance n'a pas accès au CDN externe, remplacez les URLs
+   par le chemin vers les fichiers uploadés dans sys_attachment ou un CDN interne.
+   ============================================================================ */
+
+/* Marianne Regular (400) — Texte courant */
+@font-face {
+    font-family: "Marianne";
+    src: url("/fonts/Marianne-Regular.woff2") format("woff2"),
+         url("/fonts/Marianne-Regular.woff") format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Marianne Regular Italic (400i) — Emphase */
+@font-face {
+    font-family: "Marianne";
+    src: url("/fonts/Marianne-Regular_Italic.woff2") format("woff2"),
+         url("/fonts/Marianne-Regular_Italic.woff") format("woff");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+/* Marianne Medium (500) — Sous-titres, labels actifs */
+@font-face {
+    font-family: "Marianne";
+    src: url("/fonts/Marianne-Medium.woff2") format("woff2"),
+         url("/fonts/Marianne-Medium.woff") format("woff");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Marianne Bold (700) — Titres h1-h3, boutons */
+@font-face {
+    font-family: "Marianne";
+    src: url("/fonts/Marianne-Bold.woff2") format("woff2"),
+         url("/fonts/Marianne-Bold.woff") format("woff");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Marianne ExtraBold (800) — Titres très importants */
+@font-face {
+    font-family: "Marianne";
+    src: url("/fonts/Marianne-ExtraBold.woff2") format("woff2"),
+         url("/fonts/Marianne-ExtraBold.woff") format("woff");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ============================================================================
+   2. VARIABLES CSS PERSONNALISÉES (:root)
+   ----------------------------------------------------------------------------
+   Toutes les variables DSFR en custom properties CSS.
+   Ces variables sont utilisées par les overrides de composants ci-dessous
+   et peuvent être consommées par n'importe quel composant personnalisé.
+   
+   Convention de nommage :
+     --dsfr-[catégorie]-[variante]-[propriété]-[état]
+   
+   ACCESSIBILITÉ (WCAG 2.1 AA) :
+   Tous les ratios de contraste texte/fond respectent le minimum de 4.5:1
+   pour le texte normal et 3:1 pour le texte large (≥18px ou ≥14px bold).
+   ============================================================================ */
+
+:root {
+    /* --- Couleurs primaires --- */
+    --dsfr-bleu-france: #000091;
+    --dsfr-bleu-france-hover: #1212FF;
+    --dsfr-bleu-france-active: #000050;
+    --dsfr-bleu-france-light: #F5F5FE;
+    --dsfr-bleu-france-border: #CACAFB;
+
+    /* --- Couleur d'accent (critique) --- */
+    --dsfr-rouge-marianne: #E1000F;
+    --dsfr-rouge-marianne-hover: #C0000D;
+    --dsfr-rouge-marianne-active: #91000A;
+
+    /* --- Texte (RÈGLE : jamais de bleu sur un titre non cliquable) --- */
+    --dsfr-texte-titre: #161616;
+    --dsfr-texte-courant: #3A3A3A;
+    --dsfr-texte-mention: #666666;
+
+    /* --- Fonds --- */
+    --dsfr-fond-principal: #FFFFFF;
+    --dsfr-fond-alternatif: #F6F6F6;
+    --dsfr-fond-bleu-clair: #F5F5FE;
+
+    /* --- Bordures --- */
+    --dsfr-bordure-grise: #DDDDDD;
+    --dsfr-bordure-bleue: #CACAFB;
+
+    /* --- Couleurs système --- */
+    --dsfr-succes: #18753C;
+    --dsfr-succes-fond: #B8FEC9;
+    --dsfr-avertissement: #B34000;
+    --dsfr-avertissement-fond: #FFE9D1;
+    --dsfr-info: #0063CB;
+    --dsfr-info-fond: #E0EDFF;
+    --dsfr-erreur: #CE0500;
+    --dsfr-erreur-fond: #FFE5E6;
+
+    /* --- Focus RGAA --- */
+    --dsfr-focus-outline: #0A76F6;
+    --dsfr-focus-offset: 2px;
+
+    /* --- Rayon de bord --- */
+    --dsfr-border-radius: 8px;
+
+    /* --- Typographie --- */
+    --dsfr-font-family: "Marianne", Arial, sans-serif;
+    --dsfr-font-size-base: 1rem;
+    --dsfr-line-height-base: 1.5;
+}
+
+/* ============================================================================
+   3. STYLES GLOBAUX
+   ----------------------------------------------------------------------------
+   Application de la police Marianne et des couleurs de base à l'ensemble
+   de l'interface Next Experience.
+   ============================================================================ */
+
+/* Application globale de Marianne (portée au shadow DOM host) */
+:host,
+:root,
+body {
+    font-family: var(--dsfr-font-family);
+    color: var(--dsfr-texte-courant);
+    line-height: var(--dsfr-line-height-base);
+}
+
+/* ============================================================================
+   4. FOCUS CLAVIER — Conformité RGAA critère 10.7 / WCAG 2.4.7
+   ----------------------------------------------------------------------------
+   Tout élément focusable DOIT avoir un indicateur visible au focus clavier.
+   
+   Spécifications DSFR :
+     - Outline de 2px solid #0A76F6
+     - Outline-offset de 2px (espace entre l'élément et l'outline)
+     - Ne PAS masquer le focus avec outline: none sans alternative
+   
+   Le sélecteur :focus-visible cible uniquement le focus clavier,
+   pas le focus au clic souris (comportement natif navigateur moderne).
+   ============================================================================ */
+
+*:focus-visible {
+    outline: 2px solid var(--dsfr-focus-outline) !important;
+    outline-offset: var(--dsfr-focus-offset) !important;
+}
+
+/* ============================================================================
+   5. OVERRIDES COMPOSANT : now-button
+   ----------------------------------------------------------------------------
+   Adaptation des boutons Next Experience aux standards DSFR :
+     - Coins arrondis à 8px (au lieu des 4px par défaut)
+     - Transitions fluides pour les changements d'état
+     - Focus conforme RGAA
+   ============================================================================ */
+
+now-button {
+    --now-button--border-radius: var(--dsfr-border-radius);
+}
+
+now-button::part(button) {
+    border-radius: var(--dsfr-border-radius);
+    font-family: var(--dsfr-font-family);
+    font-weight: 500;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+now-button::part(button):focus-visible {
+    outline: 2px solid var(--dsfr-focus-outline);
+    outline-offset: var(--dsfr-focus-offset);
+}
+
+/* ============================================================================
+   6. OVERRIDES COMPOSANT : now-card
+   ----------------------------------------------------------------------------
+   Les cartes DSFR se distinguent par :
+     - Coins arrondis à 8px
+     - Bordure grise subtile (#DDDDDD)
+     - Ombre portée douce au survol
+     - Titre en #161616 (JAMAIS en bleu — il n'est pas cliquable)
+     - Bordure bleue (#CACAFB) au survol pour signaler l'interactivité
+   ============================================================================ */
+
+now-card {
+    --now-card--border-radius: var(--dsfr-border-radius);
+    border-radius: var(--dsfr-border-radius);
+    border: 1px solid var(--dsfr-bordure-grise);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+now-card:hover {
+    border-color: var(--dsfr-bordure-bleue);
+    box-shadow: 0 4px 12px rgba(0, 0, 18, 0.08);
+}
+
+/* Titre de carte : TOUJOURS en neutre, JAMAIS en bleu */
+now-card::part(header),
+now-card .now-card-header {
+    color: var(--dsfr-texte-titre);
+    font-family: var(--dsfr-font-family);
+    font-weight: 600;
+}
+
+now-card:focus-visible {
+    outline: 2px solid var(--dsfr-focus-outline);
+    outline-offset: var(--dsfr-focus-offset);
+}
+
+/* ============================================================================
+   7. OVERRIDES COMPOSANT : now-alert
+   ----------------------------------------------------------------------------
+   Les alertes DSFR utilisent un système de 4 sévérités :
+     - info       : bleu institutionnel (information neutre)
+     - positive   : vert (succès, confirmation)
+     - warning    : orange (avertissement, action nécessaire)
+     - critical   : rouge (erreur, action bloquante)
+   
+   Chaque alerte a :
+     - Un fond très clair de la couleur de sévérité
+     - Une bordure gauche de 4px dans la couleur vive
+     - Un texte foncé pour maximiser le contraste
+     - Une icône dans la couleur de sévérité
+   
+   ACCESSIBILITÉ :
+     Le texte foncé sur fond clair garantit un ratio ≥ 5.5:1 minimum.
+     L'information n'est JAMAIS transmise par la couleur seule (critère RGAA 3.1) :
+     une icône et un texte accompagnent toujours la couleur.
+   ============================================================================ */
+
+now-alert {
+    border-radius: var(--dsfr-border-radius);
+    font-family: var(--dsfr-font-family);
+}
+
+/* Alerte Information */
+now-alert[type="info"],
+now-alert[status="info"] {
+    background-color: var(--dsfr-info-fond);
+    border-left: 4px solid var(--dsfr-info);
+    color: #003D79;
+}
+
+/* Alerte Succès */
+now-alert[type="positive"],
+now-alert[status="positive"] {
+    background-color: var(--dsfr-succes-fond);
+    border-left: 4px solid var(--dsfr-succes);
+    color: #104E28;
+}
+
+/* Alerte Avertissement */
+now-alert[type="warning"],
+now-alert[status="warning"] {
+    background-color: var(--dsfr-avertissement-fond);
+    border-left: 4px solid var(--dsfr-avertissement);
+    color: #822F00;
+}
+
+/* Alerte Critique / Erreur */
+now-alert[type="critical"],
+now-alert[status="critical"] {
+    background-color: var(--dsfr-erreur-fond);
+    border-left: 4px solid var(--dsfr-erreur);
+    color: #91000A;
+}
+
+/* ============================================================================
+   8. OVERRIDES COMPOSANT : now-badge
+   ----------------------------------------------------------------------------
+   Les badges DSFR sont des indicateurs compacts utilisant la même logique
+   de sévérité que les alertes : fond clair + texte foncé de la même famille.
+   
+   Coins arrondis à 4px (plus petits que les boutons/cartes car composant
+   compact) — exception au 8px global pour des raisons de proportion.
+   ============================================================================ */
+
+now-badge {
+    font-family: var(--dsfr-font-family);
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+/* Badge primaire — Bleu France */
+now-badge[status="default"],
+now-badge[variant="primary"] {
+    background-color: var(--dsfr-bleu-france);
+    color: #FFFFFF;
+}
+
+/* Badge secondaire — Fond bleu clair */
+now-badge[variant="secondary"] {
+    background-color: var(--dsfr-bleu-france-light);
+    color: var(--dsfr-bleu-france);
+}
+
+/* Badge succès */
+now-badge[status="positive"] {
+    background-color: var(--dsfr-succes-fond);
+    color: #104E28;
+}
+
+/* Badge critique */
+now-badge[status="critical"] {
+    background-color: var(--dsfr-erreur-fond);
+    color: #91000A;
+}
+
+/* Badge avertissement */
+now-badge[status="warning"] {
+    background-color: var(--dsfr-avertissement-fond);
+    color: #822F00;
+}
+
+/* Badge information */
+now-badge[status="info"] {
+    background-color: var(--dsfr-info-fond);
+    color: #003D79;
+}
+
+/* ============================================================================
+   9. TITRES — Renforcement de la règle DSFR
+   ----------------------------------------------------------------------------
+   RAPPEL CRITIQUE : Les titres ne sont JAMAIS en Bleu France.
+   Cette règle est renforcée ici via des sélecteurs globaux pour contrer
+   tout style par défaut des composants qui colorerait les headings en bleu.
+   
+   Seuls les éléments interactifs (<a>, <button>, [role="link"]) peuvent
+   être en Bleu France.
+   ============================================================================ */
+
+h1, h2, h3, h4, h5, h6,
+[class*="heading"],
+[class*="title"] {
+    color: var(--dsfr-texte-titre);
+    font-family: var(--dsfr-font-family);
+}
+
+h1 { font-weight: 700; }
+h2 { font-weight: 700; }
+h3 { font-weight: 600; }
+h4 { font-weight: 600; }
+h5 { font-weight: 500; }
+h6 { font-weight: 500; }
+
+/* Exception : un titre cliquable (lien) PEUT être en bleu */
+h1 > a, h2 > a, h3 > a, h4 > a, h5 > a, h6 > a {
+    color: var(--dsfr-bleu-france);
+    text-decoration: underline;
+}
+
+h1 > a:hover, h2 > a:hover, h3 > a:hover,
+h4 > a:hover, h5 > a:hover, h6 > a:hover {
+    color: var(--dsfr-bleu-france-hover);
+}
+
+/* ============================================================================
+   10. FORMULAIRES
+   ----------------------------------------------------------------------------
+   Les champs de saisie DSFR ont :
+     - Bordure foncée au repos (#3A3A3A) — ratio 11.5:1 sur fond blanc
+       (conforme WCAG 1.4.11 — contraste des composants UI ≥ 3:1)
+     - Bordure bleue au focus (#0A76F6)
+     - Coins arrondis à 8px
+     - Police Marianne
+   ============================================================================ */
+
+input, select, textarea,
+[class*="form-control"] {
+    font-family: var(--dsfr-font-family);
+    border-radius: var(--dsfr-border-radius);
+    border: 1px solid var(--dsfr-texte-courant);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus,
+[class*="form-control"]:focus {
+    border-color: var(--dsfr-focus-outline);
+    box-shadow: 0 0 0 2px rgba(10, 118, 246, 0.25);
+    outline: none;
+}
+]]></script>
+        <script_link/>
+        <sys_class_name>sys_ux_lib_source_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-09 12:26:40</sys_created_on>
+        <sys_id>da4e6b1d956e4a24b67e2de1723828af</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>DSFR Marianne - Thème DIADÈME CND</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sys_ux_lib_source_script_da4e6b1d956e4a24b67e2de1723828af</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:26:40</sys_updated_on>
+        <type>script</type>
+    </sys_ux_lib_source_script>
+</record_update>

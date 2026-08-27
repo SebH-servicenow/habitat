@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_instance">
+    <sp_instance action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <advanced_placeholder_dimensions>false</advanced_placeholder_dimensions>
+        <async_load>false</async_load>
+        <async_load_device_type>desktop,tablet,mobile</async_load_device_type>
+        <async_load_trigger>viewport</async_load_trigger>
+        <class_name/>
+        <color>default</color>
+        <css/>
+        <glyph/>
+        <id/>
+        <order>1</order>
+        <placeholder_dimensions>{
+	"mobile": {
+		"height": "250px",
+		"width": "100%"
+	},
+	"desktop": {
+		"height": "250px",
+		"width": "100%"
+	},
+	"tablet": {
+		"height": "250px",
+		"width": "100%"
+	}
+}</placeholder_dimensions>
+        <placeholder_dimensions_script><![CDATA[function evaluateConfig(options) { return {
+	"mobile": {
+		"height": "250px",
+		"width": "100%"
+	},
+	"desktop": {
+		"height": "250px",
+		"width": "100%"
+	},
+	"tablet": {
+		"height": "250px",
+		"width": "100%"
+	}
+}; }]]></placeholder_dimensions_script>
+        <placeholder_template>&lt;!--
+	AngularJS template with configurable options.
+	Use the "options" object to control dynamic behavior.
+	Example: Display an element when max row count is 10:
+	&lt;div ng-if="options.maxRowCount === 10"&gt;&lt;/div&gt;
+	The "skeleton-container" class is used for loading placeholders.
+--&gt;
+	&lt;div class="skeleton-container"&gt;
+	&lt;!-- Header Skeleton --&gt;
+	&lt;div class="skeleton-box skeleton-header"&gt;&lt;/div&gt;
+	&lt;!-- Body Skeleton --&gt;
+	&lt;div class="skeleton-box skeleton-line"&gt;&lt;/div&gt;
+	&lt;div class="skeleton-box skeleton-line small"&gt;&lt;/div&gt;
+	&lt;div class="skeleton-box skeleton-line medium"&gt;&lt;/div&gt;
+&lt;/div&gt;</placeholder_template>
+        <preserve_placeholder_size>false</preserve_placeholder_size>
+        <roles/>
+        <short_description/>
+        <size>md</size>
+        <sp_column display_value="1">e406524badd14050a88f0ce9cf65713b</sp_column>
+        <sp_widget display_value="Espace de traitement agent (DSFR)">2fab58e6c172408d874ef3857d012ea4</sp_widget>
+        <sys_class_name>sp_instance</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-08 05:19:41</sys_created_on>
+        <sys_id>3b8cc36726574b2cb0b0ce393d7328b3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sp_instance_3b8cc36726574b2cb0b0ce393d7328b3</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-08 05:19:41</sys_updated_on>
+        <title/>
+        <url/>
+        <widget_parameters><![CDATA[{"flux":"logement_atrium","file_label":"Atrium"}]]></widget_parameters>
+    </sp_instance>
+    <sys_translated_text action="delete_multiple" query="documentkey=3b8cc36726574b2cb0b0ce393d7328b3"/>
+</record_update>

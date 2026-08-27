@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_section caption="Demande de mobilité" section_id="41d6c1c63a474a6cb4fb42781187fe9e" sys_domain="global" table="x_snc_habitat_demande_mobilite" version="3" view="">
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.begin_split</element>
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-07 09:07:18</sys_created_on>
+            <sys_id>e9ac9f317f2b464fb7a4bbc0b0eb7f92</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande de mobilité" display_value="Demande de mobilité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">41d6c1c63a474a6cb4fb42781187fe9e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-07 09:07:18</sys_updated_on>
+            <sys_user/>
+            <type>.begin_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>number</element>
+            <position>1</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-07 09:07:18</sys_created_on>
+            <sys_id>4d70bdc4fc834b61a04fcd63d0554f53</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande de mobilité" display_value="Demande de mobilité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">41d6c1c63a474a6cb4fb42781187fe9e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-07 09:07:18</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>state</element>
+            <position>2</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-07 09:07:18</sys_created_on>
+            <sys_id>eb9f6123978446da9319607cff7c9a8b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande de mobilité" display_value="Demande de mobilité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">41d6c1c63a474a6cb4fb42781187fe9e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-07 09:07:18</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>priority</element>
+            <position>3</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-07 09:07:18</sys_created_on>
+            <sys_id>e50f9930382143b596a9553555a7b1d2</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande de mobilité" display_value="Demande de mobilité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">41d6c1c63a474a6cb4fb42781187fe9e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-07 09:07:18</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>opened_at</element>
+            <position>4</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-07 09:07:18</sys_created_on>
+            <sys_id>e071b3d765ee4e3281831c7450d96ba4</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande de mobilité" display_value="Demande de mobilité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">41d6c1c63a474a6cb4fb42781187fe9e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-07 09:07:18</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>5</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-07 09:07:18</sys_created_on>
+            <sys_id>aac67b26ae9941678098614ed84aa6cd</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande de mobilité" display_value="Demande de mobilité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">41d6c1c63a474a6cb4fb42781187fe9e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-07 09:07:18</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>assigned_to</element>
+            <position>6</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-07 09:07:18</sys_created_on>
+            <sys_id>486d71e410b84fa7b83c7c9755ccb634</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande de mobilité" display_value="Demande de mobilité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">41d6c1c63a474a6cb4fb42781187fe9e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-07 09:07:18</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>assignment_group</element>
+            <position>7</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-07 09:07:18</sys_created_on>
+            <sys_id>d45fd27deed441319c1a6fbede264163</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande de mobilité" display_value="Demande de mobilité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">41d6c1c63a474a6cb4fb42781187fe9e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-07 09:07:18</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>est_brouillon</element>
+            <position>8</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-07 09:07:18</sys_created_on>
+            <sys_id>4e831a67ef0d4c2ebf62ef3831fd5b64</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande de mobilité" display_value="Demande de mobilité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">41d6c1c63a474a6cb4fb42781187fe9e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-07 09:07:18</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>etape_visible_usager</element>
+            <position>9</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-07 09:07:18</sys_created_on>
+            <sys_id>99a059b9f286475993a5d0cd38926a12</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande de mobilité" display_value="Demande de mobilité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">41d6c1c63a474a6cb4fb42781187fe9e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-07 09:07:18</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.end_split</element>
+            <position>10</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-07 09:07:18</sys_created_on>
+            <sys_id>2d0af98a85f54e7c95d5471274d609b7</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande de mobilité" display_value="Demande de mobilité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">41d6c1c63a474a6cb4fb42781187fe9e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-07 09:07:18</sys_updated_on>
+            <sys_user/>
+            <type>.end_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>short_description</element>
+            <position>11</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-07 09:07:18</sys_created_on>
+            <sys_id>db40660369624ee7a123b939c0e24cfa</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande de mobilité" display_value="Demande de mobilité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="Default view">41d6c1c63a474a6cb4fb42781187fe9e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-07 09:07:18</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_section action="INSERT_OR_UPDATE">
+            <caption>Demande de mobilité</caption>
+            <header>false</header>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 21:00:45</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>41d6c1c63a474a6cb4fb42781187fe9e</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_habitat_demande_mobilite</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+            <sys_update_name>sys_ui_section_41d6c1c63a474a6cb4fb42781187fe9e</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 21:00:45</sys_updated_on>
+            <sys_user/>
+            <title>false</title>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+</record_update>

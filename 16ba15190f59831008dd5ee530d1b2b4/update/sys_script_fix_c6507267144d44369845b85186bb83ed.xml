@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_fix">
+    <sys_script_fix action="INSERT_OR_UPDATE">
+        <before>false</before>
+        <description>Corrige les enregistrements créés avant installation des sys_number (TASK → HAB pour demandes, TASK → DOS pour dossiers)</description>
+        <name>Fix numéros TASK vers HAB et DOS</name>
+        <record_for_rollback>false</record_for_rollback>
+        <script><![CDATA[
+(function() {
+    // Fix demandes mobilité
+    var gr = new GlideRecord('x_snc_habitat_demande_mobilite');
+    gr.addQuery('number', 'STARTSWITH', 'TASK');
+    gr.query();
+    var counter = 1006;
+    while (gr.next()) {
+        var pad = '0000000' + counter;
+        gr.setValue('number', 'HAB' + pad.substring(pad.length - 7));
+        gr.setWorkflow(false);
+        gr.update();
+        gs.info('Fixed demande: ' + gr.number);
+        counter++;
+    }
+    // Update sys_number counter
+    var sn = new GlideRecord('sys_number');
+    sn.addQuery('category', 'x_snc_habitat_demande_mobilite');
+    sn.query();
+    if (sn.next()) {
+        sn.setValue('number', counter);
+        sn.update();
+    }
+
+    // Fix dossiers métier
+    var gd = new GlideRecord('x_snc_habitat_dossier_metier');
+    gd.addQuery('number', 'STARTSWITH', 'TASK');
+    gd.orderBy('sys_created_on');
+    gd.query();
+    var dcounter = 1021;
+    while (gd.next()) {
+        var dpad = '0000000' + dcounter;
+        gd.setValue('number', 'DOS' + dpad.substring(dpad.length - 7));
+        gd.setWorkflow(false);
+        gd.update();
+        gs.info('Fixed dossier: ' + gd.number);
+        dcounter++;
+    }
+    // Update sys_number counter for dossiers
+    var sd = new GlideRecord('sys_number');
+    sd.addQuery('category', 'x_snc_habitat_dossier_metier');
+    sd.query();
+    if (sd.next()) {
+        sd.setValue('number', dcounter);
+        sd.update();
+    }
+
+    gs.info('Fix complete: ' + (counter - 1006) + ' demandes, ' + (dcounter - 1021) + ' dossiers fixed');
+})();
+]]></script>
+        <sys_class_name>sys_script_fix</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-06 20:08:00</sys_created_on>
+        <sys_id>c6507267144d44369845b85186bb83ed</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Fix numéros demandes mobilité TASK → HAB</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sys_script_fix_c6507267144d44369845b85186bb83ed</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-06 20:08:00</sys_updated_on>
+        <unloadable>false</unloadable>
+    </sys_script_fix>
+</record_update>

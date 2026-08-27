@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_hub_flow">
+    <sys_hub_flow action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>timeFromCreateToActivate=400836000</attributes>
+        <authored_on_release_version/>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from/>
+        <copied_from_name/>
+        <description>Flow BCC déclenché à la création d'un dossier métier de type BCC.</description>
+        <display_name_after_preview/>
+        <flow_priority>MEDIUM</flow_priority>
+        <generation_source>fluent</generation_source>
+        <internal_name>habitat__bcc</internal_name>
+        <label_cache>[{"name":"Created_1.current","label":"Trigger - Record Created➛x_snc_habitat_dossier_metier Record","type":"reference","base_type":"reference","usedInstances":{"aadfb1fb-c052-424a-881c-261ab72883b2":["record"]},"attributes":{}}]</label_cache>
+        <master_snapshot>8b856d590f99831008dd5ee530d1b2c7</master_snapshot>
+        <master_snapshot_digest/>
+        <name>Habitat - BCC</name>
+        <natlang/>
+        <outputs/>
+        <pre_compiled>false</pre_compiled>
+        <remote_trigger_id>f09e197a2b158350d2bef8c76e91bf67</remote_trigger_id>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <show_draft_actions>false</show_draft_actions>
+        <show_triggered_flows>false</show_triggered_flows>
+        <status>published</status>
+        <substatus/>
+        <sys_class_name>sys_hub_flow</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:39</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>2d3afd84e8e34c8cbc5a2d66097ea5de</sys_id>
+        <sys_mod_count>91</sys_mod_count>
+        <sys_name>Habitat - BCC</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sys_hub_flow_2d3afd84e8e34c8cbc5a2d66097ea5de</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:17</sys_updated_on>
+        <type>flow</type>
+        <updation_source/>
+        <version>2</version>
+        <version_record/>
+    </sys_hub_flow>
+    <sys_translated_text action="delete_multiple" query="documentkey=2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+    <sys_variable_value action="delete_multiple" query="document_key=2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+    <sys_flow_record_trigger action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <condition table="x_snc_habitat_dossier_metier">type_flux=bcc<item endquery="false" field="type_flux" goto="false" newquery="false" operator="=" or="false" value="bcc"/>
+        </condition>
+        <name/>
+        <on_delete>false</on_delete>
+        <on_insert>true</on_insert>
+        <on_update>false</on_update>
+        <published_version/>
+        <run_flow_in>background</run_flow_in>
+        <run_on_extended>false</run_on_extended>
+        <run_when_setting>both</run_when_setting>
+        <run_when_user_list/>
+        <run_when_user_setting>any</run_when_user_setting>
+        <sys_class_name>sys_flow_record_trigger</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-09 12:27:17</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>f09e197a2b158350d2bef8c76e91bf67</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:17</sys_updated_on>
+        <table>x_snc_habitat_dossier_metier</table>
+        <trigger_definition/>
+    </sys_flow_record_trigger>
+    <sys_trigger_runner_mapping action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <data>{"run_flow_in":"background","run_when_user_list":[],"run_when_setting":"both","run_when_user_setting":"any","run_on_extended":"false"}</data>
+        <identifier>2d3afd84e8e34c8cbc5a2d66097ea5de</identifier>
+        <identifier_type>flow</identifier_type>
+        <runner>FDTriggerRunner</runner>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-09 12:27:17</sys_created_on>
+        <sys_id>fc9e197a2b158350d2bef8c76e91bf67</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:17</sys_updated_on>
+        <trigger display_value="">f09e197a2b158350d2bef8c76e91bf67</trigger>
+    </sys_trigger_runner_mapping>
+    <sys_trigger_runner_mapping action="delete_multiple" query="identifier=2d3afd84e8e34c8cbc5a2d66097ea5de^sys_idNOT INfc9e197a2b158350d2bef8c76e91bf67"/>
+    <sys_hub_flow_stage action="delete_multiple" query="flow=2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+    <sys_flow_cat_variable_model action="delete_multiple" query="id=2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+    <sys_hub_flow_input action="delete_multiple" query="model=2d3afd84e8e34c8cbc5a2d66097ea5de^sys_idNOT IN909ed57a2b158350d2bef8c76e91bf72,9c9ed57a2b158350d2bef8c76e91bf53"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Habitat - BCC">2d3afd84e8e34c8cbc5a2d66097ea5de</model>
+        <model_id>2d3afd84e8e34c8cbc5a2d66097ea5de</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_2d3afd84e8e34c8cbc5a2d66097ea5de</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-09 12:27:14</sys_created_on>
+        <sys_id>909ed57a2b158350d2bef8c76e91bf72</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:14</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=909ed57a2b158350d2bef8c76e91bf72"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Habitat - BCC">2d3afd84e8e34c8cbc5a2d66097ea5de</model>
+        <model_id>2d3afd84e8e34c8cbc5a2d66097ea5de</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_2d3afd84e8e34c8cbc5a2d66097ea5de</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-09 12:27:14</sys_created_on>
+        <sys_id>9c9ed57a2b158350d2bef8c76e91bf53</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:14</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=9c9ed57a2b158350d2bef8c76e91bf53"/>
+    <sys_hub_flow_output action="delete_multiple" query="model=2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+    <sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=2d3afd84e8e34c8cbc5a2d66097ea5de^sys_idNOT INad219fef40934bbd8aa4cad13bcc42bd"/>
+    <sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Habitat - BCC">2d3afd84e8e34c8cbc5a2d66097ea5de</flow>
+        <generation_source/>
+        <name>Created</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:39</sys_created_on>
+        <sys_id>ad219fef40934bbd8aa4cad13bcc42bd</sys_id>
+        <sys_mod_count>45</sys_mod_count>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:15</sys_updated_on>
+        <trigger_definition display_value="Created">798916a0c31322002841b63b12d3ae7c</trigger_definition>
+        <trigger_inputs>H4sIAAAAAAAA/+1XTW/bMAz9K4JPG5ABHXbrbV8FAnQr0HbboSsM2aITYYqUSXQSr8h/H+WPRHWc1m3jbRh6ckQp4iP5nkRd3URo5WQCdqwdcp3CReHGIjqOolGkeAKKfl7yRAGNpUawmqvLYg5kRm+ONZ/5OQFz0AI0Vn9Np0amcCodja+uR9GMa8HR2CI6RpvDKMqsmV3CbK440l4ZV46Mxgqw0fHro6NRVO5bO6ENF1zlfryKnU7jKU8kcoyFcU6CjWeA9PEwpKMti6/9VqdTqYQFXWGcc0s+0SO42Ym9BQc7UlCjJ+ywQp8MsQksCL+2WODiTKsiWLJy8heU/88dxEFC6xXZxdQszyEDQpzCidSlu3pSmZSrzYgjVTXJERzFsl5v8nIiQdXFdamVc3ybolw0BViP+rDhPNfsTLOPdYyszJDbpUdFgXuocUNRwc/cB1RGnjWV8yyhxdlp4NVoluaWokdG+WRNlhk2CLLxjE+gckP7KkgxKEL2xYWjT5LYoCdB7HuglPO7WFQRAmqI8RQI111E6SsUm+vY6HhDva1kGvwtbTTmHiLYW/K9vrHFgX9VGxEXC89z0VBuALF8m4JmF0ClNv6L6Et+YLkkBqdtimbGsndkZ2PviZfgS+F8NvpVaKuxDacgTeSQW4chUF9n1qDdA2wwXH0w0daWHR7Uk7W+JFbFbsOmxW0itLReW3tKfQ9h9zt/VnugOmWWxJdDC5zrYkff3pPUJOmCpYacrXAwpSQ8/TGxJtdiH4rtCvZCQMZzhS+Hu5KNhbvh3F7xN4XqEdHpF2o0TGZbqeFcT71uKdfp9lmdVareGy0kVkd3W5vNlHvQU+aBbEgDAA0XfHGoVvnqe3509EYkabrLic41PbgRBtwBATtiH4wb9avvsdRYco0uRhNzIeIA8eahMDMC1IegcjUfSALzHF20DupKvermKTdQu1d2DQP1el1XATUq/hqgpNvBDl2jITZZZ6MkM1Ynh14HScFwCoRJ0RFEO5eohmwufUHb0D4YRhPM/hFwh2nmPJKOjq4qd+tIqIwP6edajLzH+fOd0ZW+Upk7ap4oKSBW1dzhL4+SBwG0zsrV3hvO7BLmMWypw73LIXak4D/kyvVv4itC+ygVAAA=</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_create</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="delete_multiple" query="flow=2d3afd84e8e34c8cbc5a2d66097ea5de^sys_idNOT INaadfb1fbc052424a881c261ab72883b2,c36b80f09a064e98a09ad958a8175167"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="">f9d01dd2c31332002841b63b12d3aea1</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot/>
+        <display_text/>
+        <flow display_value="Habitat - BCC">2d3afd84e8e34c8cbc5a2d66097ea5de</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:39</sys_created_on>
+        <sys_id>aadfb1fbc052424a881c261ab72883b2</sys_id>
+        <sys_mod_count>45</sys_mod_count>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:15</sys_updated_on>
+        <ui_id>aadfb1fb-c052-424a-881c-261ab72883b2</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1UXW/aMBT9K8jPEUoIRS1vEwxp0tZu7dSXrotu7Buw5DiZ7VAY4r/vOgkholXbSX1YpfES7qfPuT7XdzumIUc2ZQ5ShUltBGwNqvLOTWI1T1aQSgcuEYW1Ek2So6MPpQlpSwXb29dll2Cou6P/0x3jK6mEQc2md/cBk4LK0zMRRhfRhMdRHI/CcHQ+jtJJnEYjEQPyC2qhIEVFqd89WLKfwu625ZO+z/3awWUTKIzweM7CgOHGoRZISDJQFgOWgxbgCrNlU2cqchgEcaXVtstYSe2oI/O5Gyt/07nnoc/LkKhxbGKdmbTzatzZHBzcUGfuKtOm8lUhOdpmKAIzqJSb9X1NwlXpZKGbkppnW12oKteXzUxY1+BwPeSpLIHA0vP0yFsa2c2qeLg+oFxIXc+kDaqCg+oscM7ItHIez46hwpwaJTmUpdTLpDTFWtbFhCUfLhUZw0wVD3SolUs9BO6BD2msMFyQf167b8FIz+ILtaHifcDs1s4UWHvkQkNMflUeScOs5ZA0Y/Al3MjSfaAD1tjC3Qedug1yuuqesne7GV2nQ5FEQ14ZYu72+8eSfoVsx/icbDHqyfb6gOIUVatZUfCqHqgUJ6Kdt5HBp/lRtdGbqXb8nlTb0Hr3ou09UC/Kt1at7ckXHZSYrKWVvkllYYnmRxWGsfhqpMUB6gGRKR3+/Pjtsar/svqlDQhHz24A9jZgIVEJe9yAjtjh1cacgDoCV0M9ebnb4OC2DXZ78GaLEE3C+vd/Hf69dbj/A/HipUGtCAAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=aadfb1fbc052424a881c261ab72883b2"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Log">5bc1bcc6531003003bf1d9109ec587d4</action_type>
+        <action_type_parent display_value="">5bc1bcc6531003003bf1d9109ec587d4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot/>
+        <display_text/>
+        <flow display_value="Habitat - BCC">2d3afd84e8e34c8cbc5a2d66097ea5de</flow>
+        <generation_source/>
+        <order>2</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:39</sys_created_on>
+        <sys_id>c36b80f09a064e98a09ad958a8175167</sys_id>
+        <sys_mod_count>45</sys_mod_count>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:15</sys_updated_on>
+        <ui_id>c36b80f0-9a06-4e98-a09a-d958a8175167</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VU247aMBD9lcjPgAgs3S5vW+hKlfYiFYk+rFbRxJmAJcdObQeWIj6o39Ef6zgxEO2itki8VcrLnBx75ozPzPOWKSiQjZnUi0TiCiXrsBXIymNC5ZrCTNhSwmYe0C8NWoKhkw4NG28ZXwqZGVRs/PzSYSIj2ijlccr5h9Ew7veH9KV5nN3E/Rvko4/X2TVdISGlfGN2H/KeKMVtSg/xpRYcQ3wfjk32oDaZL6PfYfjqUGVI+XOQFjusAJWB02ZzQAxC9qTkEVgK5eg25smvVvygfFd9z8uRFHFs/h3CJLSjgfMpOJg5U3FXmUBtirXUi+1BYrcbPWqFUbfb6m+r9F3nyA0NfvMKgRm3md/AKKEWLfKakCN50CZ/NkabFhVDHLjDHb1chjlU0k3OVxD/s4LBOQqGZyi48gqa5j+VTmhyI4u9ZyCV+6fRsirUY+MzdtA7f2P4Bp2e9H1lyQJYept53wQT5bOlXn/de+ROqLqi8FNqDvIQgXNGpJXz/d0ylFjQRUkBZUmNSEqjV6I+TMUWvYWkoJdLvaakVixUD7iX1iNXQ++O8GkNz8EIL/OBrqHDuw6zGzuRYO1RLFk4+V75ShrpQUNSN6o+wo0o3S0lWGEo17e/NZYFWgsLbL3Bp8kk8uVFQgknwGEWdaPlr58pmkWtLOKgnFaqCVBFXFfGRhlGzoBwNfx+yVzq2r9tqcHwT1sKR60t9XDQfrIhYVNZetzaz+1NNduD+2G52KYajEaXWVWnhv/9OJ01Tf/fsLz8BlgmABlQBwAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=c36b80f09a064e98a09ad958a8175167"/>
+    <sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+    <sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+    <sys_hub_pill_compound action="delete_multiple" query="attached_to=2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+    <sys_hub_flow_variable action="delete_multiple" query="model=2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_variable_2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_2d3afd84e8e34c8cbc5a2d66097ea5de</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-09 12:27:15</sys_created_on>
+        <sys_id>549ed57a2b158350d2bef8c76e91bf79</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:15</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_2d3afd84e8e34c8cbc5a2d66097ea5de</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-09 12:27:14</sys_created_on>
+        <sys_id>d49ed57a2b158350d2bef8c76e91bf61</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:14</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+    <sys_hub_flow_snapshot action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>timeFromCreateToActivate=10000</attributes>
+        <authored_on_release_version>-1</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from/>
+        <copied_from_name/>
+        <description>Flow BCC déclenché à la création d'un dossier métier de type BCC.</description>
+        <flow_priority>MEDIUM</flow_priority>
+        <internal_name>habitat__bcc</internal_name>
+        <label_cache>[{"name":"Created_1.current","label":"Trigger - Record Created➛x_snc_habitat_dossier_metier Record","type":"reference","base_type":"reference","usedInstances":{"aadfb1fb-c052-424a-881c-261ab72883b2":["record"]},"attributes":{}}]</label_cache>
+        <master>true</master>
+        <name>Habitat - BCC</name>
+        <natlang/>
+        <outputs/>
+        <parent_flow display_value="Habitat - BCC">2d3afd84e8e34c8cbc5a2d66097ea5de</parent_flow>
+        <remote_trigger_id/>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <status>published</status>
+        <sys_class_name>sys_hub_flow_snapshot</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:52</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>8b856d590f99831008dd5ee530d1b2c7</sys_id>
+        <sys_mod_count>44</sys_mod_count>
+        <sys_name/>
+        <sys_overrides/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:16</sys_updated_on>
+        <type>flow</type>
+        <version>2</version>
+    </sys_hub_flow_snapshot>
+    <sys_translated_text action="delete_multiple" query="documentkey=8b856d590f99831008dd5ee530d1b2c7"/>
+    <sys_variable_value action="delete_multiple" query="document_key=8b856d590f99831008dd5ee530d1b2c7"/>
+    <sys_hub_flow_stage action="delete_multiple" query="flow=8b856d590f99831008dd5ee530d1b2c7"/>
+    <sys_flow_cat_variable_model action="delete_multiple" query="id=8b856d590f99831008dd5ee530d1b2c7^sys_idNOT INc7856d590f99831008dd5ee530d1b2c8"/>
+    <sys_flow_cat_variable_model action="INSERT_OR_UPDATE">
+        <id>8b856d590f99831008dd5ee530d1b2c7</id>
+        <name>Habitat - BCC</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:52</sys_created_on>
+        <sys_id>c7856d590f99831008dd5ee530d1b2c8</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:52</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=c7856d590f99831008dd5ee530d1b2c8"/>
+    <sys_hub_flow_input action="delete_multiple" query="model=8b856d590f99831008dd5ee530d1b2c7^sys_idNOT IN11b017550f15c31008dd5ee530d1b256,d9b017550f15c31008dd5ee530d1b265"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Habitat - BCC">8b856d590f99831008dd5ee530d1b2c7</model>
+        <model_id>8b856d590f99831008dd5ee530d1b2c7</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_8b856d590f99831008dd5ee530d1b2c7</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-05 04:55:03</sys_created_on>
+        <sys_id>11b017550f15c31008dd5ee530d1b256</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 07:29:59</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=11b017550f15c31008dd5ee530d1b256"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Habitat - BCC">8b856d590f99831008dd5ee530d1b2c7</model>
+        <model_id>8b856d590f99831008dd5ee530d1b2c7</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_8b856d590f99831008dd5ee530d1b2c7</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-05 04:55:03</sys_created_on>
+        <sys_id>d9b017550f15c31008dd5ee530d1b265</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-05 04:55:03</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=d9b017550f15c31008dd5ee530d1b265"/>
+    <sys_hub_flow_output action="delete_multiple" query="model=8b856d590f99831008dd5ee530d1b2c7"/>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=8b856d590f99831008dd5ee530d1b2c7"/>
+    <sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=8b856d590f99831008dd5ee530d1b2c7^sys_idNOT INd385ad590f99831008dd5ee530d1b215"/>
+    <sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Habitat - BCC">8b856d590f99831008dd5ee530d1b2c7</flow>
+        <generation_source/>
+        <name>Created</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:52</sys_created_on>
+        <sys_id>d385ad590f99831008dd5ee530d1b215</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:52</sys_updated_on>
+        <trigger_definition display_value="Created">798916a0c31322002841b63b12d3ae7c</trigger_definition>
+        <trigger_inputs>H4sIAAAAAAAA/+1XTW/bMAz9K4JPG5ABHXbrbV8FAnQr0HbboSsM2aITYYqUSXQSr8h/H+WPRHWc1m3jbRh6ckQp4iP5nkRd3URo5WQCdqwdcp3CReHGIjqOolGkeAKKfl7yRAGNpUawmqvLYg5kRm+ONZ/5OQFz0AI0Vn9Np0amcCodja+uR9GMa8HR2CI6RpvDKMqsmV3CbK440l4ZV46Mxgqw0fHro6NRVO5bO6ENF1zlfryKnU7jKU8kcoyFcU6CjWeA9PEwpKMti6/9VqdTqYQFXWGcc0s+0SO42Ym9BQc7UlCjJ+ywQp8MsQksCL+2WODiTKsiWLJy8heU/88dxEFC6xXZxdQszyEDQpzCidSlu3pSmZSrzYgjVTXJERzFsl5v8nIiQdXFdamVc3ybolw0BViP+rDhPNfsTLOPdYyszJDbpUdFgXuocUNRwc/cB1RGnjWV8yyhxdlp4NVoluaWokdG+WRNlhk2CLLxjE+gckP7KkgxKEL2xYWjT5LYoCdB7HuglPO7WFQRAmqI8RQI111E6SsUm+vY6HhDva1kGvwtbTTmHiLYW/K9vrHFgX9VGxEXC89z0VBuALF8m4JmF0ClNv6L6Et+YLkkBqdtimbGsndkZ2PviZfgS+F8NvpVaKuxDacgTeSQW4chUF9n1qDdA2wwXH0w0daWHR7Uk7W+JFbFbsOmxW0itLReW3tKfQ9h9zt/VnugOmWWxJdDC5zrYkff3pPUJOmCpYacrXAwpSQ8/TGxJtdiH4rtCvZCQMZzhS+Hu5KNhbvh3F7xN4XqEdHpF2o0TGZbqeFcT71uKdfp9lmdVareGy0kVkd3W5vNlHvQU+aBbEgDAA0XfHGoVvnqe3509EYkabrLic41PbgRBtwBATtiH4wb9avvsdRYco0uRhNzIeIA8eahMDMC1IegcjUfSALzHF20DupKvermKTdQu1d2DQP1el1XATUq/hqgpNvBDl2jITZZZ6MkM1Ynh14HScFwCoRJ0RFEO5eohmwufUHb0D4YRhPM/hFwh2nmPJKOjq4qd+tIqIwP6edajLzH+fOd0ZW+Upk7ap4oKSBW1dzhL4+SBwG0zsrV3hvO7BLmMWypw73LIXak4D/kyvVv4itC+ygVAAA=</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_create</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="delete_multiple" query="flow=8b856d590f99831008dd5ee530d1b2c7^sys_idNOT IN1385ad590f99831008dd5ee530d1b213,db85ad590f99831008dd5ee530d1b211"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Log">5bc1bcc6531003003bf1d9109ec587d4</action_type>
+        <action_type_parent display_value="Log">0e0ae8c2531003003bf1d9109ec587c8</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>5bc1bcc6531003003bf1d9109ec587d4</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Habitat - BCC">8b856d590f99831008dd5ee530d1b2c7</flow>
+        <generation_source/>
+        <order>2</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:52</sys_created_on>
+        <sys_id>1385ad590f99831008dd5ee530d1b213</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 07:30:00</sys_updated_on>
+        <ui_id>c36b80f0-9a06-4e98-a09a-d958a8175167</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VU247aMBD9lcjPgAgs3S5vW+hKlfYiFYk+rFbRxJmAJcdObQeWIj6o39Ef6zgxEO2itki8VcrLnBx75ozPzPOWKSiQjZnUi0TiCiXrsBXIymNC5ZrCTNhSwmYe0C8NWoKhkw4NG28ZXwqZGVRs/PzSYSIj2ijlccr5h9Ew7veH9KV5nN3E/Rvko4/X2TVdISGlfGN2H/KeKMVtSg/xpRYcQ3wfjk32oDaZL6PfYfjqUGVI+XOQFjusAJWB02ZzQAxC9qTkEVgK5eg25smvVvygfFd9z8uRFHFs/h3CJLSjgfMpOJg5U3FXmUBtirXUi+1BYrcbPWqFUbfb6m+r9F3nyA0NfvMKgRm3md/AKKEWLfKakCN50CZ/NkabFhVDHLjDHb1chjlU0k3OVxD/s4LBOQqGZyi48gqa5j+VTmhyI4u9ZyCV+6fRsirUY+MzdtA7f2P4Bp2e9H1lyQJYept53wQT5bOlXn/de+ROqLqi8FNqDvIQgXNGpJXz/d0ylFjQRUkBZUmNSEqjV6I+TMUWvYWkoJdLvaakVixUD7iX1iNXQ++O8GkNz8EIL/OBrqHDuw6zGzuRYO1RLFk4+V75ShrpQUNSN6o+wo0o3S0lWGEo17e/NZYFWgsLbL3Bp8kk8uVFQgknwGEWdaPlr58pmkWtLOKgnFaqCVBFXFfGRhlGzoBwNfx+yVzq2r9tqcHwT1sKR60t9XDQfrIhYVNZetzaz+1NNduD+2G52KYajEaXWVWnhv/9OJ01Tf/fsLz8BlgmABlQBwAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=1385ad590f99831008dd5ee530d1b213"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Habitat - BCC">8b856d590f99831008dd5ee530d1b2c7</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:52</sys_created_on>
+        <sys_id>db85ad590f99831008dd5ee530d1b211</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 07:30:00</sys_updated_on>
+        <ui_id>aadfb1fb-c052-424a-881c-261ab72883b2</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1UXW/aMBT9K8jPEUoIRS1vEwxp0tZu7dSXrotu7Buw5DiZ7VAY4r/vOgkholXbSX1YpfES7qfPuT7XdzumIUc2ZQ5ShUltBGwNqvLOTWI1T1aQSgcuEYW1Ek2So6MPpQlpSwXb29dll2Cou6P/0x3jK6mEQc2md/cBk4LK0zMRRhfRhMdRHI/CcHQ+jtJJnEYjEQPyC2qhIEVFqd89WLKfwu625ZO+z/3awWUTKIzweM7CgOHGoRZISDJQFgOWgxbgCrNlU2cqchgEcaXVtstYSe2oI/O5Gyt/07nnoc/LkKhxbGKdmbTzatzZHBzcUGfuKtOm8lUhOdpmKAIzqJSb9X1NwlXpZKGbkppnW12oKteXzUxY1+BwPeSpLIHA0vP0yFsa2c2qeLg+oFxIXc+kDaqCg+oscM7ItHIez46hwpwaJTmUpdTLpDTFWtbFhCUfLhUZw0wVD3SolUs9BO6BD2msMFyQf167b8FIz+ILtaHifcDs1s4UWHvkQkNMflUeScOs5ZA0Y/Al3MjSfaAD1tjC3Qedug1yuuqesne7GV2nQ5FEQ14ZYu72+8eSfoVsx/icbDHqyfb6gOIUVatZUfCqHqgUJ6Kdt5HBp/lRtdGbqXb8nlTb0Hr3ou09UC/Kt1at7ckXHZSYrKWVvkllYYnmRxWGsfhqpMUB6gGRKR3+/Pjtsar/svqlDQhHz24A9jZgIVEJe9yAjtjh1cacgDoCV0M9ebnb4OC2DXZ78GaLEE3C+vd/Hf69dbj/A/HipUGtCAAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=db85ad590f99831008dd5ee530d1b211"/>
+    <sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=8b856d590f99831008dd5ee530d1b2c7"/>
+    <sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=8b856d590f99831008dd5ee530d1b2c7"/>
+    <sys_hub_pill_compound action="delete_multiple" query="attached_to=8b856d590f99831008dd5ee530d1b2c7"/>
+    <sys_hub_flow_variable action="delete_multiple" query="model=8b856d590f99831008dd5ee530d1b2c7"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_variable_8b856d590f99831008dd5ee530d1b2c7"/>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_8b856d590f99831008dd5ee530d1b2c7</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-09 12:27:16</sys_created_on>
+        <sys_id>6c9ed57a2b158350d2bef8c76e91bff4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:16</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_8b856d590f99831008dd5ee530d1b2c7</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-09 12:27:16</sys_created_on>
+        <sys_id>e49e197a2b158350d2bef8c76e91bf0b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:16</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_8b856d590f99831008dd5ee530d1b2c7"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_8b856d590f99831008dd5ee530d1b2c7"/>
+    <sys_hub_flow action="UPDATE">
+        <sys_id>2d3afd84e8e34c8cbc5a2d66097ea5de</sys_id>
+        <latest_snapshot>8b856d590f99831008dd5ee530d1b2c7</latest_snapshot>
+        <compiler_build/>
+        <version_record/>
+    </sys_hub_flow>
+    <sys_flow_trigger_plan action="delete_multiple" query="plan_id=2d3afd84e8e34c8cbc5a2d66097ea5de^sys_idNOT INdf85ad590f99831008dd5ee530d1b233"/>
+    <sys_flow_trigger_plan action="INSERT_OR_UPDATE">
+        <binding_strategy>com.snc.process_flow.engine.binding.OncePerRecord</binding_strategy>
+        <plan/>
+        <plan_id>2d3afd84e8e34c8cbc5a2d66097ea5de</plan_id>
+        <snapshot>8b856d590f99831008dd5ee530d1b2c7</snapshot>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:52</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>df85ad590f99831008dd5ee530d1b233</sys_id>
+        <sys_mod_count>44</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-09 12:27:17</sys_updated_on>
+        <trigger display_value="">f09e197a2b158350d2bef8c76e91bf67</trigger>
+    </sys_flow_trigger_plan>
+    <sys_flow_subflow_plan action="delete_multiple" query="plan_id=2d3afd84e8e34c8cbc5a2d66097ea5de"/>
+</record_update>

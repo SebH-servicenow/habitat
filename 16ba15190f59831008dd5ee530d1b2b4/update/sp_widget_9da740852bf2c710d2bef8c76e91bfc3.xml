@@ -1,0 +1,1799 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $timeout, $element) {
+
+  /* ============================================================
+     CLIENT CONTROLLER — Widget "Simulateur CIMob"
+
+     Le champ doit commencer par un identifiant : on utilise donc
+     la forme "api.controller = function(...) { ... };" et non une
+     fonction anonyme seule, qui déclenche l'erreur
+     "SyntaxError: Expected ident at line 1, column 1".
+
+     Les dépendances ($scope, $timeout, $element) sont injectées
+     automatiquement par le Service Portal.
+
+     $element : limite les recherches DOM au widget, pour ne pas
+                entrer en conflit avec le reste de la page.
+     $timeout : laisse Angular finir son rendu avant de mesurer
+                les positions (indispensable pour l'avion).
+     ➜ À coller dans le champ "Client controller" du widget.
+     ============================================================ */
+
+  var c = this;
+
+  /* ----------------------------------------------------------
+     1. ICÔNES SVG
+     Tracés embarqués : aucun appel réseau, fonctionne sur
+     Intradef. Usage : ICONS.plane
+     ---------------------------------------------------------- */
+  var ICONS = {
+    plane:      '<svg class="icn icn--solid" viewBox="0 0 24 24"><path d="M12 2 L14 9 L21 11.5 L21 13 L14 12 L13.5 18 L16 20 L16 21.5 L12 20.5 L8 21.5 L8 20 L10.5 18 L10 12 L3 13 L3 11.5 L10 9 Z"/></svg>',
+    building:   '<svg class="icn" viewBox="0 0 24 24"><path d="M4 21h16M5 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16M15 9h3a1 1 0 0 1 1 1v11M8 7h2M8 11h2M8 15h2"/></svg>',
+    earth:      '<svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3.5 9.5h17M3.5 14.5h17M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>',
+    anchor:     '<svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><path d="M12 7.5V21M12 21c-4.5 0-8-3-8.5-7M12 21c4.5 0 8-3 8.5-7M9 10h6"/></svg>',
+    sun:        '<svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12h2.5M19 12h2.5M5 5l1.8 1.8M17.2 17.2 19 19M19 5l-1.8 1.8M6.8 17.2 5 19"/></svg>',
+    pin:        '<svg class="icn" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+    flag:       '<svg class="icn" viewBox="0 0 24 24"><path d="M5 21V4M5 4h13l-2.5 4L18 12H5"/></svg>',
+    check:      '<svg class="icn" viewBox="0 0 24 24"><path d="M4.5 12.5 10 18 19.5 7"/></svg>',
+    home:       '<svg class="icn" viewBox="0 0 24 24"><path d="M3.5 11 12 3.5 20.5 11M6 9.5V20a.8.8 0 0 0 .8.8h10.4a.8.8 0 0 0 .8-.8V9.5M10 20.5v-6h4v6"/></svg>',
+    truck:      '<svg class="icn" viewBox="0 0 24 24"><path d="M2.5 6h11v10h-11zM13.5 9.5H18l3.5 3.5v3h-8"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>',
+    team:       '<svg class="icn" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="17" cy="9.5" r="2.3"/><path d="M16.5 14.7c2.3.3 4 2 4 4.3"/></svg>',
+    arrowLeft:  '<svg class="icn" viewBox="0 0 24 24"><path d="M20 12H4M10 6l-6 6 6 6"/></svg>',
+    refresh:    '<svg class="icn" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 3.5V8h-4.5"/></svg>'
+  };
+
+  /* ----------------------------------------------------------
+     2. DONNÉES VENUES DU SERVER SCRIPT
+     ---------------------------------------------------------- */
+  var SITES  = c.data.sites;
+  var THEMES = c.data.themes;
+  var STEPS  = c.data.steps;
+  var MATRIX = c.data.matrix;
+
+  /* ----------------------------------------------------------
+     3. ÉTAT ET UTILITAIRES
+     ---------------------------------------------------------- */
+  var state = {
+    depart: null,
+    arrivee: null
+  };
+
+  var currentStep = 1;
+
+  /* Recherche limitée au widget grâce à $element */
+  function $(selecteur) {
+    return $element[0].querySelector(selecteur);
+  }
+
+  function $$(selecteur) {
+    return $element[0].querySelectorAll(selecteur);
+  }
+
+  /* ----------------------------------------------------------
+     4. ICÔNES STATIQUES DU TEMPLATE
+     Remplit tous les <span data-icn="..."> du HTML.
+     ---------------------------------------------------------- */
+  function fillStaticIcons() {
+    var spans = $$("[data-icn]");
+    for (var i = 0; i < spans.length; i++) {
+      spans[i].innerHTML = ICONS[spans[i].getAttribute("data-icn")] || "";
+    }
+  }
+
+  /* ----------------------------------------------------------
+     5. STEPPER-TRAJET
+     ---------------------------------------------------------- */
+
+  /**
+   * Construit les 3 escales et place l'avion sur la ligne.
+   * @param {number} etape - 1, 2 ou 3
+   */
+  function renderRoute(etape) {
+    var track = $(".cimob-route__track");
+
+    /* On retire les anciennes escales (ligne et avion restent) */
+    var anciennes = track.querySelectorAll(".cimob-route__stop");
+    for (var j = 0; j < anciennes.length; j++) {
+      anciennes[j].remove();
+    }
+
+    STEPS.forEach(function(step, index) {
+      var numero = index + 1;
+
+      var el = document.createElement("div");
+      el.className = "cimob-route__stop"
+                   + (numero === etape ? " is-current" : "")
+                   + (numero < etape   ? " is-done"    : "");
+      el.innerHTML =
+        '<span class="cimob-route__circle" aria-hidden="true">'
+        + (numero < etape ? ICONS.check : numero)
+        + '</span>'
+        + '<span class="cimob-route__label">' + step.label + '</span>';
+
+      track.appendChild(el);
+    });
+
+    /* Position de l'avion : toujours SUR la ligne, jamais derrière
+       une pastille.
+       - étape 1 : juste à droite de la pastille "Départ"
+       - étapes 2 et 3 : juste à gauche de la pastille courante
+
+       $timeout laisse Angular terminer son rendu : sans lui, les
+       largeurs valent 0 et l'avion se placerait mal. */
+    $timeout(function() {
+      var pastilles = track.querySelectorAll(".cimob-route__circle");
+      var cible = pastilles[etape - 1];
+      if (!cible) { return; }
+
+      var rectTrack = track.getBoundingClientRect();
+      var rectCible = cible.getBoundingClientRect();
+
+      var ECART = 24; /* distance entre la pastille et l'avion */
+      var positionX;
+
+      if (etape === 1) {
+        positionX = rectCible.right - rectTrack.left + ECART;
+      } else {
+        positionX = rectCible.left - rectTrack.left - ECART;
+      }
+
+      $(".cimob-plane").style.left = positionX + "px";
+
+      /* La ligne bleue s'arrête juste derrière l'avion */
+      $(".cimob-route__done").style.width =
+        Math.max(0, positionX - 26 - 14) + "px";
+    }, 0);
+
+    /* Titre et sous-titre de l'étape */
+    $(".cimob-route__num").textContent = etape;
+    $(".cimob-route__title").innerHTML = STEPS[etape - 1].titleHtml;
+
+    var next = $(".cimob-route__next");
+    if (etape < STEPS.length) {
+      next.style.display = "block";
+      next.textContent = "prochaine étape : " + STEPS[etape].titlePlain;
+    } else {
+      next.style.display = "none";
+    }
+  }
+
+  /* ----------------------------------------------------------
+     6. CARTES DE DESTINATION
+     ---------------------------------------------------------- */
+
+  /**
+   * Affiche les 6 sites dans une grille.
+   * @param {HTMLElement} grid - conteneur .cimob-grid
+   * @param {Function} onSelect - appelée avec le site choisi
+   */
+  function renderSiteCards(grid, onSelect) {
+    grid.innerHTML = "";
+
+    SITES.forEach(function(site, index) {
+      /* <button> plutôt que <div> pour l'accessibilité clavier */
+      var card = document.createElement("button");
+      card.type = "button";
+      card.className = "cimob-card";
+      card.setAttribute("role", "listitem");
+
+      /* La couleur de la zone alimente pastille, anneau et coche */
+      card.style.setProperty("--zone", site.color);
+      card.style.setProperty("--zone-tint", site.tint);
+
+      /* Apparition en cascade */
+      card.style.animationDelay = (index * 60) + "ms";
+
+      card.innerHTML =
+        '<span class="cimob-card__check">' + ICONS.check + '</span>'
+        + '<span class="cimob-card__icon">' + ICONS[site.icon] + '</span>'
+        + '<p class="cimob-card__title">' + site.label + '</p>'
+        + '<p class="cimob-card__desc">' + site.desc + '</p>';
+
+      card.addEventListener("click", function() {
+        var cartes = grid.querySelectorAll(".cimob-card");
+        for (var k = 0; k < cartes.length; k++) {
+          cartes[k].classList.remove("is-selected");
+        }
+        card.classList.add("is-selected");
+
+        /* 320 ms : le temps de voir la coche rebondir */
+        $timeout(function() { onSelect(site); }, 320);
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  /* ----------------------------------------------------------
+     7. NAVIGATION ENTRE ÉTAPES
+     ---------------------------------------------------------- */
+
+  /**
+   * Affiche l'étape demandée et masque les autres.
+   * @param {number} etape - 1, 2 ou 3
+   */
+  function goToStep(etape) {
+    currentStep = etape;
+
+    [1, 2, 3].forEach(function(numero) {
+      var section = $("#cimob-step-" + numero);
+      section.style.display = (numero === etape) ? "block" : "none";
+
+      /* Rejouer l'animation d'apparition */
+      if (numero === etape) {
+        section.classList.remove("cimob-step--in");
+        void section.offsetWidth;
+        section.classList.add("cimob-step--in");
+      }
+    });
+
+    /* Regénérer les cartes pour rejouer la cascade */
+    if (etape === 1) { renderSiteCards($("#cimob-grid-depart"), onSelectDepart); }
+    if (etape === 2) { renderSiteCards($("#cimob-grid-arrivee"), onSelectArrivee); }
+
+    renderRoute(etape);
+  }
+
+  /* ----------------------------------------------------------
+     8. AFFICHAGE DES OFFRES (étape 3)
+     ---------------------------------------------------------- */
+  function renderResults() {
+    var zone = $("#cimob-results");
+    var vide = $("#cimob-results-empty");
+
+    zone.innerHTML = "";
+
+    /* Rappel du trajet */
+    $(".cimob-result-depart").textContent  = state.depart.label;
+    $(".cimob-result-arrivee").textContent = state.arrivee.label;
+
+    /* Lecture de la matrice */
+    var parDepart = MATRIX[state.depart.id];
+    var offres = parDepart ? parDepart[state.arrivee.id] : null;
+
+    /* Combinaison absente : message d'information */
+    if (!offres) {
+      vide.style.display = "block";
+      return;
+    }
+    vide.style.display = "none";
+
+    /* Un bloc par thème, en cascade */
+    THEMES.forEach(function(theme, index) {
+      var items = offres[theme.key] || [];
+      if (items.length === 0) { return; }
+
+      var bloc = document.createElement("div");
+      bloc.className = "cimob-result-card";
+      bloc.style.setProperty("--theme", theme.color);
+      bloc.style.setProperty("--theme-tint", theme.tint);
+      bloc.style.animationDelay = (index * 150) + "ms";
+
+      var lignes = items.map(function(offre) {
+        return '<li>' + ICONS.check + '<span>' + offre + '</span></li>';
+      }).join("");
+
+      bloc.innerHTML =
+        '<div class="cimob-result-card__header">'
+        +   '<span class="cimob-result-card__icon">' + ICONS[theme.icon] + '</span>'
+        +   '<p class="cimob-result-card__title">' + theme.titre + '</p>'
+        +   '<span class="cimob-result-card__count">'
+        +     items.length + ' offre' + (items.length > 1 ? 's' : '')
+        +   '</span>'
+        + '</div>'
+        + '<ul class="cimob-result-card__list">' + lignes + '</ul>';
+
+      zone.appendChild(bloc);
+    });
+  }
+
+  /* ----------------------------------------------------------
+     9. SÉLECTIONS
+     ---------------------------------------------------------- */
+  function onSelectDepart(site) {
+    state.depart = site;
+    $(".cimob-summary-depart").textContent = site.label;
+    goToStep(2);
+  }
+
+  function onSelectArrivee(site) {
+    state.arrivee = site;
+    renderResults();
+    goToStep(3);
+  }
+
+  /* ----------------------------------------------------------
+     10. MÉTHODES EXPOSÉES AU TEMPLATE
+     Appelées depuis le HTML avec ng-click="c.retourDepart()"
+     ---------------------------------------------------------- */
+  c.retourDepart = function() {
+    goToStep(1);
+  };
+
+  c.retourArrivee = function() {
+    goToStep(2);
+  };
+
+  c.recommencer = function() {
+    state.depart = null;
+    state.arrivee = null;
+    goToStep(1);
+  };
+
+  /* ----------------------------------------------------------
+     11. DÉMARRAGE
+     $timeout(0) : on attend que le template soit dans le DOM
+     avant de manipuler les éléments.
+     ---------------------------------------------------------- */
+  $timeout(function() {
+    fillStaticIcons();
+    goToStep(1);
+  }, 0);
+
+  /* L'avion se replace si la fenêtre change de taille */
+  window.addEventListener("resize", function() {
+    renderRoute(currentStep);
+  });
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ============================================================&#13;
+   CSS — Widget "Simulateur CIMob"&#13;
+   Cartes blanches arrondies sur fond gris-bleu, pastilles&#13;
+   d'icônes colorées, marqueur bleu sur les mots-clés.&#13;
+   Préfixe "cimob-" partout (portage ServiceNow sans collision).&#13;
+   ➜ À coller dans le champ "CSS" du widget.&#13;
+   Les variables sont portées par .cimob-container (et non :root)&#13;
+   pour rester isolées du reste du portail.&#13;
+   ============================================================ */&#13;
+&#13;
+&#13;
+/* ------------------------------------------------------------&#13;
+   VARIABLES&#13;
+   ------------------------------------------------------------ */&#13;
+.cimob-container {&#13;
+  --blue: #000091;          /* bleu France */&#13;
+  --blue-hover: #1212FF;&#13;
+  --blue-tint: #F5F5FE;     /* fond bleu très clair */&#13;
+  --blue-line: #CACAFB;     /* marqueur et bordures claires */&#13;
+  --blue-soft: #E3E3FD;     /* bordure au survol */&#13;
+&#13;
+  --text: #161616;&#13;
+  --text-soft: #666666;&#13;
+&#13;
+  --page: #F1F2F7;          /* fond de page */&#13;
+  --card: #FFFFFF;          /* cartes principales */&#13;
+  --tile: #FAFAFA;          /* cartes internes (sites, offres) */&#13;
+  --border: #EEEEEE;&#13;
+  --line: #E0E0EA;&#13;
+&#13;
+  --radius-card: 20px;&#13;
+  --radius-tile: 14px;&#13;
+  --shadow-card: 0 2px 18px rgba(10, 10, 60, 0.06);&#13;
+  --shadow-soft: 0 4px 16px rgba(10, 10, 60, 0.05);&#13;
+}&#13;
+&#13;
+&#13;
+/* ------------------------------------------------------------&#13;
+   BASE&#13;
+   ------------------------------------------------------------ */&#13;
+.cimob-container * {&#13;
+  box-sizing: border-box;&#13;
+}&#13;
+&#13;
+/* Le conteneur porte les variables (voir plus haut) et les styles&#13;
+   de base. On ne touche pas à &lt;body&gt; : c'est le portail qui gère. */&#13;
+.cimob-container {&#13;
+  max-width: 860px;&#13;
+  margin: 0 auto;&#13;
+  padding: 24px 16px 40px;&#13;
+  background: var(--page);&#13;
+  color: var(--text);&#13;
+  font-family: "Marianne", "Segoe UI", Roboto, Arial, sans-serif;&#13;
+  line-height: 1.5;&#13;
+}&#13;
+&#13;
+/* Icônes SVG : elles prennent la couleur du texte parent */&#13;
+.icn {&#13;
+  width: 1em;&#13;
+  height: 1em;&#13;
+  fill: none;&#13;
+  stroke: currentColor;&#13;
+  stroke-width: 1.7;&#13;
+  stroke-linecap: round;&#13;
+  stroke-linejoin: round;&#13;
+  flex-shrink: 0;&#13;
+}&#13;
+&#13;
+/* L'avion est un tracé plein, pas un contour */&#13;
+.icn--solid {&#13;
+  fill: currentColor;&#13;
+  stroke: none;&#13;
+}&#13;
+&#13;
+/* Petit intitulé bleu en majuscules, utilisé partout */&#13;
+.cimob-kicker {&#13;
+  font-size: 12px;&#13;
+  font-weight: 700;&#13;
+  letter-spacing: 2px;&#13;
+  text-transform: uppercase;&#13;
+  color: var(--blue);&#13;
+  margin: 0 0 10px;&#13;
+}&#13;
+&#13;
+/* Le mot surligné au marqueur bleu clair */&#13;
+.cimob-route__title span {&#13;
+  color: var(--blue);&#13;
+  background: linear-gradient(transparent 62%, var(--blue-line) 62%);&#13;
+  padding: 0 4px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   A. STEPPER-TRAJET&#13;
+   ============================================================ */&#13;
+.cimob-route {&#13;
+  background: var(--card);&#13;
+  border-radius: var(--radius-card);&#13;
+  box-shadow: var(--shadow-card);&#13;
+  padding: 32px 32px 24px;&#13;
+  margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+.cimob-route__track {&#13;
+  position: relative;&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  max-width: 480px;&#13;
+  margin: 0 auto;&#13;
+}&#13;
+&#13;
+/* Ligne pointillée grise : le trajet restant */&#13;
+.cimob-route__track::before {&#13;
+  content: "";&#13;
+  position: absolute;&#13;
+  left: 26px;&#13;
+  right: 26px;&#13;
+  top: 25px;&#13;
+  border-top: 2px dashed var(--line);&#13;
+}&#13;
+&#13;
+/* Ligne pointillée bleue : le trajet parcouru (largeur en JS) */&#13;
+.cimob-route__done {&#13;
+  position: absolute;&#13;
+  left: 26px;&#13;
+  top: 25px;&#13;
+  width: 0;&#13;
+  border-top: 2px dashed var(--blue);&#13;
+  transition: width 0.8s cubic-bezier(0.45, 0, 0.25, 1);&#13;
+}&#13;
+&#13;
+/* L'avion vole vers l'escale courante (position en JS) */&#13;
+.cimob-plane {&#13;
+  position: absolute;&#13;
+  top: 11px;&#13;
+  left: 26px;&#13;
+  width: 26px;&#13;
+  height: 26px;&#13;
+  color: var(--blue);&#13;
+  transform: translateX(-50%) rotate(90deg);&#13;
+  transition: left 0.8s cubic-bezier(0.45, 0, 0.25, 1);&#13;
+  z-index: 2;&#13;
+  animation: cimob-hover 2.4s ease-in-out infinite;&#13;
+}&#13;
+&#13;
+.cimob-plane .icn {&#13;
+  width: 100%;&#13;
+  height: 100%;&#13;
+}&#13;
+&#13;
+/* Léger flottement, comme en vol */&#13;
+@keyframes cimob-hover {&#13;
+  0%, 100% { margin-top: 0; }&#13;
+  50%      { margin-top: -4px; }&#13;
+}&#13;
+&#13;
+/* ---------- Une escale ---------- */&#13;
+.cimob-route__stop {&#13;
+  position: relative;&#13;
+  z-index: 1;&#13;
+  display: flex;&#13;
+  flex-direction: column;&#13;
+  align-items: center;&#13;
+  gap: 9px;&#13;
+  width: 100px;&#13;
+}&#13;
+&#13;
+.cimob-route__circle {&#13;
+  width: 52px;&#13;
+  height: 52px;&#13;
+  border-radius: 16px;&#13;
+  background: var(--tile);&#13;
+  border: 1px solid var(--border);&#13;
+  color: #999999;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  font-weight: 700;&#13;
+  font-size: 15px;&#13;
+  transition: all 0.4s ease;&#13;
+}&#13;
+&#13;
+.cimob-route__circle .icn {&#13;
+  width: 20px;&#13;
+  height: 20px;&#13;
+}&#13;
+&#13;
+/* Escale en cours : pastille bleue pleine */&#13;
+.is-current .cimob-route__circle {&#13;
+  background: var(--blue);&#13;
+  border-color: var(--blue);&#13;
+  color: #FFFFFF;&#13;
+  box-shadow: 0 8px 20px rgba(0, 0, 145, 0.28);&#13;
+}&#13;
+&#13;
+/* Escale franchie : pastille bleu clair avec coche */&#13;
+.is-done .cimob-route__circle {&#13;
+  background: var(--blue-tint);&#13;
+  border-color: var(--blue-line);&#13;
+  color: var(--blue);&#13;
+}&#13;
+&#13;
+.cimob-route__label {&#13;
+  font-size: 13px;&#13;
+  font-weight: 600;&#13;
+  color: #999999;&#13;
+  text-align: center;&#13;
+  transition: color 0.3s ease;&#13;
+}&#13;
+&#13;
+.is-current .cimob-route__label {&#13;
+  color: var(--blue);&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+.is-done .cimob-route__label {&#13;
+  color: var(--text);&#13;
+}&#13;
+&#13;
+/* ---------- Titre de l'étape ---------- */&#13;
+.cimob-route__meta {&#13;
+  text-align: center;&#13;
+  margin-top: 22px;&#13;
+  padding-top: 18px;&#13;
+  border-top: 1px solid #F0F0F4;&#13;
+}&#13;
+&#13;
+.cimob-route__title {&#13;
+  font-size: 24px;&#13;
+  font-weight: 700;&#13;
+  margin: 0;&#13;
+  color: var(--text);&#13;
+}&#13;
+&#13;
+.cimob-route__next {&#13;
+  font-size: 13px;&#13;
+  color: var(--text-soft);&#13;
+  margin: 6px 0 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   B. ÉTAPES (chaque étape est une carte blanche)&#13;
+   ============================================================ */&#13;
+.cimob-step {&#13;
+  background: var(--card);&#13;
+  border-radius: var(--radius-card);&#13;
+  box-shadow: var(--shadow-card);&#13;
+  padding: 28px 26px;&#13;
+}&#13;
+&#13;
+/* Classe posée par le contrôleur pour rejouer l'apparition */&#13;
+.cimob-step--in {&#13;
+  animation: cimob-rise 0.4s ease both;&#13;
+}&#13;
+&#13;
+@keyframes cimob-rise {&#13;
+  from { opacity: 0; transform: translateY(16px); }&#13;
+  to   { opacity: 1; transform: translateY(0); }&#13;
+}&#13;
+&#13;
+&#13;
+/* ---------- Cartes de destination ---------- */&#13;
+.cimob-grid {&#13;
+  display: grid;&#13;
+  grid-template-columns: repeat(3, 1fr);&#13;
+  gap: 14px;&#13;
+}&#13;
+&#13;
+.cimob-card {&#13;
+  position: relative;&#13;
+  background: var(--tile);&#13;
+  border: 1px solid var(--border);&#13;
+  border-radius: var(--radius-tile);&#13;
+  padding: 20px 14px;&#13;
+  cursor: pointer;&#13;
+  text-align: center;&#13;
+  font-family: inherit;&#13;
+  font-size: inherit;&#13;
+  display: flex;&#13;
+  flex-direction: column;&#13;
+  align-items: center;&#13;
+  gap: 8px;&#13;
+  /* survol adouci : transition lente et courbe douce */&#13;
+  transition: transform 0.32s cubic-bezier(0.33, 1, 0.68, 1),&#13;
+              box-shadow 0.32s cubic-bezier(0.33, 1, 0.68, 1),&#13;
+              background 0.32s ease,&#13;
+              border-color 0.32s ease;&#13;
+  animation: cimob-rise 0.45s cubic-bezier(0.22, 0.7, 0.3, 1) both;&#13;
+}&#13;
+&#13;
+/* Survol doux : 2 px de montée, ombre légère, bordure bleutée */&#13;
+.cimob-card:hover {&#13;
+  transform: translateY(-2px);&#13;
+  background: var(--card);&#13;
+  border-color: var(--blue-soft);&#13;
+  box-shadow: var(--shadow-soft);&#13;
+}&#13;
+&#13;
+/* Sélection : anneau dans la couleur de la zone */&#13;
+.cimob-card.is-selected {&#13;
+  background: var(--card);&#13;
+  border-color: var(--zone);&#13;
+  box-shadow: 0 0 0 2px var(--zone), var(--shadow-soft);&#13;
+}&#13;
+&#13;
+/* Pastille d'icône, couleur injectée par --zone / --zone-tint */&#13;
+.cimob-card__icon {&#13;
+  display: inline-flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  width: 46px;&#13;
+  height: 46px;&#13;
+  border-radius: 12px;&#13;
+  background: var(--zone-tint);&#13;
+  color: var(--zone);&#13;
+}&#13;
+&#13;
+.cimob-card__icon .icn {&#13;
+  width: 22px;&#13;
+  height: 22px;&#13;
+}&#13;
+&#13;
+/* Textes en noir */&#13;
+.cimob-card__title {&#13;
+  font-weight: 700;&#13;
+  font-size: 14px;&#13;
+  margin: 0;&#13;
+  color: var(--text);&#13;
+}&#13;
+&#13;
+.cimob-card__desc {&#13;
+  font-size: 12px;&#13;
+  line-height: 1.4;&#13;
+  margin: 0;&#13;
+  color: var(--text);&#13;
+}&#13;
+&#13;
+/* Coche de sélection, avec rebond */&#13;
+.cimob-card__check {&#13;
+  position: absolute;&#13;
+  top: 10px;&#13;
+  right: 10px;&#13;
+  width: 22px;&#13;
+  height: 22px;&#13;
+  border-radius: 50%;&#13;
+  background: var(--zone);&#13;
+  color: #FFFFFF;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  opacity: 0;&#13;
+  transform: scale(0.4);&#13;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);&#13;
+}&#13;
+&#13;
+.cimob-card__check .icn {&#13;
+  width: 12px;&#13;
+  height: 12px;&#13;
+  stroke-width: 2.6;&#13;
+}&#13;
+&#13;
+.cimob-card.is-selected .cimob-card__check {&#13;
+  opacity: 1;&#13;
+  transform: scale(1);&#13;
+}&#13;
+&#13;
+&#13;
+/* ---------- Résumé du trajet (pilule) ---------- */&#13;
+.cimob-summary {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  gap: 10px;&#13;
+  flex-wrap: wrap;&#13;
+  background: var(--blue-tint);&#13;
+  border-radius: 999px;&#13;
+  padding: 10px 20px;&#13;
+  margin: 0 auto 22px;&#13;
+  width: fit-content;&#13;
+  font-size: 14px;&#13;
+  color: var(--text-soft);&#13;
+}&#13;
+&#13;
+.cimob-summary strong {&#13;
+  color: var(--blue);&#13;
+}&#13;
+&#13;
+.cimob-summary .icn {&#13;
+  color: var(--blue);&#13;
+  width: 16px;&#13;
+  height: 16px;&#13;
+}&#13;
+&#13;
+/* Le petit avion entre les deux sites */&#13;
+.cimob-mini-plane {&#13;
+  display: inline-flex;&#13;
+  color: var(--blue);&#13;
+  transform: rotate(90deg);&#13;
+}&#13;
+&#13;
+.cimob-mini-plane .icn {&#13;
+  width: 16px;&#13;
+  height: 16px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   C. BLOCS DE RÉSULTATS&#13;
+   ============================================================ */&#13;
+.cimob-result-card {&#13;
+  background: var(--tile);&#13;
+  border: 1px solid var(--border);&#13;
+  border-radius: 16px;&#13;
+  padding: 20px 22px;&#13;
+  margin-bottom: 14px;&#13;
+  animation: cimob-rise 0.5s cubic-bezier(0.22, 0.7, 0.3, 1) both;&#13;
+}&#13;
+&#13;
+.cimob-result-card__header {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 12px;&#13;
+  margin-bottom: 12px;&#13;
+}&#13;
+&#13;
+/* Pastille d'icône du thème */&#13;
+.cimob-result-card__icon {&#13;
+  width: 44px;&#13;
+  height: 44px;&#13;
+  border-radius: 12px;&#13;
+  background: var(--theme-tint);&#13;
+  color: var(--theme);&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  flex-shrink: 0;&#13;
+}&#13;
+&#13;
+.cimob-result-card__icon .icn {&#13;
+  width: 22px;&#13;
+  height: 22px;&#13;
+}&#13;
+&#13;
+.cimob-result-card__title {&#13;
+  font-size: 16px;&#13;
+  font-weight: 700;&#13;
+  margin: 0;&#13;
+  flex: 1;&#13;
+  color: var(--text);&#13;
+}&#13;
+&#13;
+/* Compteur d'offres en pilule */&#13;
+.cimob-result-card__count {&#13;
+  font-size: 12px;&#13;
+  font-weight: 700;&#13;
+  color: var(--theme);&#13;
+  background: var(--theme-tint);&#13;
+  border-radius: 999px;&#13;
+  padding: 4px 11px;&#13;
+  white-space: nowrap;&#13;
+}&#13;
+&#13;
+.cimob-result-card__list {&#13;
+  list-style: none;&#13;
+  margin: 0;&#13;
+  padding: 0;&#13;
+}&#13;
+&#13;
+.cimob-result-card__list li {&#13;
+  display: flex;&#13;
+  align-items: flex-start;&#13;
+  gap: 9px;&#13;
+  padding: 8px 0;&#13;
+  font-size: 14px;&#13;
+  line-height: 1.5;&#13;
+  color: var(--text);&#13;
+}&#13;
+&#13;
+.cimob-result-card__list li + li {&#13;
+  border-top: 1px solid #EFEFEF;&#13;
+}&#13;
+&#13;
+.cimob-result-card__list li .icn {&#13;
+  width: 15px;&#13;
+  height: 15px;&#13;
+  color: var(--theme);&#13;
+  stroke-width: 2.2;&#13;
+  margin-top: 3px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   D. BOUTONS ET ALERTE&#13;
+   ============================================================ */&#13;
+.cimob-actions {&#13;
+  display: flex;&#13;
+  gap: 12px;&#13;
+  justify-content: center;&#13;
+  flex-wrap: wrap;&#13;
+  margin-top: 22px;&#13;
+}&#13;
+&#13;
+.cimob-btn {&#13;
+  font-family: inherit;&#13;
+  font-size: 14px;&#13;
+  font-weight: 600;&#13;
+  border: none;&#13;
+  border-radius: 10px;&#13;
+  padding: 11px 22px;&#13;
+  cursor: pointer;&#13;
+  display: inline-flex;&#13;
+  align-items: center;&#13;
+  gap: 8px;&#13;
+  background: var(--blue);&#13;
+  color: #FFFFFF;&#13;
+  transition: background 0.2s ease, transform 0.2s ease;&#13;
+}&#13;
+&#13;
+.cimob-btn:hover {&#13;
+  background: var(--blue-hover);&#13;
+  transform: translateY(-2px);&#13;
+}&#13;
+&#13;
+.cimob-btn .icn {&#13;
+  width: 15px;&#13;
+  height: 15px;&#13;
+}&#13;
+&#13;
+/* Bouton secondaire : liseré bleu */&#13;
+.cimob-btn--secondary {&#13;
+  background: var(--card);&#13;
+  color: var(--blue);&#13;
+  box-shadow: inset 0 0 0 1.5px var(--blue);&#13;
+}&#13;
+&#13;
+.cimob-btn--secondary:hover {&#13;
+  background: var(--blue-tint);&#13;
+}&#13;
+&#13;
+/* La flèche avance au survol */&#13;
+.cimob-btn [data-icn] {&#13;
+  display: inline-flex;&#13;
+  transition: transform 0.2s ease;&#13;
+}&#13;
+&#13;
+.cimob-btn:hover [data-icn] {&#13;
+  transform: translateX(4px);&#13;
+}&#13;
+&#13;
+/* Alerte "combinaison non renseignée" */&#13;
+.cimob-alert {&#13;
+  background: var(--tile);&#13;
+  border: 1px solid var(--border);&#13;
+  border-left: 4px solid #0063CB;&#13;
+  border-radius: var(--radius-tile);&#13;
+  padding: 20px 22px;&#13;
+}&#13;
+&#13;
+.cimob-alert strong {&#13;
+  display: block;&#13;
+  margin-bottom: 4px;&#13;
+  font-size: 16px;&#13;
+}&#13;
+&#13;
+.cimob-alert p {&#13;
+  margin: 0;&#13;
+  color: var(--text-soft);&#13;
+  font-size: 14px;&#13;
+}&#13;
+&#13;
+/* Accessibilité clavier */&#13;
+.cimob-card:focus-visible,&#13;
+.cimob-btn:focus-visible {&#13;
+  outline: 3px solid var(--blue);&#13;
+  outline-offset: 3px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   E. MOBILE&#13;
+   ============================================================ */&#13;
+@media (max-width: 620px) {&#13;
+  .cimob-container { padding: 24px 14px 60px; }&#13;
+&#13;
+  .cimob-route { padding: 24px 16px 20px; }&#13;
+  .cimob-route__circle { width: 44px; height: 44px; }&#13;
+  .cimob-route__track::before,&#13;
+  .cimob-route__done { top: 21px; }&#13;
+  .cimob-plane { top: 8px; width: 22px; height: 22px; }&#13;
+  .cimob-route__label { font-size: 12px; }&#13;
+  .cimob-route__title { font-size: 20px; }&#13;
+&#13;
+  .cimob-step { padding: 20px 16px; }&#13;
+  .cimob-grid { grid-template-columns: 1fr 1fr; gap: 10px; }&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   F. ACCESSIBILITÉ — couper les animations si demandé (RGAA)&#13;
+   ============================================================ */&#13;
+@media (prefers-reduced-motion: reduce) {&#13;
+  .cimob-container *,&#13;
+  .cimob-container *::before,&#13;
+  .cimob-container *::after {&#13;
+    animation: none !important;&#13;
+    transition: none !important;&#13;
+  }&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>x_snc_habitat_familles_simulateur</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Simulateur Mutation</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[/* ============================================================
+   SERVER SCRIPT — Widget "Simulateur CIMob"
+   Fournit au client : les 6 sites, les 3 thèmes, les 3 étapes
+   et la matrice d'éligibilité 6 x 6.
+   ➜ À coller dans le champ "Server script" du widget.
+   ============================================================ */
+(function() {
+
+  /* ----------------------------------------------------------
+     1. LES 6 SITES
+     color / tint : couleur de la zone (pastille, anneau, coche)
+     ---------------------------------------------------------- */
+  data.sites = [
+    {
+      id: "Metropole et IDF",
+      label: "Métropole et IDF",
+      desc: "France métropolitaine et Île-de-France",
+      icon: "building",
+      color: "#000091",
+      tint: "#F5F5FE"
+    },
+    {
+      id: "Europe",
+      label: "Europe",
+      desc: "Pays européens hors France",
+      icon: "earth",
+      color: "#C9191E",
+      tint: "#FEE9E9"
+    },
+    {
+      id: "PF, REU et MAY",
+      label: "PF, REU et MAY",
+      desc: "Polynésie, La Réunion, Mayotte",
+      icon: "anchor",
+      color: "#006A6F",
+      tint: "#DFFDF7"
+    },
+    {
+      id: "DJI",
+      label: "Djibouti",
+      desc: "Base de Djibouti",
+      icon: "sun",
+      color: "#B34000",
+      tint: "#FEECC2"
+    },
+    {
+      id: "Autre OM",
+      label: "Autre Outre-Mer",
+      desc: "Autres territoires ultramarins",
+      icon: "pin",
+      color: "#297254",
+      tint: "#E3FDEB"
+    },
+    {
+      id: "Autres étranger",
+      label: "Autres étranger",
+      desc: "Reste du monde",
+      icon: "flag",
+      color: "#6E445A",
+      tint: "#FEE7FC"
+    }
+  ];
+
+  /* ----------------------------------------------------------
+     2. LES 3 THÈMES D'OFFRES (étape 3)
+     ---------------------------------------------------------- */
+  data.themes = [
+    {
+      key: "logement",
+      titre: "Logement",
+      icon: "home",
+      color: "#00A95F",
+      tint: "#DFFDF0"
+    },
+    {
+      key: "demenagement",
+      titre: "Déménagement",
+      icon: "truck",
+      color: "#0063CB",
+      tint: "#E8EDFF"
+    },
+    {
+      key: "accompagnement",
+      titre: "Accompagnement",
+      icon: "team",
+      color: "#6E445A",
+      tint: "#FEE7FC"
+    }
+  ];
+
+  /* ----------------------------------------------------------
+     3. LES 3 ÉTAPES
+     titleHtml : le <span> est surligné au marqueur bleu par le CSS
+     ---------------------------------------------------------- */
+  data.steps = [
+    {
+      titleHtml: "Site de <span>départ</span>",
+      titlePlain: "Site de départ",
+      label: "Départ"
+    },
+    {
+      titleHtml: "Site d'<span>arrivée</span>",
+      titlePlain: "Site d'arrivée",
+      label: "Arrivée"
+    },
+    {
+      titleHtml: "Vos offres <span>éligibles</span>",
+      titlePlain: "Vos offres éligibles",
+      label: "Offres"
+    }
+  ];
+
+  /* ----------------------------------------------------------
+     4. MATRICE D'ÉLIGIBILITÉ
+     data.matrix[site de départ][site d'arrivée] =
+       { logement: [...], demenagement: [...], accompagnement: [...] }
+
+     Pour brancher une vraie table ServiceNow plus tard, remplacer
+     ce littéral par une boucle GlideRecord qui remplit le même
+     format : rien à changer côté client.
+     ---------------------------------------------------------- */
+  data.matrix = {
+    "Metropole et IDF": {
+      "Metropole et IDF": {
+        "logement": [
+          "Mut'actions (+ SCR pour l'IDF)",
+          "DTIE",
+          "BCC"
+        ],
+        "demenagement": [
+          "PFMD (sauf de et vers BCC)",
+          "par mes propres moyens",
+          "mon déménageur"
+        ],
+        "accompagnement": [
+          "Defense mobilité",
+          "Mut'action accompagnement"
+        ]
+      },
+      "Europe": {
+        "logement": [
+          "Mut'actions pour les familles ou les frontaliers logés en métropole",
+          "Etablissement de soutien national et service ambassade"
+        ],
+        "demenagement": [
+          "PFMD (sauf de et vers BCC, transport terrestre uniquement)",
+          "par mes propres moyens",
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passport vers le RU)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles ou les frontaliers logés en métropole"
+        ]
+      },
+      "PF, REU et MAY": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "PCD CR",
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité",
+          "Administratif et frais annexes (visas, passports)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "DJI": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "Autre OM": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "Autres étranger": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "Etablissement de soutien national et service ambassade"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      }
+    },
+    "Europe": {
+      "Metropole et IDF": {
+        "logement": [
+          "Mut'actions",
+          "DTIE",
+          "BCC"
+        ],
+        "demenagement": [
+          "PFMD (transport terrestre uniquement)",
+          "par mes propres moyens",
+          "mon déménageur"
+        ],
+        "accompagnement": [
+          "Defense mobilité",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement"
+        ]
+      },
+      "Europe": {
+        "logement": [
+          "Mut'actions pour les familles ou les frontaliers logés en métropole",
+          "Etablissement de soutien national et service ambassade"
+        ],
+        "demenagement": [
+          "PFMD (transport terrestre uniquement)",
+          "par mes propres moyens",
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passport vers le RU)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles ou les frontaliers logés en métropole"
+        ]
+      },
+      "PF, REU et MAY": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité",
+          "Administratif et frais annexes (visas, passports)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "DJI": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "Autre OM": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "Autres étranger": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "Etablissement de soutien national et service ambassade"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      }
+    },
+    "PF, REU et MAY": {
+      "Metropole et IDF": {
+        "logement": [
+          "Mut'actions",
+          "DTIE",
+          "BCC"
+        ],
+        "demenagement": [
+          "DICOM (PCD)",
+          "mon déménageur"
+        ],
+        "accompagnement": [
+          "Defense mobilité",
+          "Administratif et frais annexes (visas, passports)",
+          "DICOM vers la destination",
+          "Mut'action accompagnement"
+        ]
+      },
+      "Europe": {
+        "logement": [
+          "Mut'actions pour les familles ou les frontaliers logés en métropole",
+          "Etablissement de soutien national et service ambassade"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel",
+          "PFMD possible si autorisation CIMob de Transport de mobilier"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif",
+          "DICOM vers la destination",
+          "Mut'action accompagnement pour les familles ou les frontaliers logés en métropole"
+        ]
+      },
+      "PF, REU et MAY": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité",
+          "Administratif et frais annexes (visas, passports)",
+          "DICOM vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "DJI": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DICOM vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "Autre OM": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DICOM vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "Autres étranger": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "Etablissement de soutien national et service ambassade"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DICOM vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      }
+    },
+    "DJI": {
+      "Metropole et IDF": {
+        "logement": [
+          "Mut'actions",
+          "DTIE",
+          "BCC"
+        ],
+        "demenagement": [
+          "DICOM (PCD)",
+          "Mon déménageur (replis)"
+        ],
+        "accompagnement": [
+          "Defense mobilité",
+          "Administratif et frais annexes (visas, passports)",
+          "DICOM vers la destination",
+          "Mut'action accompagnement"
+        ]
+      },
+      "Europe": {
+        "logement": [
+          "Mut'actions pour les familles ou les frontaliers logés en métropole",
+          "Etablissement de soutien national et service ambassade"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel",
+          "PFMD possible si autorisation CIMob de Transport de mobilier"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif",
+          "DICOM vers la destination",
+          "Mut'action accompagnement pour les familles ou les frontaliers logés en métropole"
+        ]
+      },
+      "PF, REU et MAY": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité",
+          "Administratif et frais annexes (visas, passports)",
+          "DICOM vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "DJI": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DICOM vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "Autre OM": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DICOM vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "Autres étranger": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "Etablissement de soutien national et service ambassade"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DICOM vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      }
+    },
+    "Autre OM": {
+      "Metropole et IDF": {
+        "logement": [
+          "Mut'actions",
+          "DTIE",
+          "BCC"
+        ],
+        "demenagement": [
+          "Mon déménageur"
+        ],
+        "accompagnement": [
+          "Defense mobilité",
+          "Administratif et frais annexes (visas, passports)",
+          "DICOM vers la destination",
+          "Mut'action accompagnement"
+        ]
+      },
+      "Europe": {
+        "logement": [
+          "Mut'actions pour les familles ou les frontaliers logés en métropole",
+          "Etablissement de soutien national et service ambassade"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel",
+          "PFMD possible si autorisation CIMob de Transport de mobilier"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif",
+          "DICOM vers la destination",
+          "Mut'action accompagnement pour les familles ou les frontaliers logés en métropole"
+        ]
+      },
+      "PF, REU et MAY": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité",
+          "Administratif et frais annexes (visas, passports)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "DJI": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "Autre OM": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "Autres étranger": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "Etablissement de soutien national et service ambassade"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      }
+    },
+    "Autres étranger": {
+      "Metropole et IDF": {
+        "logement": [
+          "Mut'actions",
+          "DTIE",
+          "BCC"
+        ],
+        "demenagement": [
+          "Mon déménageur"
+        ],
+        "accompagnement": [
+          "Defense mobilité",
+          "Administratif et frais annexes (visas, passports)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement"
+        ]
+      },
+      "Europe": {
+        "logement": [
+          "Mut'actions pour les familles ou les frontaliers logés en métropole",
+          "Etablissement de soutien national et service ambassade"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel",
+          "PFMD possible si autorisation CIMob de Transport de mobilier"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles ou les frontaliers logés en métropole"
+        ]
+      },
+      "PF, REU et MAY": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité",
+          "Administratif et frais annexes (visas, passports)",
+          "DGA PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "DJI": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "Autre OM": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "DICOM"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      },
+      "Autres étranger": {
+        "logement": [
+          "Mut'actions pour les familles en métropole",
+          "Etablissement de soutien national et service ambassade"
+        ],
+        "demenagement": [
+          "mon déménageur",
+          "Prise en charge totale ou partielle du gardiennage professionnel"
+        ],
+        "accompagnement": [
+          "Defense mobilité ( si famille reste en metropole)",
+          "Administratif (passports, visas, vaccins)",
+          "DAG PPE vers la destination",
+          "Mut'action accompagnement pour les familles en métropole"
+        ]
+      }
+    }
+  };
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-08-17 09:12:50</sys_created_on>
+        <sys_id>9da740852bf2c710d2bef8c76e91bfc3</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>Simulateur Mutation</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sp_widget_9da740852bf2c710d2bef8c76e91bfc3</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-08-17 12:43:22</sys_updated_on>
+        <template><![CDATA[<!-- ============================================================
+     HTML TEMPLATE — Widget "Simulateur CIMob"
+     Les identifiants sont préfixés "cimob-" et les boutons
+     appellent les méthodes du contrôleur avec ng-click.
+     ➜ À coller dans le champ "Body HTML template" du widget.
+     ============================================================ -->
+<div class="cimob-container">
+
+  <!-- ============================================================
+       STEPPER-TRAJET : 3 escales, l'avion vole entre elles
+       ============================================================ -->
+  <div class="cimob-route" role="group" aria-label="Progression du simulateur">
+
+    <div class="cimob-route__track">
+      <div class="cimob-route__done"></div>
+      <span class="cimob-plane" aria-hidden="true" data-icn="plane"></span>
+    </div>
+
+    <div class="cimob-route__meta">
+      <p class="cimob-kicker">
+        Étape <span class="cimob-route__num">1</span> sur 3
+      </p>
+      <p class="cimob-route__title">Site de départ</p>
+      <p class="cimob-route__next">prochaine étape : Site d'arrivée</p>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       ÉTAPE 1 : site de départ
+       ============================================================ -->
+  <section id="cimob-step-1" class="cimob-step">
+    <div class="cimob-grid" id="cimob-grid-depart" role="list"></div>
+  </section>
+
+  <!-- ============================================================
+       ÉTAPE 2 : site d'arrivée
+       ============================================================ -->
+  <section id="cimob-step-2" class="cimob-step" style="display: none;">
+
+    <div class="cimob-summary">
+      <span data-icn="pin"></span>
+      Départ : <strong class="cimob-summary-depart"></strong>
+    </div>
+
+    <div class="cimob-grid" id="cimob-grid-arrivee" role="list"></div>
+
+    <div class="cimob-actions">
+      <button type="button"
+              class="cimob-btn cimob-btn--secondary"
+              ng-click="c.retourDepart()">
+        <span data-icn="arrowLeft"></span> Revenir au site de départ
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ============================================================
+       ÉTAPE 3 : offres éligibles
+       ============================================================ -->
+  <section id="cimob-step-3" class="cimob-step" style="display: none;">
+
+    <div class="cimob-summary">
+      <strong class="cimob-result-depart"></strong>
+      <span class="cimob-mini-plane" data-icn="plane"></span>
+      <strong class="cimob-result-arrivee"></strong>
+    </div>
+
+    <!-- Les 3 blocs d'offres sont injectés ici -->
+    <div id="cimob-results" aria-live="polite"></div>
+
+    <!-- Affiché si la combinaison n'existe pas dans la matrice -->
+    <div id="cimob-results-empty" class="cimob-alert" style="display: none;">
+      <strong>Combinaison non renseignée</strong>
+      <p>Les offres pour ce trajet ne sont pas encore disponibles.
+         Rapprochez-vous de votre gestionnaire mobilité.</p>
+    </div>
+
+    <div class="cimob-actions">
+      <button type="button"
+              class="cimob-btn cimob-btn--secondary"
+              ng-click="c.retourArrivee()">
+        <span data-icn="arrowLeft"></span> Modifier le site d'arrivée
+      </button>
+      <button type="button"
+              class="cimob-btn"
+              ng-click="c.recommencer()">
+        <span data-icn="refresh"></span> Nouvelle simulation
+      </button>
+    </div>
+
+  </section>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

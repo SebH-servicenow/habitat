@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_theme">
+    <sp_theme action="INSERT_OR_UPDATE">
+        <css_variables>
+/* ==========================================================================
+   DSFR Theme - Design System de l'État français
+   Conforme RGAA (accessibilité)
+   ========================================================================== */
+
+/* --- Variables principales DSFR --- */
+$brand-primary: #000091 !default;
+$brand-success: #18753C !default;
+$brand-info: #0063CB !default;
+$brand-warning: #B34000 !default;
+$brand-danger: #CE0500 !default;
+
+$brand-text-color: #161616 !default;
+$brand-bg-light: #F5F5FE !default;
+
+/* Navbar alignment */
+$navbar-default-bg: #FFFFFF !default;
+$navbar-default-border: #E5E5E5 !default;
+$navbar-default-link-color: #161616 !default;
+$navbar-default-link-hover-color: #000091 !default;
+$navbar-default-link-active-color: #000091 !default;
+
+/* --- Typographie Marianne --- */
+$font-family-sans-serif: "Marianne", Arial, sans-serif !default;
+$headings-font-family: "Marianne", Arial, sans-serif !default;
+$font-size-base: 16px !default;
+$line-height-base: 1.5 !default;
+
+/* --- Focus RGAA --- */
+$input-border-focus: #0A76F6 !default;
+
+/* --- Boutons --- */
+$btn-border-radius-base: 0px !default;
+$btn-primary-bg: #000091 !default;
+$btn-primary-color: #FFFFFF !default;
+
+/* --- Liens --- */
+$link-color: #000091 !default;
+$link-hover-color: #1212FF !default;
+
+/* --- Composants --- */
+$panel-default-border: #E5E5E5 !default;
+$panel-default-heading-bg: #F6F6F6 !default;
+
+/* ==========================================================================
+   Styles globaux
+   ========================================================================== */
+
+body {
+  font-family: "Marianne", Arial, sans-serif;
+  color: #161616;
+  background-color: #F5F5FE;
+}
+
+/* Focus visible conforme RGAA */
+*:focus-visible {
+  outline: 2px solid #0A76F6 !important;
+  outline-offset: 2px !important;
+}
+
+/* En-tête République Française */
+.navbar-header .navbar-brand {
+  font-family: "Marianne", Arial, sans-serif;
+  font-weight: 700;
+  color: #000091;
+}
+
+/* Boutons DSFR */
+.btn-primary {
+  background-color: #000091;
+  border-color: #000091;
+  color: #FFFFFF;
+  border-radius: 0;
+  &amp;:hover, &amp;:focus {
+    background-color: #1212FF;
+    border-color: #1212FF;
+  }
+}
+
+.btn-default {
+  border-color: #000091;
+  color: #000091;
+  border-radius: 0;
+  &amp;:hover, &amp;:focus {
+    background-color: #F5F5FE;
+    border-color: #1212FF;
+    color: #1212FF;
+  }
+}
+
+/* Liens DSFR */
+a {
+  color: #000091;
+  text-decoration: underline;
+  &amp;:hover, &amp;:focus {
+    color: #1212FF;
+  }
+}
+
+/* Panels / Cards */
+.panel {
+  border-radius: 0;
+  border-color: #E5E5E5;
+  box-shadow: 0 2px 6px rgba(0, 0, 18, 0.08);
+}
+
+.panel-heading {
+  border-radius: 0;
+  background-color: #F6F6F6;
+  border-bottom: 2px solid #000091;
+}
+
+/* Alertes DSFR */
+.alert-info {
+  background-color: #E8EDFF;
+  border-color: #000091;
+  color: #000091;
+}
+
+.alert-success {
+  background-color: #B8FEC9;
+  border-color: #18753C;
+  color: #18753C;
+}
+
+.alert-warning {
+  background-color: #FFE9E6;
+  border-color: #B34000;
+  color: #B34000;
+}
+
+.alert-danger {
+  background-color: #FFE9E6;
+  border-color: #CE0500;
+  color: #CE0500;
+}
+
+/* Formulaires */
+.form-control {
+  border-radius: 0;
+  border-color: #929292;
+  &amp;:focus {
+    border-color: #0A76F6;
+    box-shadow: 0 0 0 2px rgba(10, 118, 246, 0.25);
+  }
+}
+
+/* Bannière REPUBLIQUE FRANCAISE */
+.sp-header {
+  border-top: 3px solid;
+  border-image: linear-gradient(to right, #000091, #FFFFFF, #E1000F) 1;
+}
+</css_variables>
+        <footer display_value="Sample Footer">feb4f763df121200ba13a4836bf26320</footer>
+        <footer_fixed>true</footer_fixed>
+        <header display_value="Habitat - DSFR Header">b35cc0c874f644e4a9ecb9bb70466c2f</header>
+        <icon/>
+        <logo/>
+        <logo_alt_text/>
+        <matching_now_experience_theme/>
+        <name>DSFR - Habitat</name>
+        <navbar_fixed>true</navbar_fixed>
+        <sys_class_name>sp_theme</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:37</sys_created_on>
+        <sys_id>be576fc0a6d84176bfbb7e9148ffb528</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>DSFR - Habitat</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sp_theme_be576fc0a6d84176bfbb7e9148ffb528</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:37</sys_updated_on>
+        <turn_off_scss_compilation>false</turn_off_scss_compilation>
+    </sp_theme>
+    <sys_translated_text action="delete_multiple" query="documentkey=be576fc0a6d84176bfbb7e9148ffb528"/>
+</record_update>

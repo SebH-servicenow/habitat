@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_container">
+    <sp_container action="INSERT_OR_UPDATE">
+        <aria_label/>
+        <background_color/>
+        <background_image/>
+        <background_style>default</background_style>
+        <bootstrap_alt>false</bootstrap_alt>
+        <class_name/>
+        <container_class_name/>
+        <name>Simulation Mutation - Container 1</name>
+        <order>1</order>
+        <semantic_tag/>
+        <sp_page display_value="x_snc_habitat_familles_simulateur">4c5780452bf2c710d2bef8c76e91bf27</sp_page>
+        <subheader>false</subheader>
+        <sys_class_name>sp_container</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-08-17 12:44:37</sys_created_on>
+        <sys_id>7f38b8850fb20b1008dd5ee530d1b296</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Simulation Mutation - Container 1</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sp_container_7f38b8850fb20b1008dd5ee530d1b296</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-08-17 12:44:37</sys_updated_on>
+        <title/>
+        <width>container</width>
+    </sp_container>
+</record_update>

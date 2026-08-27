@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="ac75a5190f99831008dd5ee530d1b22e" label="Pièce justificative" max_length="40" name="x_snc_habitat_piece_justificative" type="collection">
+        <element label="Source d'extraction" max_length="40" name="source_extraction" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Saisie agent" sequence="0" value="saisie_agent"/>
+                <element inactive_on_update="false" label="OCR" sequence="1" value="ocr"/>
+            </choice>
+        </element>
+        <element label="Type de document" max_length="40" name="type_document" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Ordre de mutation" sequence="0" value="ordre_mutation"/>
+                <element inactive_on_update="false" label="Autre" sequence="4" value="autre"/>
+                <element inactive_on_update="false" label="Certificat de radiation" sequence="1" value="certificat_radiation"/>
+                <element inactive_on_update="false" label="Justificatif d'identité" sequence="3" value="justificatif_identite"/>
+                <element inactive_on_update="false" label="Attestation de domicile" sequence="2" value="attestation_domicile"/>
+            </choice>
+        </element>
+        <element label="Administré" max_length="32" name="administre" reference="sys_user" type="reference"/>
+        <element label="Métadonnées" max_length="4000" name="metadonnees" type="string"/>
+        <index name="index">
+            <element name="administre"/>
+        </index>
+    </element>
+</database>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_section caption="Demande parente" section_id="efa8a2a79f364a12bd3058ce74161b9d" sys_domain="global" table="x_snc_habitat_dossier_metier" version="3" view="">
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.begin_split</element>
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-08 06:23:22</sys_created_on>
+            <sys_id>8767bd9b73e6434f8da6aff39c494173</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande parente" display_value="Demande parente" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">efa8a2a79f364a12bd3058ce74161b9d</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-08 06:23:22</sys_updated_on>
+            <sys_user/>
+            <type>.begin_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>demande_parente</element>
+            <position>1</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-08 06:23:22</sys_created_on>
+            <sys_id>115e8303d6a14ee48e44809aaa389736</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande parente" display_value="Demande parente" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">efa8a2a79f364a12bd3058ce74161b9d</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-08 06:23:22</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>2</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-08 06:23:22</sys_created_on>
+            <sys_id>73a2426f3c564a219d9e03b58fc58878</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande parente" display_value="Demande parente" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">efa8a2a79f364a12bd3058ce74161b9d</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-08 06:23:22</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>ville_destination</element>
+            <position>3</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-08 06:23:22</sys_created_on>
+            <sys_id>0695930e97344e2ca7e44a9f5d656468</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande parente" display_value="Demande parente" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">efa8a2a79f364a12bd3058ce74161b9d</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-08 06:23:22</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.end_split</element>
+            <position>4</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-08 06:23:22</sys_created_on>
+            <sys_id>37d06da180344bff94e93ad298ff824c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Demande parente" display_value="Demande parente" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">efa8a2a79f364a12bd3058ce74161b9d</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-08 06:23:22</sys_updated_on>
+            <sys_user/>
+            <type>.end_split</type>
+        </sys_ui_element>
+        <sys_ui_section action="INSERT_OR_UPDATE">
+            <caption>Demande parente</caption>
+            <header>false</header>
+            <name>x_snc_habitat_dossier_metier</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-08 06:23:22</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>efa8a2a79f364a12bd3058ce74161b9d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_habitat_dossier_metier</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+            <sys_update_name>sys_ui_section_efa8a2a79f364a12bd3058ce74161b9d</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-08 06:23:22</sys_updated_on>
+            <sys_user/>
+            <title>false</title>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+</record_update>

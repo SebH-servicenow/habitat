@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_section caption="Dossier" section_id="1bc70b20c08b40a58b6249326daef2f0" sys_domain="global" table="x_snc_habitat_dossier_metier" version="3" view="">
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.begin_split</element>
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_id>ef8ff0f0266241128728ad53f1060cdd</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Dossier" display_value="Dossier" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">1bc70b20c08b40a58b6249326daef2f0</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+            <sys_user/>
+            <type>.begin_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>number</element>
+            <position>1</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_id>494b8ef41c19475c9abde91c0d9d409e</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Dossier" display_value="Dossier" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">1bc70b20c08b40a58b6249326daef2f0</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>state</element>
+            <position>2</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_id>89f6693ebf3543eca6623dbf01a30577</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Dossier" display_value="Dossier" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">1bc70b20c08b40a58b6249326daef2f0</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>priority</element>
+            <position>3</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_id>4eca18d2c77b461c897e626d36a6f8ea</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Dossier" display_value="Dossier" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">1bc70b20c08b40a58b6249326daef2f0</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>type_flux</element>
+            <position>4</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_id>5a28ac31aa74475b890d5d2910e7f44e</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Dossier" display_value="Dossier" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">1bc70b20c08b40a58b6249326daef2f0</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>5</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_id>a079e00e9efb459d9f9fcbe5be5b9ade</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Dossier" display_value="Dossier" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">1bc70b20c08b40a58b6249326daef2f0</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>assigned_to</element>
+            <position>6</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_id>95ae6cbef33346308ab84e43e140c20e</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Dossier" display_value="Dossier" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">1bc70b20c08b40a58b6249326daef2f0</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>assignment_group</element>
+            <position>7</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_id>5f85cd6b3fe04ffeb428f160e6553541</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Dossier" display_value="Dossier" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">1bc70b20c08b40a58b6249326daef2f0</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>due_date</element>
+            <position>8</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_id>8fc807ef75df43b8a51032b9e914660e</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Dossier" display_value="Dossier" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">1bc70b20c08b40a58b6249326daef2f0</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>ville_destination</element>
+            <position>9</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_id>5f696d2d4dca4ed6b25ffec829a3bbf1</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Dossier" display_value="Dossier" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">1bc70b20c08b40a58b6249326daef2f0</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.end_split</element>
+            <position>10</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_id>4146554ef0054777934c80792811c8ce</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Dossier" display_value="Dossier" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">1bc70b20c08b40a58b6249326daef2f0</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+            <sys_user/>
+            <type>.end_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>short_description</element>
+            <position>11</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:35</sys_created_on>
+            <sys_id>f027e7998f4c4e33a1ae4a9193b896e4</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Dossier" display_value="Dossier" name="x_snc_habitat_dossier_metier" sys_domain="global" view="Default view">1bc70b20c08b40a58b6249326daef2f0</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:35</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_section action="INSERT_OR_UPDATE">
+            <caption>Dossier</caption>
+            <header>false</header>
+            <name>x_snc_habitat_dossier_metier</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-08 06:33:31</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>1bc70b20c08b40a58b6249326daef2f0</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_habitat_dossier_metier</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+            <sys_update_name>sys_ui_section_1bc70b20c08b40a58b6249326daef2f0</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-08 06:33:31</sys_updated_on>
+            <sys_user/>
+            <title>false</title>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+</record_update>

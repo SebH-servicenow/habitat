@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="par_dashboard_widget">
+    <par_dashboard_widget action="INSERT_OR_UPDATE">
+        <canvas display_value="">21970ae56ae14be3a9ddd5f62bd09662</canvas>
+        <component display_value="Vertical bar">23051643b7e03010097cb81cde11a910</component>
+        <component_props>{"allowAdditionalGroupByPerMetric":false,"allowChangeDateRange":false,"scoreIcon":"","applyDateRange":false,"autoAggregatePeriods":false,"bareBorder":false,"cacheExpirationTime":0,"chartVariation":"stacked","dataLabelPosition":"middle","dataLabelsType":"both","dateFormat":"default","disableTooltip":false,"emptyStateAlignment":"vertical-centered","emptyStateContent":"There are no scores available for the selected criteria. Contact your admin for more info.","emptyStateHeading":"No data available.","emptyStateHeadingLevel":3,"emptyStateIllustration":"no-data","enableAddZerosAtApi":true,"enableClickAndStay":false,"enableCustomEmptyState":false,"enableDrilldown":true,"enableRealTimeUpdate":false,"extensionType":"step","filterConfigurations":"@state.parFilters","followFilters":true,"freezeFirstColumn":true,"freezeFooter":false,"freezeHeader":true,"gaugeArcAngle":"180","headerTitleAlignment":"start","headingLevel":2,"headingPosition":"top","hideDevSettings":false,"hideMatrixAggregate":false,"hideYAxis0":false,"hideYAxis1":false,"hideYAxis2":false,"hideYAxis3":false,"hideYAxis4":false,"iconStyle":"background","legendExpandToFit":false,"legendHorizontalAlignment":"center","legendPosition":"bottom","lineClamp":1,"lineStrokeWidth":"2","mapSysId":"93b8a3a2d7101200bd4a4ebfae61033a","minValue":0,"newReporting":false,"numberOfPeriods":3,"period":"M","registerOrientation":"horizontal","registerPosition":"bottom","scoreAlignment":"start","scoreLabel":"none","scoreSize":"auto","scoreType":"latest","showAbsolutePeriod":false,"showAdditionalGroupBySelector":false,"showAlternateColumnColors":false,"showAlternateRowColors":true,"showBorder":true,"showCacheTime":true,"showChange":false,"showChangeFrom":"previous","showChangePercentage":false,"showClosestSeriesOnHover":true,"showColumnAggregate":true,"showColumnDividers":true,"showComment":false,"showConfidenceBand":false,"showContinuousLine":true,"showDataLabels":false,"showDataPassthrough":false,"showDataTable":false,"showDateRangeByDefault":false,"showExportOptions":true,"showFilterAsSeparateSeries":false,"showFilterIcon":true,"showFirstGroupAggregate":false,"showForecast":false,"showForecastRange":false,"showGapPercentage":false,"showHeader":true,"showHeaderSeparator":false,"showLabelFirst":false,"showLegend":true,"showLegendValue":false,"showLoadingIndicator":false,"showMarkers":false,"showMaximumRange":false,"showMetricLabel":false,"showOverlappingLabels":false,"showPercentageOfTotalInTooltip":true,"showPivotExpanded":true,"showRangeLabels":false,"showRangeLimit":true,"showRefresh":true,"showRegister":true,"showRegisterOnSameLine":false,"showRegisterPercentage":false,"showRegisterValue":false,"showRowAggregate":true,"showRowDividers":false,"showScoreDate":false,"showScoreUpdateTime":false,"showSecondGroupAggregate":false,"showSparkline":false,"showStackedValues":"none","showSubAggregate":true,"showTarget":false,"showThreshold":false,"showTotalAggregate":false,"showTrend":false,"showXGrid":false,"showYGrid":true,"showZero":false,"sortByOrder":"desc","sparklineStyle":"area","truncateColumnHeader":true,"truncateFirstColumn":true,"truncationType":"end","useCurrentDateForEnd":false,"useDataCache":false,"useRelativeScoreTime":false,"valueLabelSize":"md","wrapColumnHeader":false,"wrapElements":false,"wrapTitle":false,"xAxisHidden":false,"xAxisMaxLabelSize":100,"xAxisTruncationType":"end","xAxisWrapLabels":false,"yAxis0Position":"left","yAxis1Position":"right","yAxis2Position":"right","yAxis3Position":"right","yAxis4Position":"right","yAxisHidden":false,"yAxisPosition":"bottom","yAxisShowGrid":true,"yAxisStyle":"clean","colorConfig":{"type":"default"},"userInfo":"@context.session.user","dataSources":[{"label":"Dossiers Mut'Actions","sourceType":"table","tableOrViewName":"x_snc_habitat_dossier_metier","filterQuery":"type_flux=mut_actions","id":"ds_mut_bar_state"}],"headerTitle":"Par état","metrics":[{"dataSource":"ds_mut_bar_state","id":"metric_mut_bar_state","aggregateFunction":"COUNT","axisId":"primary"}],"groupBy":[{"groupBy":[{"dataSource":"ds_mut_bar_state","groupByField":"state"}],"maxNumberOfGroups":10,"showOthers":false}]}</component_props>
+        <h>14</h>
+        <name/>
+        <required_translations>[{"comment":"","message":"Dossiers Mut'Actions","code":"PAR_DASHBOARD.09b2c0cc50214c92879afcb50fa2166b.c7d47c7634f04ef7a53e53fafcb62bf7"},{"comment":"","message":"Par état","code":"PAR_DASHBOARD.09b2c0cc50214c92879afcb50fa2166b.c7d47c7634f04ef7a53e53fafcb62bf7"},{"comment":"","message":"No data available.","code":"PAR_DASHBOARD.09b2c0cc50214c92879afcb50fa2166b.c7d47c7634f04ef7a53e53fafcb62bf7"},{"comment":"","message":"There are no scores available for the selected criteria. Contact your admin for more info.","code":"PAR_DASHBOARD.09b2c0cc50214c92879afcb50fa2166b.c7d47c7634f04ef7a53e53fafcb62bf7"}]</required_translations>
+        <stored_component/>
+        <sys_class_name>par_dashboard_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-06 18:57:41</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>c7d47c7634f04ef7a53e53fafcb62bf7</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_overrides/>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>par_dashboard_widget_c7d47c7634f04ef7a53e53fafcb62bf7</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-06 18:57:41</sys_updated_on>
+        <visualization/>
+        <w>24</w>
+        <widget_props/>
+        <x>0</x>
+        <y>14</y>
+    </par_dashboard_widget>
+</record_update>

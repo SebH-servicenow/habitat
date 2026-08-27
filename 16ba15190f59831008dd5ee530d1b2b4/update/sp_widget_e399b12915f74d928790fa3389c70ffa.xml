@@ -1,0 +1,1907 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $timeout, $element) {
+  var c = this;
+
+  // Attendre qu'Angular ait insere le template dans la page
+  $timeout(function() {
+
+    var faq = $element[0].querySelector('.faq');
+    if (!faq) {
+      return;
+    }
+
+    // Ajouter la classe is-visible quand la FAQ entre dans l'ecran
+    var observateur = new IntersectionObserver(function(entrees) {
+      for (var i = 0; i < entrees.length; i++) {
+        if (entrees[i].isIntersecting) {
+          entrees[i].target.className += ' is-visible';
+          observateur.unobserve(entrees[i].target);
+        }
+      }
+    }, { threshold: 0.2 });
+
+    observateur.observe(faq);
+
+    // Arreter l'observation si le widget est retire de la page
+    $scope.$on('$destroy', function() {
+      observateur.disconnect();
+    });
+
+  }, 0);
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ============================================================&#13;
+   PORTAIL HABITAT — PAGE D'ACCUEIL&#13;
+   Sommaire :&#13;
+     1. Conteneur&#13;
+     2. Fil d'Ariane&#13;
+     3. Hero&#13;
+     4. Bloc simulateur&#13;
+     5. Actualités&#13;
+     6. FAQ&#13;
+     7. Informations pratiques&#13;
+     8. Divers&#13;
+   ============================================================ */&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   1. CONTENEUR&#13;
+   ============================================================ */&#13;
+   .accueil-familles {&#13;
+    font-family: 'Marianne', Arial, sans-serif;&#13;
+    color: #161616;&#13;
+    max-width: 1200px;&#13;
+    margin: 0 auto;&#13;
+    padding: 24px 16px 0;&#13;
+    background-color: #ffffff;&#13;
+  }&#13;
+  &#13;
+  /* On ne cible jamais * ni body : tout reste dans le widget */&#13;
+  .accueil-familles * {&#13;
+    box-sizing: border-box;&#13;
+  }&#13;
+  &#13;
+  &#13;
+  /* ============================================================&#13;
+     2. FIL D'ARIANE&#13;
+     ============================================================ */&#13;
+  .breadcrumb {&#13;
+    margin: 0 0 24px;&#13;
+    padding: 12px 16px;&#13;
+    background-color: #F6F6F6;&#13;
+    font-size: 14px;&#13;
+  }&#13;
+  &#13;
+  .breadcrumb ol {&#13;
+    list-style: none;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    padding: 0;&#13;
+    margin: 0;&#13;
+    font-size: 14px;&#13;
+  }&#13;
+  &#13;
+  .breadcrumb ol li {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+  }&#13;
+  &#13;
+  .breadcrumb ol li + li::before {&#13;
+    content: '›';&#13;
+    margin: 0 8px;&#13;
+    color: #666666;&#13;
+  }&#13;
+  &#13;
+  .breadcrumb ol li a {&#13;
+    color: #000091;&#13;
+    text-decoration: none;&#13;
+  }&#13;
+  &#13;
+  .breadcrumb ol li a:hover {&#13;
+    text-decoration: underline;&#13;
+  }&#13;
+  &#13;
+  .breadcrumb ol li[aria-current="page"] {&#13;
+    color: #666666;&#13;
+  }&#13;
+  &#13;
+  &#13;
+  /* ============================================================&#13;
+     3. HERO&#13;
+     Une bande photo, puis une carte blanche qui remonte dessus.&#13;
+     ============================================================ */&#13;
+  .hero {&#13;
+    margin-bottom: 40px;&#13;
+  }&#13;
+  &#13;
+  /* ---------- La bande photo ---------- */&#13;
+  .hero__image {&#13;
+    height: 300px;&#13;
+    background-image:&#13;
+      /* voile bleu pour garder la photo lisible */&#13;
+      linear-gradient(180deg, rgba(0, 0, 145, 0.55) 0%, rgba(0, 0, 145, 0.25) 100%),&#13;
+      url("/demenagement.jpg");&#13;
+    background-size: cover;&#13;
+    background-position: center 35%;&#13;
+  }&#13;
+  &#13;
+  /* ---------- La carte blanche ---------- */&#13;
+  .hero__card {&#13;
+    position: relative;             /* passe au-dessus de la photo */&#13;
+    margin: -120px 40px 0;          /* la remontée sur la photo */&#13;
+    background-color: #ffffff;&#13;
+    border-top: 4px solid #E1000F;  /* liseré Marianne */&#13;
+    border-radius: 16px;&#13;
+    padding: 32px 36px 30px;&#13;
+    box-shadow: 0 12px 40px rgba(10, 10, 60, 0.16);&#13;
+    animation: hero-apparition 0.6s ease both;&#13;
+  }&#13;
+  &#13;
+  @keyframes hero-apparition {&#13;
+    from { opacity: 0; transform: translateY(20px); }&#13;
+    to   { opacity: 1; transform: translateY(0); }&#13;
+  }&#13;
+  &#13;
+  /* ---------- Textes du hero ---------- */&#13;
+  .hero__label {&#13;
+    font-size: 12px;&#13;
+    font-weight: 700;&#13;
+    letter-spacing: 0.05em;&#13;
+    text-transform: uppercase;&#13;
+    color: #000091;&#13;
+    margin: 0 0 14px;&#13;
+  }&#13;
+  &#13;
+  .hero__title {&#13;
+    font-size: 32px;&#13;
+    font-weight: 700;&#13;
+    line-height: 1.2;&#13;
+    color: #161616;&#13;
+    margin: 0 0 14px;&#13;
+  }&#13;
+  &#13;
+  /* Mots surlignés au marqueur bleu clair */&#13;
+  .hero__title span {&#13;
+    color: #000091;&#13;
+    background: linear-gradient(transparent 62%, #CACAFB 62%);&#13;
+    padding: 0 4px;&#13;
+  }&#13;
+  &#13;
+  .hero__text {&#13;
+    font-size: 16px;&#13;
+    line-height: 1.65;&#13;
+    color: #666666;&#13;
+    max-width: 680px;&#13;
+    margin: 0 0 28px;&#13;
+  }&#13;
+  &#13;
+  .hero__text strong {&#13;
+    font-weight: 700;&#13;
+    color: #161616;&#13;
+  }&#13;
+  &#13;
+  /* ---------- Boutons du hero ---------- */&#13;
+  .hero__actions {&#13;
+    display: flex;&#13;
+    flex-wrap: wrap;&#13;
+    gap: 14px;&#13;
+    align-items: center;&#13;
+  }&#13;
+  &#13;
+  .btn-primary {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    gap: 10px;&#13;
+    background-color: #000091;&#13;
+    color: #ffffff;&#13;
+    border: none;&#13;
+    border-radius: 8px;&#13;
+    padding: 13px 24px;&#13;
+    font-family: 'Marianne', Arial, sans-serif;&#13;
+    font-size: 16px;&#13;
+    font-weight: 700;&#13;
+    text-decoration: none;&#13;
+    cursor: pointer;&#13;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;&#13;
+  }&#13;
+  &#13;
+  .btn-primary:hover {&#13;
+    background-color: #1212FF;&#13;
+    color: #ffffff;&#13;
+    text-decoration: none;&#13;
+    transform: translateY(-2px);&#13;
+    box-shadow: 0 10px 22px rgba(0, 0, 145, 0.26);&#13;
+  }&#13;
+  &#13;
+  .btn-primary svg {&#13;
+    width: 15px;&#13;
+    height: 15px;&#13;
+    fill: none;&#13;
+    stroke: currentColor;&#13;
+    stroke-width: 2;&#13;
+    stroke-linecap: round;&#13;
+    stroke-linejoin: round;&#13;
+    transition: transform 0.2s ease;&#13;
+  }&#13;
+  &#13;
+  /* La flèche avance au survol */&#13;
+  .btn-primary:hover svg {&#13;
+    transform: translateX(4px);&#13;
+  }&#13;
+  &#13;
+  .btn-secondary {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    background-color: #ffffff;&#13;
+    color: #000091;&#13;
+    border: 1px solid #000091;&#13;
+    border-radius: 8px;&#13;
+    padding: 13px 24px;&#13;
+    font-family: 'Marianne', Arial, sans-serif;&#13;
+    font-size: 16px;&#13;
+    font-weight: 600;&#13;
+    text-decoration: none;&#13;
+    cursor: pointer;&#13;
+    transition: background-color 0.2s ease, transform 0.2s ease;&#13;
+  }&#13;
+  &#13;
+  .btn-secondary:hover {&#13;
+    background-color: #F5F5FE;&#13;
+    color: #000091;&#13;
+    text-decoration: none;&#13;
+    transform: translateY(-2px);&#13;
+  }&#13;
+  &#13;
+  &#13;
+  /* ============================================================&#13;
+     4. BLOC SIMULATEUR&#13;
+     Carte d'appel vers le simulateur CIMob.&#13;
+     ============================================================ */&#13;
+  .sim-intro {&#13;
+    background-color: #ffffff;&#13;
+    border-radius: 20px;&#13;
+    box-shadow: 0 2px 18px rgba(10, 10, 60, 0.06);&#13;
+    max-width: 800px;&#13;
+    margin: 0 auto 48px;&#13;
+    padding: 48px 40px 40px;&#13;
+    text-align: center;&#13;
+  }&#13;
+  &#13;
+  /* ---------- Le trajet avec l'avion ---------- */&#13;
+  .sim-route {&#13;
+    position: relative;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+    max-width: 340px;&#13;
+    height: 30px;&#13;
+    margin: 0 auto 32px;&#13;
+  }&#13;
+  &#13;
+  .sim-route__dot {&#13;
+    width: 12px;&#13;
+    height: 12px;&#13;
+    border-radius: 50%;&#13;
+    background-color: #000091;&#13;
+    flex-shrink: 0;&#13;
+  }&#13;
+  &#13;
+  .sim-route__dot--end {&#13;
+    background-color: #ffffff;&#13;
+    border: 2px solid #000091;&#13;
+  }&#13;
+  &#13;
+  .sim-route__line {&#13;
+    position: absolute;&#13;
+    left: 18px;&#13;
+    right: 18px;&#13;
+    top: 50%;&#13;
+    border-top: 2px dashed #DDDDDD;&#13;
+  }&#13;
+  &#13;
+  /* L'avion traverse la ligne en boucle */&#13;
+  .sim-route__plane {&#13;
+    position: absolute;&#13;
+    top: 50%;&#13;
+    left: 0;&#13;
+    width: 24px;&#13;
+    height: 24px;&#13;
+    color: #000091;&#13;
+    /* rotate(90deg) : le dessin pointe vers le haut, on le met à plat */&#13;
+    transform: translate(-50%, -50%) rotate(90deg);&#13;
+    animation: sim-vol 7s ease-in-out infinite;&#13;
+  }&#13;
+  &#13;
+  .sim-route__plane svg {&#13;
+    width: 100%;&#13;
+    height: 100%;&#13;
+    fill: currentColor;&#13;
+  }&#13;
+  &#13;
+  @keyframes sim-vol {&#13;
+    0%   { left: 6%;  opacity: 0; }&#13;
+    8%   { opacity: 1; }&#13;
+    86%  { left: 94%; opacity: 1; }&#13;
+    95%  { left: 94%; opacity: 0; }&#13;
+    100% { left: 6%;  opacity: 0; }&#13;
+  }&#13;
+  &#13;
+  /* ---------- Textes du bloc simulateur ---------- */&#13;
+  .sim-kicker {&#13;
+    font-size: 12px;&#13;
+    font-weight: 700;&#13;
+    letter-spacing: 2px;&#13;
+    text-transform: uppercase;&#13;
+    color: #000091;&#13;
+    margin: 0 0 12px;&#13;
+  }&#13;
+  &#13;
+  .sim-title {&#13;
+    font-size: 32px;&#13;
+    font-weight: 700;&#13;
+    line-height: 1.2;&#13;
+    color: #161616;&#13;
+    margin: 0 0 16px;&#13;
+  }&#13;
+  &#13;
+  .sim-title span {&#13;
+    color: #000091;&#13;
+    background: linear-gradient(transparent 62%, #CACAFB 62%);&#13;
+    padding: 0 4px;&#13;
+  }&#13;
+  &#13;
+  .sim-text {&#13;
+    font-size: 16px;&#13;
+    line-height: 1.6;&#13;
+    color: #666666;&#13;
+    max-width: 520px;&#13;
+    margin: 0 auto 32px;&#13;
+  }&#13;
+  &#13;
+  /* ---------- Les 3 familles d'offres ---------- */&#13;
+  .sim-cards {&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(3, 1fr);&#13;
+    gap: 16px;&#13;
+    margin: 0 0 32px;&#13;
+  }&#13;
+  &#13;
+  .sim-card {&#13;
+    background-color: #FAFAFA;&#13;
+    border: 1px solid #EEEEEE;&#13;
+    border-radius: 12px;&#13;
+    padding: 20px 16px;&#13;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;&#13;
+  }&#13;
+  &#13;
+  .sim-card:hover {&#13;
+    transform: translateY(-4px);&#13;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);&#13;
+  }&#13;
+  &#13;
+  .sim-card__icon {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    width: 44px;&#13;
+    height: 44px;&#13;
+    border-radius: 10px;&#13;
+    margin-bottom: 12px;&#13;
+  }&#13;
+  &#13;
+  .sim-card__icon svg {&#13;
+    width: 22px;&#13;
+    height: 22px;&#13;
+    fill: none;&#13;
+    stroke: currentColor;&#13;
+    stroke-width: 1.6;&#13;
+    stroke-linecap: round;&#13;
+    stroke-linejoin: round;&#13;
+  }&#13;
+  &#13;
+  /* Une couleur par famille */&#13;
+  .sim-card__icon--vert { background-color: #DFFDF0; color: #00A95F; }&#13;
+  .sim-card__icon--bleu { background-color: #E8EDFF; color: #0063CB; }&#13;
+  .sim-card__icon--rose { background-color: #FEE7FC; color: #6E445A; }&#13;
+  &#13;
+  .sim-card__title {&#13;
+    font-size: 16px;&#13;
+    font-weight: 700;&#13;
+    color: #161616;&#13;
+    margin: 0 0 4px;&#13;
+  }&#13;
+  &#13;
+  .sim-card__text {&#13;
+    font-size: 14px;&#13;
+    line-height: 1.45;&#13;
+    color: #666666;&#13;
+    margin: 0;&#13;
+  }&#13;
+  &#13;
+  /* ---------- Bouton du simulateur ---------- */&#13;
+  .sim-button {&#13;
+    font-family: 'Marianne', Arial, sans-serif;&#13;
+    font-size: 16px;&#13;
+    font-weight: 700;&#13;
+    color: #ffffff;&#13;
+    background-color: #000091;&#13;
+    border: none;&#13;
+    border-radius: 8px;&#13;
+    padding: 14px 32px;&#13;
+    cursor: pointer;&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    gap: 10px;&#13;
+    transition: background-color 0.2s ease, transform 0.2s ease;&#13;
+  }&#13;
+  &#13;
+  .sim-button:hover {&#13;
+    background-color: #1212FF;&#13;
+    transform: translateY(-2px);&#13;
+  }&#13;
+  &#13;
+  .sim-button svg {&#13;
+    width: 16px;&#13;
+    height: 16px;&#13;
+    fill: none;&#13;
+    stroke: #ffffff;&#13;
+    stroke-width: 2;&#13;
+    stroke-linecap: round;&#13;
+    stroke-linejoin: round;&#13;
+    transition: transform 0.2s ease;&#13;
+  }&#13;
+  &#13;
+  .sim-button:hover svg {&#13;
+    transform: translateX(4px);&#13;
+  }&#13;
+  &#13;
+  .sim-hint {&#13;
+    font-size: 13px;&#13;
+    color: #666666;&#13;
+    margin: 16px 0 0;&#13;
+  }&#13;
+  &#13;
+  &#13;
+  /* ============================================================&#13;
+     5. ACTUALITÉS&#13;
+     Une actualité à la une à gauche, trois brèves à droite.&#13;
+     ============================================================ */&#13;
+  .news {&#13;
+    padding: 0 0 48px;&#13;
+  }&#13;
+  &#13;
+  /* ---------- Titre de section ---------- */&#13;
+  .news__head {&#13;
+    display: flex;&#13;
+    align-items: flex-end;&#13;
+    justify-content: space-between;&#13;
+    gap: 20px;&#13;
+    flex-wrap: wrap;&#13;
+    margin-bottom: 28px;&#13;
+  }&#13;
+  &#13;
+  .news__label {&#13;
+    font-size: 12px;&#13;
+    font-weight: 700;&#13;
+    letter-spacing: 0.05em;&#13;
+    text-transform: uppercase;&#13;
+    color: #000091;&#13;
+    margin: 0 0 8px;&#13;
+  }&#13;
+  &#13;
+  .news__title {&#13;
+    font-size: 26px;&#13;
+    font-weight: 700;&#13;
+    color: #161616;&#13;
+    margin: 0;&#13;
+  }&#13;
+  &#13;
+  .news__title span {&#13;
+    color: #000091;&#13;
+    background: linear-gradient(transparent 62%, #CACAFB 62%);&#13;
+    padding: 0 4px;&#13;
+  }&#13;
+  &#13;
+  /* Lien "Voir tout" */&#13;
+  .news__all {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    gap: 8px;&#13;
+    font-size: 14px;&#13;
+    font-weight: 700;&#13;
+    color: #000091;&#13;
+    text-decoration: none;&#13;
+    white-space: nowrap;&#13;
+    transition: gap 0.2s ease;&#13;
+  }&#13;
+  &#13;
+  .news__all:hover {&#13;
+    gap: 13px;&#13;
+    color: #000091;&#13;
+    text-decoration: underline;&#13;
+  }&#13;
+  &#13;
+  .news__all svg {&#13;
+    width: 17px;&#13;
+    height: 17px;&#13;
+    fill: none;&#13;
+    stroke: currentColor;&#13;
+    stroke-width: 2;&#13;
+    stroke-linecap: round;&#13;
+    stroke-linejoin: round;&#13;
+  }&#13;
+  &#13;
+  /* ---------- Disposition ---------- */&#13;
+  .news__grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: 1.25fr 1fr;&#13;
+    gap: 24px;&#13;
+  }&#13;
+  &#13;
+  .news__side {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    gap: 12px;&#13;
+  }&#13;
+  &#13;
+  /* ---------- Actualité à la une ---------- */&#13;
+  .news-main {&#13;
+    display: block;&#13;
+    border: 1px solid #E5E5E5;&#13;
+    border-radius: 14px;&#13;
+    overflow: hidden;&#13;
+    text-decoration: none;&#13;
+    color: inherit;&#13;
+    transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1),&#13;
+                box-shadow 0.3s ease;&#13;
+  }&#13;
+  &#13;
+  .news-main:hover {&#13;
+    transform: translateY(-3px);&#13;
+    box-shadow: 0 12px 30px rgba(10, 10, 60, 0.12);&#13;
+    color: inherit;&#13;
+    text-decoration: none;&#13;
+  }&#13;
+  &#13;
+  .news-main__image {&#13;
+    height: 220px;&#13;
+    background-image: url("/x_snc_habitat.logement.png");&#13;
+    background-size: cover;&#13;
+    background-position: center;&#13;
+    transition: transform 0.5s cubic-bezier(0.33, 1, 0.68, 1);&#13;
+  }&#13;
+  &#13;
+  /* L'image zoome légèrement au survol */&#13;
+  .news-main:hover .news-main__image {&#13;
+    transform: scale(1.05);&#13;
+  }&#13;
+  &#13;
+  .news-main__body {&#13;
+    padding: 20px 22px 22px;&#13;
+  }&#13;
+  &#13;
+  .news-main__headline {&#13;
+    font-size: 19px;&#13;
+    font-weight: 700;&#13;
+    line-height: 1.35;&#13;
+    color: #161616;&#13;
+    margin: 12px 0 8px;&#13;
+  }&#13;
+  &#13;
+  .news-main__text {&#13;
+    font-size: 14px;&#13;
+    line-height: 1.6;&#13;
+    color: #666666;&#13;
+    margin: 0 0 12px;&#13;
+  }&#13;
+  &#13;
+  /* ---------- Brèves ---------- */&#13;
+  .news-item {&#13;
+    display: flex;&#13;
+    gap: 14px;&#13;
+    align-items: center;&#13;
+    background-color: #FAFAFA;&#13;
+    border: 1px solid #EEEEEE;&#13;
+    border-radius: 12px;&#13;
+    padding: 12px;&#13;
+    text-decoration: none;&#13;
+    color: inherit;&#13;
+    transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1),&#13;
+                background-color 0.3s ease,&#13;
+                border-color 0.3s ease,&#13;
+                box-shadow 0.3s ease;&#13;
+  }&#13;
+  &#13;
+  .news-item:hover {&#13;
+    transform: translateX(3px);&#13;
+    background-color: #ffffff;&#13;
+    border-color: #CACAFB;&#13;
+    box-shadow: 0 4px 16px rgba(10, 10, 60, 0.06);&#13;
+    color: inherit;&#13;
+    text-decoration: none;&#13;
+  }&#13;
+  &#13;
+  .news-item__image {&#13;
+    width: 88px;&#13;
+    height: 88px;&#13;
+    flex-shrink: 0;&#13;
+    border-radius: 10px;&#13;
+    background-image: url("/x_snc_habitat.demarche.png");&#13;
+    background-size: cover;&#13;
+    background-position: center;&#13;
+  }&#13;
+  &#13;
+  .news-item__body {&#13;
+    min-width: 0;&#13;
+  }&#13;
+  &#13;
+  .news-item__headline {&#13;
+    font-size: 14.5px;&#13;
+    font-weight: 700;&#13;
+    line-height: 1.4;&#13;
+    color: #161616;&#13;
+    margin: 6px 0;&#13;
+  }&#13;
+  &#13;
+  /* ---------- Éléments communs ---------- */&#13;
+  .news-tag {&#13;
+    display: inline-block;&#13;
+    background-color: #F5F5FE;&#13;
+    color: #000091;&#13;
+    font-size: 11px;&#13;
+    font-weight: 700;&#13;
+    padding: 4px 10px;&#13;
+    border-radius: 999px;&#13;
+  }&#13;
+  &#13;
+  .news-date {&#13;
+    font-size: 12px;&#13;
+    color: #666666;&#13;
+  }&#13;
+  &#13;
+  &#13;
+  /* ============================================================&#13;
+     6. FAQ&#13;
+     Les questions s'accrochent en alternance à une courbe rouge.&#13;
+     L'accordéon utilise &lt;details&gt; : aucun JavaScript nécessaire.&#13;
+     ============================================================ */&#13;
+  .faq {&#13;
+    padding: 0 0 48px;&#13;
+  }&#13;
+  &#13;
+  /* ---------- Titre de section ---------- */&#13;
+  .faq__head {&#13;
+    text-align: center;&#13;
+    margin-bottom: 44px;&#13;
+  }&#13;
+  &#13;
+  .faq__label {&#13;
+    font-size: 12px;&#13;
+    font-weight: 700;&#13;
+    letter-spacing: 0.05em;&#13;
+    text-transform: uppercase;&#13;
+    color: #000091;&#13;
+    margin: 0 0 10px;&#13;
+  }&#13;
+  &#13;
+  .faq__title {&#13;
+    font-size: 28px;&#13;
+    font-weight: 700;&#13;
+    color: #161616;&#13;
+    margin: 0 0 10px;&#13;
+  }&#13;
+  &#13;
+  .faq__title span {&#13;
+    color: #000091;&#13;
+    background: linear-gradient(transparent 62%, #CACAFB 62%);&#13;
+    padding: 0 4px;&#13;
+  }&#13;
+  &#13;
+  .faq__text {&#13;
+    font-size: 15px;&#13;
+    color: #666666;&#13;
+    max-width: 520px;&#13;
+    margin: 0 auto;&#13;
+  }&#13;
+  &#13;
+  /* ---------- La zone du chemin ---------- */&#13;
+  .faq__path-wrap {&#13;
+    position: relative;&#13;
+  }&#13;
+  &#13;
+  /* Le chemin rouge : il se dessine au chargement */&#13;
+  .faq__path {&#13;
+    position: absolute;&#13;
+    left: 50%;&#13;
+    top: 0;&#13;
+    /* il s'étire sur toute la hauteur du bloc de questions, donc il&#13;
+       s'arrête net avant le bouton "Voir toutes les questions" */&#13;
+    height: 100%;&#13;
+    width: 420px;&#13;
+    transform: translateX(-50%);&#13;
+    z-index: 0;&#13;
+    pointer-events: none;&#13;
+  }&#13;
+  &#13;
+    .faq__path-trait {&#13;
+    stroke: #E1000F;&#13;
+    stroke-width: 3;&#13;
+    fill: none;&#13;
+    stroke-dasharray: 8 10;&#13;
+    stroke-linecap: round;&#13;
+  }&#13;
+&#13;
+  .faq__path-masque {&#13;
+    stroke-dasharray: 810;&#13;
+    stroke-dashoffset: 810;&#13;
+  }&#13;
+&#13;
+  .faq.is-visible .faq__path-masque {&#13;
+    animation: faq-trace 4.5s cubic-bezier(0.33, 0, 0.15, 1) 0.3s forwards;&#13;
+  }&#13;
+  &#13;
+  @keyframes faq-trace {&#13;
+    to { stroke-dashoffset: 0; }&#13;
+  }&#13;
+  &#13;
+  /* ---------- Les illustrations ---------- */&#13;
+  .faq__illu {&#13;
+    position: absolute;&#13;
+    z-index: 0;&#13;
+    opacity: 0.9;&#13;
+  }&#13;
+  &#13;
+  .faq__illu svg {&#13;
+    width: 150px;&#13;
+    height: auto;&#13;
+  }&#13;
+  &#13;
+  .faq__illu--1 { right: 2%; top: 20px; }&#13;
+  .faq__illu--2 { left: 1%; top: 330px; }&#13;
+  &#13;
+  /* ---------- Une question ---------- */&#13;
+  .faq__item {&#13;
+    position: relative;&#13;
+    z-index: 1;&#13;
+    width: 62%;&#13;
+    margin-bottom: 26px;&#13;
+    /* invisible tant que la section n'est pas repérée par le JS */&#13;
+    opacity: 0;&#13;
+  }&#13;
+  &#13;
+  /* Les questions paires sont décalées vers la droite */&#13;
+  .faq__item:nth-child(even) {&#13;
+    margin-left: 38%;&#13;
+  }&#13;
+  &#13;
+  /* L'apparition en cascade ne démarre que lorsque .faq porte la classe&#13;
+     "is-visible" (ajoutée par le JS au moment où la section entre dans&#13;
+     l'écran). Les questions impaires entrent par la gauche, les paires&#13;
+     par la droite. Les 2 illustrations occupant les 2 premières positions,&#13;
+     les questions commencent au 4e enfant. */&#13;
+  .faq.is-visible .faq__item:nth-child(odd)  { animation: faq-entree-gauche 0.7s cubic-bezier(0.22, 0.7, 0.3, 1) forwards; }&#13;
+  .faq.is-visible .faq__item:nth-child(even) { animation: faq-entree-droite 0.7s cubic-bezier(0.22, 0.7, 0.3, 1) forwards; }&#13;
+  &#13;
+  .faq__item:nth-child(4) { animation-delay: 0.30s; }&#13;
+  .faq__item:nth-child(5) { animation-delay: 0.55s; }&#13;
+  .faq__item:nth-child(6) { animation-delay: 0.80s; }&#13;
+  .faq__item:nth-child(7) { animation-delay: 1.05s; }&#13;
+  .faq__item:nth-child(8) { animation-delay: 1.30s; }&#13;
+  &#13;
+  @keyframes faq-entree-gauche {&#13;
+    from { opacity: 0; transform: translateX(-34px); }&#13;
+    to   { opacity: 1; transform: translateX(0); }&#13;
+  }&#13;
+  &#13;
+  @keyframes faq-entree-droite {&#13;
+    from { opacity: 0; transform: translateX(34px); }&#13;
+    to   { opacity: 1; transform: translateX(0); }&#13;
+  }&#13;
+  &#13;
+  /* ---------- La carte ---------- */&#13;
+  .faq-q {&#13;
+    background-color: #ffffff;&#13;
+    border: 1px solid #E5E5E5;&#13;
+    border-radius: 14px;&#13;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;&#13;
+  }&#13;
+  &#13;
+  .faq-q:hover {&#13;
+    border-color: #CACAFB;&#13;
+    box-shadow: 0 4px 16px rgba(10, 10, 60, 0.06);&#13;
+  }&#13;
+  &#13;
+  .faq-q[open] {&#13;
+    border-color: #CACAFB;&#13;
+    box-shadow: 0 8px 24px rgba(10, 10, 60, 0.09);&#13;
+  }&#13;
+  &#13;
+  /* ---------- La ligne cliquable ---------- */&#13;
+  .faq-q__btn {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 14px;&#13;
+    padding: 18px 20px;&#13;
+    font-size: 15.5px;&#13;
+    font-weight: 700;&#13;
+    color: #161616;&#13;
+    cursor: pointer;&#13;
+    /* on masque la flèche par défaut de &lt;details&gt; */&#13;
+    list-style: none;&#13;
+  }&#13;
+  &#13;
+  .faq-q__btn::-webkit-details-marker {&#13;
+    display: none;&#13;
+  }&#13;
+  &#13;
+  /* Le numéro de la question */&#13;
+  .faq-q__num {&#13;
+    flex-shrink: 0;&#13;
+    width: 30px;&#13;
+    height: 30px;&#13;
+    border-radius: 9px;&#13;
+    background-color: #F5F5FE;&#13;
+    color: #000091;&#13;
+    font-size: 13px;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;&#13;
+  }&#13;
+  &#13;
+  .faq-q[open] .faq-q__num {&#13;
+    background-color: #000091;&#13;
+    color: #ffffff;&#13;
+    transform: scale(1.06);&#13;
+  }&#13;
+  &#13;
+  .faq-q__txt {&#13;
+    flex: 1;&#13;
+  }&#13;
+  &#13;
+  /* ---------- Le + qui devient − ---------- */&#13;
+  .faq-q__sign {&#13;
+    flex-shrink: 0;&#13;
+    position: relative;&#13;
+    width: 18px;&#13;
+    height: 18px;&#13;
+  }&#13;
+  &#13;
+  .faq-q__sign::before,&#13;
+  .faq-q__sign::after {&#13;
+    content: "";&#13;
+    position: absolute;&#13;
+    background-color: #000091;&#13;
+    border-radius: 2px;&#13;
+    transition: transform 0.35s cubic-bezier(0.22, 0.7, 0.3, 1), opacity 0.35s ease;&#13;
+  }&#13;
+  &#13;
+  /* La barre horizontale */&#13;
+  .faq-q__sign::before {&#13;
+    top: 8px;&#13;
+    left: 0;&#13;
+    width: 18px;&#13;
+    height: 2px;&#13;
+  }&#13;
+  &#13;
+  /* La barre verticale : elle pivote et disparaît à l'ouverture */&#13;
+  .faq-q__sign::after {&#13;
+    left: 8px;&#13;
+    top: 0;&#13;
+    width: 2px;&#13;
+    height: 18px;&#13;
+  }&#13;
+  &#13;
+  .faq-q[open] .faq-q__sign::after {&#13;
+    transform: rotate(90deg);&#13;
+    opacity: 0;&#13;
+  }&#13;
+  &#13;
+  /* ---------- La réponse ---------- */&#13;
+  .faq-q__answer {&#13;
+    padding: 0 20px 20px 64px;&#13;
+    font-size: 14.5px;&#13;
+    line-height: 1.7;&#13;
+    color: #666666;&#13;
+  }&#13;
+  &#13;
+  /* Le texte monte en fondu à l'ouverture */&#13;
+  .faq-q[open] .faq-q__answer {&#13;
+    animation: faq-ouverture 0.4s ease both;&#13;
+  }&#13;
+  &#13;
+  @keyframes faq-ouverture {&#13;
+    from { opacity: 0; transform: translateY(-8px); }&#13;
+    to   { opacity: 1; transform: translateY(0); }&#13;
+  }&#13;
+  &#13;
+  /* ---------- Voir toutes les questions ---------- */&#13;
+  .faq__more {&#13;
+    /* passe au-dessus du chemin, dont le tracé se termine juste derrière */&#13;
+    position: relative;&#13;
+    z-index: 1;&#13;
+    display: flex;&#13;
+    justify-content: center;&#13;
+    margin-top: 36px;&#13;
+  }&#13;
+  &#13;
+  .faq__more-link {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    gap: 10px;&#13;
+    background-color: #ffffff;&#13;
+    color: #000091;&#13;
+    border: 1px solid #000091;&#13;
+    border-radius: 8px;&#13;
+    padding: 13px 26px;&#13;
+    font-family: 'Marianne', Arial, sans-serif;&#13;
+    font-size: 15px;&#13;
+    font-weight: 700;&#13;
+    text-decoration: none;&#13;
+    transition: background-color 0.2s ease, transform 0.2s ease;&#13;
+  }&#13;
+  &#13;
+  .faq__more-link:hover {&#13;
+    background-color: #F5F5FE;&#13;
+    color: #000091;&#13;
+    text-decoration: none;&#13;
+    transform: translateY(-2px);&#13;
+  }&#13;
+  &#13;
+  .faq__more-link svg {&#13;
+    width: 16px;&#13;
+    height: 16px;&#13;
+    fill: none;&#13;
+    stroke: currentColor;&#13;
+    stroke-width: 2;&#13;
+    stroke-linecap: round;&#13;
+    stroke-linejoin: round;&#13;
+    transition: transform 0.2s ease;&#13;
+  }&#13;
+  &#13;
+  .faq__more-link:hover svg {&#13;
+    transform: translateX(4px);&#13;
+  }&#13;
+  &#13;
+  &#13;
+  /* ============================================================&#13;
+     7. INFORMATIONS PRATIQUES&#13;
+     Version provisoire : le front sera revu.&#13;
+     ============================================================ */&#13;
+  .infos {&#13;
+    padding: 0 0 56px;&#13;
+  }&#13;
+  &#13;
+  .infos__head {&#13;
+    margin-bottom: 24px;&#13;
+  }&#13;
+  &#13;
+  .infos__title {&#13;
+    font-size: 26px;&#13;
+    font-weight: 700;&#13;
+    color: #161616;&#13;
+    margin: 0;&#13;
+  }&#13;
+  &#13;
+  .infos__title span {&#13;
+    color: #000091;&#13;
+    background: linear-gradient(transparent 62%, #CACAFB 62%);&#13;
+    padding: 0 4px;&#13;
+  }&#13;
+  &#13;
+  .infos__grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(2, 1fr);&#13;
+    gap: 12px;&#13;
+  }&#13;
+  &#13;
+  .infos-tile {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 12px;&#13;
+    background-color: #FAFAFA;&#13;
+    border: 1px solid #EEEEEE;&#13;
+    border-radius: 12px;&#13;
+    padding: 14px 16px;&#13;
+    text-decoration: none;&#13;
+    color: #161616;&#13;
+    font-size: 14px;&#13;
+    font-weight: 600;&#13;
+    line-height: 1.4;&#13;
+    transition: border-color 0.2s ease, background-color 0.2s ease,&#13;
+                transform 0.2s ease, box-shadow 0.2s ease;&#13;
+  }&#13;
+  &#13;
+  .infos-tile:hover {&#13;
+    border-color: #CACAFB;&#13;
+    background-color: #ffffff;&#13;
+    color: #000091;&#13;
+    text-decoration: none;&#13;
+    transform: translateX(3px);&#13;
+    box-shadow: 0 4px 12px rgba(10, 10, 60, 0.06);&#13;
+  }&#13;
+  &#13;
+  .infos-tile svg {&#13;
+    width: 20px;&#13;
+    height: 20px;&#13;
+    fill: none;&#13;
+    stroke: #000091;&#13;
+    stroke-width: 1.9;&#13;
+    stroke-linecap: round;&#13;
+    stroke-linejoin: round;&#13;
+    flex-shrink: 0;&#13;
+  }&#13;
+  &#13;
+  .infos-tile__arrow {&#13;
+    margin-left: auto;&#13;
+    width: 16px;&#13;
+    height: 16px;&#13;
+    stroke-width: 2;&#13;
+    transition: transform 0.2s ease;&#13;
+  }&#13;
+  &#13;
+  .infos-tile:hover .infos-tile__arrow {&#13;
+    transform: translateX(4px);&#13;
+  }&#13;
+  &#13;
+  &#13;
+  /* ============================================================&#13;
+     8. DIVERS&#13;
+     ============================================================ */&#13;
+  .separator {&#13;
+    border: none;&#13;
+    border-top: 1px solid #E5E5E5;&#13;
+    margin: 0 0 40px;&#13;
+  }&#13;
+  &#13;
+  &#13;
+  /* ============================================================&#13;
+     MOBILE&#13;
+     ============================================================ */&#13;
+  @media (max-width: 768px) {&#13;
+  &#13;
+    /* Hero */&#13;
+    .hero__image { height: 200px; }&#13;
+    .hero__card  { margin: -80px 16px 0; padding: 24px 20px; }&#13;
+    .hero__title { font-size: 24px; }&#13;
+  &#13;
+    .btn-primary,&#13;
+    .btn-secondary {&#13;
+      width: 100%;&#13;
+      justify-content: center;&#13;
+    }&#13;
+  &#13;
+    /* Simulateur */&#13;
+    .sim-intro { padding: 32px 20px 28px; }&#13;
+    .sim-title { font-size: 24px; }&#13;
+    .sim-cards { grid-template-columns: 1fr; }&#13;
+  &#13;
+    /* Actualités */&#13;
+    .news__grid        { grid-template-columns: 1fr; }&#13;
+    .news-main__image  { height: 180px; }&#13;
+    .news-item__image  { width: 72px; height: 72px; }&#13;
+  &#13;
+    /* FAQ : le chemin et les illustrations n'ont plus de place */&#13;
+    .faq__path,&#13;
+    .faq__illu { display: none; }&#13;
+  &#13;
+    .faq__item,&#13;
+    .faq__item:nth-child(even) {&#13;
+      width: 100%;&#13;
+      margin-left: 0;&#13;
+    }&#13;
+  &#13;
+    /* Arrivée par le bas plutôt que par les côtés */&#13;
+    .faq.is-visible .faq__item:nth-child(odd),&#13;
+    .faq.is-visible .faq__item:nth-child(even) {&#13;
+      animation-name: faq-entree-bas;&#13;
+    }&#13;
+  &#13;
+    .faq-q__answer { padding-left: 20px; }&#13;
+  &#13;
+    /* Informations pratiques */&#13;
+    .infos__grid { grid-template-columns: 1fr; }&#13;
+  }&#13;
+  &#13;
+  &#13;
+  /* Arrivée verticale, utilisée sur mobile */&#13;
+  @keyframes faq-entree-bas {&#13;
+    from { opacity: 0; transform: translateY(24px); }&#13;
+    to   { opacity: 1; transform: translateY(0); }&#13;
+  }&#13;
+  &#13;
+  &#13;
+  /* ============================================================&#13;
+     ACCESSIBILITÉ&#13;
+     Animations coupées si l'utilisateur le demande (RGAA).&#13;
+     Limité au widget : on ne cible jamais * seul.&#13;
+     ============================================================ */&#13;
+  @media (prefers-reduced-motion: reduce) {&#13;
+    .accueil-familles *,&#13;
+    .accueil-familles *::before,&#13;
+    .accueil-familles *::after {&#13;
+      animation: none !important;&#13;
+      transition: none !important;&#13;
+    }&#13;
+  &#13;
+    /* les questions doivent rester visibles sans leur animation */&#13;
+    .faq__item { opacity: 1; }&#13;
+  &#13;
+    /* le chemin s'affiche tracé d'emblée */&#13;
+    .faq__path-masque { stroke-dashoffset: 0; }&#13;
+   &#13;
+  }&#13;
+&#13;
+/* ============================================================&#13;
+   INFORMATIONS PRATIQUES&#13;
+   1. Titre de section&#13;
+   2. Carte de recherche du bureau logement&#13;
+   3. Liste des rubriques&#13;
+   4. Mobile&#13;
+   5. Accessibilite&#13;
+   ============================================================ */&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   1. TITRE DE SECTION&#13;
+   ============================================================ */&#13;
+.infos {&#13;
+  padding: 0 0 56px;&#13;
+}&#13;
+&#13;
+.infos__title {&#13;
+  font-size: 26px;&#13;
+  font-weight: 700;&#13;
+  color: #161616;&#13;
+  margin: 0 0 26px;&#13;
+}&#13;
+&#13;
+/* Le mot surligne au marqueur bleu */&#13;
+.infos__title span {&#13;
+  color: #000091;&#13;
+  background: linear-gradient(transparent 62%, #CACAFB 62%);&#13;
+  padding: 0 4px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   2. CARTE DE RECHERCHE&#13;
+   Le texte a gauche, l'image a droite.&#13;
+   ============================================================ */&#13;
+.infos-recherche {&#13;
+  display: grid;&#13;
+  grid-template-columns: 1fr 330px;&#13;
+  border: 1px solid #E5E5E5;&#13;
+  border-radius: 16px;&#13;
+  overflow: hidden;&#13;
+  background-color: #ffffff;&#13;
+  margin-bottom: 20px;&#13;
+}&#13;
+&#13;
+.infos-recherche__body {&#13;
+  padding: 32px 34px;&#13;
+}&#13;
+&#13;
+.infos-recherche__titre {&#13;
+  font-size: 18px;&#13;
+  font-weight: 700;&#13;
+  color: #161616;&#13;
+  margin: 0 0 8px;&#13;
+}&#13;
+&#13;
+.infos-recherche__texte {&#13;
+  font-size: 14px;&#13;
+  line-height: 1.6;&#13;
+  color: #666666;&#13;
+  margin: 0;&#13;
+}&#13;
+&#13;
+/* ---------- L'image ---------- */&#13;
+.infos-recherche__image {&#13;
+  min-height: 200px;&#13;
+  background-image: url("/rechercheBase.png");&#13;
+  background-size: cover;&#13;
+  background-position: center;&#13;
+}&#13;
+&#13;
+/* ---------- Le formulaire ---------- */&#13;
+.infos-recherche__form {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 10px;&#13;
+  flex-wrap: wrap;&#13;
+  margin-top: 20px;&#13;
+}&#13;
+&#13;
+/* Le label est masque a l'ecran mais lu par les lecteurs d'ecran */&#13;
+.infos-recherche__label {&#13;
+  position: absolute;&#13;
+  width: 1px;&#13;
+  height: 1px;&#13;
+  overflow: hidden;&#13;
+  clip: rect(0 0 0 0);&#13;
+}&#13;
+&#13;
+.infos-recherche__select {&#13;
+  font-family: 'Marianne', Arial, sans-serif;&#13;
+  font-size: 14px;&#13;
+  font-weight: 600;&#13;
+  color: #161616;&#13;
+  background-color: #ffffff;&#13;
+  border: 1px solid #E5E5E5;&#13;
+  border-radius: 10px;&#13;
+  padding: 11px 16px;&#13;
+  min-width: 230px;&#13;
+  cursor: pointer;&#13;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+.infos-recherche__select:hover {&#13;
+  border-color: #CACAFB;&#13;
+  box-shadow: 0 4px 14px rgba(10, 10, 60, 0.06);&#13;
+}&#13;
+&#13;
+.infos-recherche__bouton {&#13;
+  font-family: 'Marianne', Arial, sans-serif;&#13;
+  font-size: 14px;&#13;
+  font-weight: 700;&#13;
+  color: #ffffff;&#13;
+  background-color: #000091;&#13;
+  border: none;&#13;
+  border-radius: 10px;&#13;
+  padding: 11px 22px;&#13;
+  cursor: pointer;&#13;
+  display: inline-flex;&#13;
+  align-items: center;&#13;
+  gap: 8px;&#13;
+  transition: background-color 0.2s ease, transform 0.2s ease;&#13;
+}&#13;
+&#13;
+.infos-recherche__bouton:hover {&#13;
+  background-color: #1212FF;&#13;
+  transform: translateY(-2px);&#13;
+}&#13;
+&#13;
+.infos-recherche__bouton svg {&#13;
+  width: 15px;&#13;
+  height: 15px;&#13;
+  fill: none;&#13;
+  stroke: #ffffff;&#13;
+  stroke-width: 2;&#13;
+  stroke-linecap: round;&#13;
+  stroke-linejoin: round;&#13;
+  transition: transform 0.2s ease;&#13;
+}&#13;
+&#13;
+/* La fleche avance au survol */&#13;
+.infos-recherche__bouton:hover svg {&#13;
+  transform: translateX(3px);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   3. LISTE DES RUBRIQUES&#13;
+   Pas de cartes : de simples lignes separees par un filet.&#13;
+   ============================================================ */&#13;
+.infos-liste {&#13;
+  border-top: 1px solid #EDEDF2;&#13;
+}&#13;
+&#13;
+.infos-ligne {&#13;
+  position: relative;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 24px;&#13;
+  padding: 24px 16px;&#13;
+  border-bottom: 1px solid #EDEDF2;&#13;
+  text-decoration: none;&#13;
+  color: inherit;&#13;
+  transition: padding-left 0.35s cubic-bezier(0.33, 1, 0.68, 1),&#13;
+              background-color 0.35s ease;&#13;
+}&#13;
+&#13;
+/* Un liseré bleu se deploie a gauche au survol */&#13;
+.infos-ligne::before {&#13;
+  content: "";&#13;
+  position: absolute;&#13;
+  left: 0;&#13;
+  top: 0;&#13;
+  bottom: 0;&#13;
+  width: 3px;&#13;
+  background-color: #000091;&#13;
+  transform: scaleY(0);&#13;
+  transition: transform 0.35s cubic-bezier(0.33, 1, 0.68, 1);&#13;
+}&#13;
+&#13;
+.infos-ligne:hover {&#13;
+  background-color: #FBFBFE;&#13;
+  padding-left: 26px;&#13;
+  color: inherit;&#13;
+  text-decoration: none;&#13;
+}&#13;
+&#13;
+.infos-ligne:hover::before {&#13;
+  transform: scaleY(1);&#13;
+}&#13;
+&#13;
+/* ---------- L'illustration ---------- */&#13;
+.infos-ligne__illu {&#13;
+  flex-shrink: 0;&#13;
+  width: 64px;&#13;
+  height: 64px;&#13;
+  transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);&#13;
+}&#13;
+&#13;
+.infos-ligne:hover .infos-ligne__illu {&#13;
+  transform: scale(1.1) rotate(-3deg);&#13;
+}&#13;
+&#13;
+.infos-ligne__illu svg {&#13;
+  width: 100%;&#13;
+  height: 100%;&#13;
+}&#13;
+&#13;
+/* ---------- Les textes ---------- */&#13;
+.infos-ligne__body {&#13;
+  flex: 1;&#13;
+  min-width: 0;&#13;
+}&#13;
+&#13;
+.infos-ligne__titre {&#13;
+  display: block;&#13;
+  font-size: 16.5px;&#13;
+  font-weight: 700;&#13;
+  color: #161616;&#13;
+  line-height: 1.3;&#13;
+  margin-bottom: 6px;&#13;
+}&#13;
+&#13;
+.infos-ligne__texte {&#13;
+  display: block;&#13;
+  font-size: 13.5px;&#13;
+  line-height: 1.6;&#13;
+  color: #666666;&#13;
+}&#13;
+&#13;
+/* ---------- Le lien, revele au survol ---------- */&#13;
+.infos-ligne__lien {&#13;
+  flex-shrink: 0;&#13;
+  display: inline-flex;&#13;
+  align-items: center;&#13;
+  gap: 8px;&#13;
+  font-size: 13.5px;&#13;
+  font-weight: 700;&#13;
+  color: #000091;&#13;
+  opacity: 0;&#13;
+  transform: translateX(-8px);&#13;
+  transition: opacity 0.35s ease, transform 0.35s ease;&#13;
+}&#13;
+&#13;
+.infos-ligne:hover .infos-ligne__lien {&#13;
+  opacity: 1;&#13;
+  transform: translateX(0);&#13;
+}&#13;
+&#13;
+.infos-ligne__lien svg {&#13;
+  width: 15px;&#13;
+  height: 15px;&#13;
+  fill: none;&#13;
+  stroke: currentColor;&#13;
+  stroke-width: 2;&#13;
+  stroke-linecap: round;&#13;
+  stroke-linejoin: round;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   4. MOBILE&#13;
+   ============================================================ */&#13;
+@media (max-width: 768px) {&#13;
+&#13;
+  .infos-recherche {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+  /* L'image passe au-dessus du texte */&#13;
+  .infos-recherche__image {&#13;
+    order: -1;&#13;
+    min-height: 150px;&#13;
+  }&#13;
+&#13;
+  .infos-recherche__body {&#13;
+    padding: 24px 20px;&#13;
+  }&#13;
+&#13;
+  .infos-recherche__select,&#13;
+  .infos-recherche__bouton {&#13;
+    width: 100%;&#13;
+    justify-content: center;&#13;
+  }&#13;
+&#13;
+  /* Le lien reste toujours visible, faute de survol au doigt */&#13;
+  .infos-ligne__lien {&#13;
+    display: none;&#13;
+  }&#13;
+&#13;
+  .infos-ligne {&#13;
+    gap: 16px;&#13;
+    padding: 20px 12px;&#13;
+  }&#13;
+&#13;
+  .infos-ligne__illu {&#13;
+    width: 52px;&#13;
+    height: 52px;&#13;
+  }&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   5. ACCESSIBILITE&#13;
+   Animations coupees si l'utilisateur le demande.&#13;
+   ============================================================ */&#13;
+@media (prefers-reduced-motion: reduce) {&#13;
+&#13;
+  .infos-ligne,&#13;
+  .infos-ligne__illu,&#13;
+  .infos-ligne__lien,&#13;
+  .infos-recherche__bouton,&#13;
+  .infos-recherche__select {&#13;
+    transition: none;&#13;
+  }&#13;
+&#13;
+  /* Le lien reste visible sans son animation */&#13;
+  .infos-ligne__lien {&#13;
+    opacity: 1;&#13;
+    transform: none;&#13;
+  }&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>x_snc_habitat_familles_home</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+}]]></link>
+        <name>Habitat - Accueil Familles</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script/>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-05 16:36:26</sys_created_on>
+        <sys_id>e399b12915f74d928790fa3389c70ffa</sys_id>
+        <sys_mod_count>52</sys_mod_count>
+        <sys_name>Habitat - Accueil Familles</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sp_widget_e399b12915f74d928790fa3389c70ffa</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-08-27 07:56:32</sys_updated_on>
+        <template><![CDATA[<div class="accueil-familles">
+
+  <!-- Fil d'Ariane -->
+  <nav class="breadcrumb" aria-label="Fil d'Ariane">
+    <ol>
+      <li><a href="?id=x_snc_habitat_familles_home">Accueil</a></li>
+      <li aria-current="page">Tableau de bord</li>
+    </ol>
+  </nav>
+
+
+  <!-- Hero -->
+  <section class="hero">
+
+    <div class="hero__image" aria-hidden="true"></div>
+
+    <div class="hero__card">
+      <p class="hero__label">Espace usager &middot; Portail internet</p>
+
+      <h1 class="hero__title">
+        Préparez votre mobilité en <span>une seule démarche</span>
+      </h1>
+
+      <p class="hero__text">
+        Le Portail Habitat regroupe l'ensemble de vos démarches de déménagement,
+        de logement et d'accompagnement lors d'une mutation. Vous renseignez un
+        <strong>formulaire unique</strong> ; les services compétents du ministère
+        sont automatiquement saisis.
+      </p>
+
+      <div class="hero__actions">
+        <a href="?id=x_snc_habitat_familles_mobilite" class="btn-primary">
+          + Démarrer ma démarche de mobilité
+          <svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
+        </a>
+        <a href="?id=x_snc_habitat_familles_suivi" class="btn-secondary">
+          Suivre mes dossiers
+        </a>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- Simulateur CIMob -->
+  <section class="sim-intro">
+
+    <!-- Trajet animé -->
+    <div class="sim-route" aria-hidden="true">
+      <span class="sim-route__dot"></span>
+      <span class="sim-route__line"></span>
+      <span class="sim-route__plane">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2 L14 9 L21 11.5 L21 13 L14 12 L13.5 18 L16 20 L16 21.5 L12 20.5 L8 21.5 L8 20 L10.5 18 L10 12 L3 13 L3 11.5 L10 9 Z"/>
+        </svg>
+      </span>
+      <span class="sim-route__dot sim-route__dot--end"></span>
+    </div>
+
+    <p class="sim-kicker">Mobilité &middot; CIMob</p>
+    <h2 class="sim-title">Votre mutation se prépare <span>ici</span></h2>
+    <p class="sim-text">
+      En deux clics, découvrez toutes les offres de service auxquelles
+      vous êtes éligible pour votre prochaine affectation.
+    </p>
+
+    <!-- Les 3 familles d'offres -->
+    <div class="sim-cards">
+
+      <div class="sim-card">
+        <span class="sim-card__icon sim-card__icon--vert">
+          <svg viewBox="0 0 24 24">
+            <path d="M3.5 11 12 3.5 20.5 11M6 9.5V20a.8.8 0 0 0 .8.8h10.4a.8.8 0 0 0 .8-.8V9.5M10 20.5v-6h4v6"/>
+          </svg>
+        </span>
+        <p class="sim-card__title">Logement</p>
+        <p class="sim-card__text">Parc domanial, DTIE, BCC, DICOM…</p>
+      </div>
+
+      <div class="sim-card">
+        <span class="sim-card__icon sim-card__icon--bleu">
+          <svg viewBox="0 0 24 24">
+            <path d="M2.5 6h11v10h-11zM13.5 9.5H18l3.5 3.5v3h-8"/>
+            <circle cx="7" cy="17.5" r="1.8"/>
+            <circle cx="17" cy="17.5" r="1.8"/>
+          </svg>
+        </span>
+        <p class="sim-card__title">Déménagement</p>
+        <p class="sim-card__text">PFMD, mon déménageur, gardiennage…</p>
+      </div>
+
+      <div class="sim-card">
+        <span class="sim-card__icon sim-card__icon--rose">
+          <svg viewBox="0 0 24 24">
+            <circle cx="9" cy="8.5" r="3"/>
+            <path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/>
+            <circle cx="17" cy="9.5" r="2.3"/>
+            <path d="M16.5 14.7c2.3.3 4 2 4 4.3"/>
+          </svg>
+        </span>
+        <p class="sim-card__title">Accompagnement</p>
+        <p class="sim-card__text">Défense mobilité, administratif, visas…</p>
+      </div>
+
+    </div>
+
+    <button type="button" class="sim-button"
+            onclick="window.location.href='?id=x_snc_habitat_familles_simulateur'">
+      Lancer la simulation
+      <svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
+    </button>
+
+   
+
+  </section>
+
+
+  <!-- Actualités -->  <section class="news">
+
+    <div class="news__head">
+      <div>
+        <p class="news__label">Ce qui bouge</p>
+        <h2 class="news__title">Actualités du <span>logement</span></h2>
+      </div>
+      <a href="?id=x_snc_habitat_familles_actualites" class="news__all">
+        Voir tout
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+
+    <div class="news__grid">
+
+      <!-- Actualité à la une -->
+      <a href="?id=x_snc_habitat_familles_actualite" class="news-main">
+        <div class="news-main__image"></div>
+        <div class="news-main__body">
+          <span class="news-tag">Logement</span>
+          <h3 class="news-main__headline">
+            Ouverture de 120 nouveaux logements patrimoniaux en Île-de-France
+          </h3>
+          <p class="news-main__text">
+            Les demandes sont ouvertes dès à présent pour les agents mutés
+            à la rentrée, avec une priorité accordée aux familles.
+          </p>
+          <span class="news-date">3 juillet 2026</span>
+        </div>
+      </a>
+
+      <!-- Actualités secondaires -->
+      <div class="news__side">
+
+        <!-- Actualité -->
+        <a href="?id=x_snc_habitat_familles_actualite" class="news-item">
+          <div class="news-item__image"></div>
+          <div class="news-item__body">
+            <span class="news-tag">Démarche en ligne</span>
+            <h3 class="news-item__headline">
+              Le formulaire unique de mobilité est disponible sur mobile
+            </h3>
+            <span class="news-date">28 juin 2026</span>
+          </div>
+        </a>
+
+        <!-- Actualité -->
+        <a href="?id=x_snc_habitat_familles_actualite" class="news-item">
+          <div class="news-item__image"></div>
+          <div class="news-item__body">
+            <span class="news-tag">Accompagnement</span>
+            <h3 class="news-item__headline">
+              Nouveau simulateur d'indemnités de changement de résidence
+            </h3>
+            <span class="news-date">15 juin 2026</span>
+          </div>
+        </a>
+
+        <!-- Actualité -->
+        <a href="?id=x_snc_habitat_familles_actualite" class="news-item">
+          <div class="news-item__image"></div>
+          <div class="news-item__body">
+            <span class="news-tag">Logement</span>
+            <h3 class="news-item__headline">
+              Bureaux logement : nouveaux horaires d'accueil en garnison
+            </h3>
+            <span class="news-date">2 juin 2026</span>
+          </div>
+        </a>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- FAQ -->
+  <section class="faq">
+
+    <!-- Titre de section -->
+    <div class="faq__head">
+      <p class="faq__label">Foire aux questions</p>
+      <h2 class="faq__title">Vos questions sur <span>la mobilité</span></h2>
+    </div>
+
+    <div class="faq__path-wrap">
+
+      <!-- Le chemin qui se dessine -->
+      <svg class="faq__path" viewBox="0 0 420 660" preserveAspectRatio="none" aria-hidden="true">
+      
+        <defs>
+          <mask id="faq-masque">
+            <path class="faq__path-masque"
+                  d="M210 0 C 60 90, 360 190, 210 300 C 60 410, 360 500, 210 610 C 150 638, 270 648, 210 656"
+                  stroke="#ffffff" stroke-width="14" fill="none" stroke-linecap="round"/>
+          </mask>
+        </defs>
+        <path class="faq__path-trait"
+              d="M210 0 C 60 90, 360 190, 210 300 C 60 410, 360 500, 210 610 C 150 638, 270 648, 210 656"
+              mask="url(#faq-masque)"/>
+      </svg>
+
+      <!-- Illustration -->
+      <div class="faq__illu faq__illu--1" aria-hidden="true">
+        <svg viewBox="0 0 200 200">
+          <ellipse cx="100" cy="180" rx="62" ry="10" fill="#F5F5FE"/>
+          <rect x="46" y="82" width="108" height="90" rx="7" fill="#E8EDFF"/>
+          <path d="M38 84 L100 42 L162 84 Z" fill="#000091"/>
+          <rect x="72" y="116" width="24" height="56" rx="3" fill="#ffffff"/>
+          <rect x="112" y="116" width="24" height="26" rx="3" fill="#ffffff"/>
+        </svg>
+      </div>
+
+
+      <!-- Question -->
+      <div class="faq__item">
+        <details class="faq-q">
+          <summary class="faq-q__btn">
+            <span class="faq-q__num">1</span>
+            <span class="faq-q__txt">Qui peut déposer une demande ?</span>
+            <span class="faq-q__sign"></span>
+          </summary>
+          <div class="faq-q__answer">
+            Tout agent civil ou militaire du ministère faisant l'objet d'une
+            mutation peut déposer une demande, dès réception de son ordre de mutation.
+          </div>
+        </details>
+      </div>
+
+      <!-- Question -->
+      <div class="faq__item">
+        <details class="faq-q">
+          <summary class="faq-q__btn">
+            <span class="faq-q__num">2</span>
+            <span class="faq-q__txt">Un seul formulaire pour trois prestations ?</span>
+            <span class="faq-q__sign"></span>
+          </summary>
+          <div class="faq-q__answer">
+            Oui. Un formulaire unique suffit : les services compétents pour le logement,
+            le déménagement et l'accompagnement sont saisis automatiquement.
+          </div>
+        </details>
+      </div>
+
+      <!-- Question -->
+      <div class="faq__item">
+        <details class="faq-q">
+          <summary class="faq-q__btn">
+            <span class="faq-q__num">3</span>
+            <span class="faq-q__txt">Quelles pièces dois-je fournir ?</span>
+            <span class="faq-q__sign"></span>
+          </summary>
+          <div class="faq-q__answer">
+            Votre ordre de mutation, un justificatif de domicile et, selon votre
+            situation, les pièces relatives à votre famille. La liste exacte
+            s'affiche dans le formulaire.
+          </div>
+        </details>
+      </div>
+
+      <!-- Question -->
+      <div class="faq__item">
+        <details class="faq-q">
+          <summary class="faq-q__btn">
+            <span class="faq-q__num">4</span>
+            <span class="faq-q__txt">Combien de temps prend le traitement ?</span>
+            <span class="faq-q__sign"></span>
+          </summary>
+          <div class="faq-q__answer">
+            Le délai moyen est de trois semaines après réception du dossier complet.
+            Vous suivez l'avancement depuis « Suivre mes dossiers ».
+          </div>
+        </details>
+      </div>
+
+    </div>
+
+    <!-- Voir toutes les questions -->
+    <div class="faq__more">
+      <a href="?id=x_snc_habitat_familles_faq" class="faq__more-link">
+        Voir toutes les questions
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+
+  </section>
+
+    <!-- Informations pratiques -->
+<section class="infos">
+
+  <!-- Titre de section -->
+  <h2 class="infos__title">Informations <span>pratiques</span></h2>
+
+  <!-- Carte de recherche du bureau logement -->
+  <div class="infos-recherche">
+
+    <div class="infos-recherche__body">
+      <h3 class="infos-recherche__titre">Trouvez votre bureau logement</h3>
+      <p class="infos-recherche__texte">
+        Retrouvez le bureau logement dont vous dépendez ainsi que sa carte
+        des zones. Nos équipes vous aident à constituer votre dossier et
+        répondent à vos questions.
+      </p>
+
+      <div class="infos-recherche__form">
+        <label class="infos-recherche__label" for="choix-base">Votre base</label>
+        <select class="infos-recherche__select" id="choix-base">
+          <option value="">Sélectionner votre base…</option>
+          <option value="rambouillet">Base de Rambouillet</option>
+          <option value="brest">Base de Brest</option>
+          <option value="toulon">Base de Toulon</option>
+          <option value="metz">Base de Metz</option>
+        </select>
+        <button type="button" class="infos-recherche__bouton">
+          Rechercher
+          <svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- L'image est posée en fond par le CSS -->
+    <div class="infos-recherche__image" aria-hidden="true"></div>
+
+  </div>
+
+  <!-- Liste des rubriques -->
+  <div class="infos-liste">
+
+    <!-- Rubrique -->
+    <a href="?id=x_snc_habitat_familles_guide_doc" class="infos-ligne">
+      <span class="infos-ligne__illu">
+        <svg viewBox="0 0 60 60">
+          <rect x="14" y="8" width="32" height="40" rx="4" fill="#DFFDF0"/>
+          <rect x="20" y="18" width="20" height="3" rx="1.5" fill="#00A95F"/>
+          <rect x="20" y="26" width="14" height="3" rx="1.5" fill="#00A95F"/>
+          <rect x="20" y="34" width="18" height="3" rx="1.5" fill="#00A95F"/>
+          <circle cx="43" cy="43" r="10" fill="#00A95F"/>
+          <path d="M39 43 l3 3 5 -6" stroke="#ffffff" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="infos-ligne__body">
+        <span class="infos-ligne__titre">Guides et documents à télécharger</span>
+        <span class="infos-ligne__texte">Notices, formulaires et guides pratiques, classés par prestation.</span>
+      </span>
+      <span class="infos-ligne__lien">
+        Consulter
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </a>
+
+    <!-- Rubrique -->
+    <a href="?id=x_snc_habitat_familles_eligibilite" class="infos-ligne">
+      <span class="infos-ligne__illu">
+        <svg viewBox="0 0 60 60">
+          <circle cx="30" cy="30" r="21" fill="#E8EDFF"/>
+          <circle cx="30" cy="30" r="21" stroke="#0063CB" stroke-width="3" fill="none"/>
+          <path d="M21 30 l6 6 12 -13" stroke="#0063CB" stroke-width="3.5" fill="none"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="infos-ligne__body">
+        <span class="infos-ligne__titre">Conditions d'éligibilité</span>
+        <span class="infos-ligne__texte">Vérifiez vos droits selon votre statut et votre destination.</span>
+      </span>
+      <span class="infos-ligne__lien">
+        En savoir plus
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </a>
+
+    <!-- Rubrique -->
+    <a href="?id=x_snc_habitat_familles_contact" class="infos-ligne">
+      <span class="infos-ligne__illu">
+        <svg viewBox="0 0 60 60">
+          <path d="M11 15h38v25H26l-11 9v-9h-4z" fill="#FEE7FC"/>
+          <path d="M11 15h38v25H26l-11 9v-9h-4z" stroke="#6E445A" stroke-width="3" fill="none"
+                stroke-linejoin="round"/>
+          <circle cx="24" cy="27" r="2.6" fill="#6E445A"/>
+          <circle cx="32" cy="27" r="2.6" fill="#6E445A"/>
+          <circle cx="40" cy="27" r="2.6" fill="#6E445A"/>
+        </svg>
+      </span>
+      <span class="infos-ligne__body">
+        <span class="infos-ligne__titre">Contacter un référent</span>
+        <span class="infos-ligne__texte">Une question précise sur votre dossier ? Écrivez à votre référent mobilité.</span>
+      </span>
+      <span class="infos-ligne__lien">
+        Nous écrire
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </a>
+
+  </div>
+
+</section>
+
+  </section>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

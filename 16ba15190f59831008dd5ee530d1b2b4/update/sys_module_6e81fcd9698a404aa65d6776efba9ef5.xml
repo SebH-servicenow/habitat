@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_module">
+    <sys_module action="INSERT_OR_UPDATE">
+        <content><![CDATA[{
+  "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:f8887dd1-2fc3-4465-a7aa-4c278006564f",
+  "metadata": {
+    "timestamp": "2026-06-09T12:25:32.981Z",
+    "tools": {
+      "components": [
+        {
+          "type": "library",
+          "name": "sdk-build-plugins",
+          "group": "@servicenow",
+          "version": "4.7.1",
+          "author": "ServiceNow"
+        }
+      ]
+    },
+    "component": {
+      "type": "application",
+      "name": "x-snc-habitat",
+      "version": "1.0.0",
+      "bom-ref": "pkg:servicenow/x-snc-habitat@1.0.0?sys_scope_id=16ba15190f59831008dd5ee530d1b2b4",
+      "description": "[BUILD AGENT GENERATED]:  Application de gestion des demandes de mobilité (logement, déménagement, accompagnement) pour le Ministère des Armées. Portails Intradef et Internet Familles, moteur de décision, flux métiers cloisonnés, charte DSFR.",
+      "licenses": [
+        {
+          "license": {
+            "name": "UNLICENSED"
+          }
+        }
+      ],
+      "purl": "pkg:servicenow/x-snc-habitat@1.0.0?sys_scope_id=16ba15190f59831008dd5ee530d1b2b4"
+    }
+  },
+  "components": [],
+  "dependencies": [
+    {
+      "ref": "pkg:servicenow/x-snc-habitat@1.0.0?sys_scope_id=16ba15190f59831008dd5ee530d1b2b4"
+    }
+  ]
+}]]></content>
+        <external_source>false</external_source>
+        <path>x_snc_habitat/x-snc-habitat/1.0.0/bom.json</path>
+        <sys_class_name>sys_module</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:40</sys_created_on>
+        <sys_id>6e81fcd9698a404aa65d6776efba9ef5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_snc_habitat/x-snc-habitat/1.0.0/bom.json</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sys_module_6e81fcd9698a404aa65d6776efba9ef5</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:40</sys_updated_on>
+    </sys_module>
+</record_update>

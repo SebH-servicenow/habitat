@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_section caption="Activité" section_id="33aad2baf356494da37250d32baabd16" sys_domain="global" table="x_snc_habitat_demande_mobilite" version="3" view="x_snc_habitat_ws">
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>activity.xml</element>
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:22</sys_created_on>
+            <sys_id>c0f161f1c14e42859283bcd86c919536</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter display_value="Activities (filtered)">444ea5c6bf310100e628555b3f0739d6</sys_ui_formatter>
+            <sys_ui_section caption="Activité" display_value="Activité" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">33aad2baf356494da37250d32baabd16</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:22</sys_updated_on>
+            <sys_user/>
+            <type>formatter</type>
+        </sys_ui_element>
+        <sys_ui_section action="INSERT_OR_UPDATE">
+            <caption>Activité</caption>
+            <header>false</header>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 19:15:49</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>33aad2baf356494da37250d32baabd16</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_habitat_demande_mobilite</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+            <sys_update_name>sys_ui_section_33aad2baf356494da37250d32baabd16</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 19:15:49</sys_updated_on>
+            <sys_user/>
+            <title>false</title>
+            <view display_value="Habitat Workspace" name="x_snc_habitat_ws">cc7d063d32624b0cacb68f3f3f5c751f</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+</record_update>

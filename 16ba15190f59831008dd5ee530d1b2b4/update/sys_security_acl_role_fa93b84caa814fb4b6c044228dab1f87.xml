@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl_role">
+    <sys_security_acl_role action="INSERT_OR_UPDATE">
+        <sys_class_name>sys_security_acl_role</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-06 18:57:51</sys_created_on>
+        <sys_id>fa93b84caa814fb4b6c044228dab1f87</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>now.habitat-defense-mobilite.*.admin</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_security_acl display_value="now.habitat-defense-mobilite.*">9ecfdee2ef4546ecbdd699e75cb29b4f</sys_security_acl>
+        <sys_update_name>sys_security_acl_role_fa93b84caa814fb4b6c044228dab1f87</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-06 18:57:51</sys_updated_on>
+        <sys_user_role display_value="admin" name="admin">2831a114c611228501d4ea6c309d626d</sys_user_role>
+    </sys_security_acl_role>
+</record_update>

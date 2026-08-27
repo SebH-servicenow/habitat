@@ -1,0 +1,613 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope) {
+    var c = this;
+
+    // Filter model
+    c.siteDepart = '';
+    c.siteArrivee = '';
+    c.statut = '';
+    c.offres = c.data.offres;
+    c.hasResults = false;
+    c.loading = false;
+
+    // Helper : retrouve le label d'une valeur dans une liste de choix
+    c.getLabel = function(value, list) {
+        if (!value || !list) return '';
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].value === value) return list[i].label;
+        }
+        return value;
+    };
+
+    // Filter action
+    c.applyFilter = function() {
+        if (!c.siteDepart || !c.siteArrivee) return;
+        c.loading = true;
+        c.server.get({
+            action: 'filter',
+            site_depart: c.siteDepart,
+            site_arrivee: c.siteArrivee,
+            statut: c.statut
+        }).then(function(response) {
+            c.offres = response.data.offres;
+            c.hasResults = (c.offres.logement.length > 0 || c.offres.demenagement.length > 0 || c.offres.accompagnement.length > 0);
+            c.loading = false;
+        }, function() {
+            c.loading = false;
+        });
+    };
+
+    // Auto-filter when departure + arrival are selected (statut relances aussi le filtre)
+    $scope.$watchGroup(['c.siteDepart', 'c.siteArrivee', 'c.statut'], function(newVals) {
+        if (newVals[0] && newVals[1]) {
+            c.applyFilter();
+        }
+    });
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ===== Offres par Destination - DSFR ===== */&#13;
+.offres-destination {&#13;
+    font-family: 'Marianne', Arial, sans-serif;&#13;
+    color: #161616;&#13;
+    max-width: 1200px;&#13;
+    margin: 0 auto;&#13;
+    padding: 24px 16px 48px;&#13;
+    line-height: 1.5;&#13;
+  background-color : #ffffff;&#13;
+}&#13;
+&#13;
+/* Breadcrumb */&#13;
+.offres-breadcrumb {&#13;
+    margin-bottom: 24px;&#13;
+}&#13;
+&#13;
+.offres-breadcrumb ol {&#13;
+    list-style: none;&#13;
+    padding: 0;&#13;
+    margin: 0;&#13;
+    display: flex;&#13;
+    flex-wrap: wrap;&#13;
+    gap: 4px;&#13;
+    font-size: 14px;&#13;
+}&#13;
+&#13;
+.offres-breadcrumb li {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+}&#13;
+&#13;
+.offres-breadcrumb li + li::before {&#13;
+    content: '›';&#13;
+    margin-right: 8px;&#13;
+    margin-left: 4px;&#13;
+    color: #666666;&#13;
+}&#13;
+&#13;
+.offres-breadcrumb a {&#13;
+    color: #000091;&#13;
+    text-decoration: underline;&#13;
+}&#13;
+&#13;
+.offres-breadcrumb a:hover {&#13;
+    text-decoration: none;&#13;
+}&#13;
+&#13;
+.offres-breadcrumb [aria-current] {&#13;
+    color: #161616;&#13;
+    font-weight: 500;&#13;
+}&#13;
+&#13;
+/* Header */&#13;
+.offres-header {&#13;
+    margin-bottom: 32px;&#13;
+}&#13;
+&#13;
+.offres-tag {&#13;
+    display: inline-block;&#13;
+    font-size: 12px;&#13;
+    font-weight: 700;&#13;
+    letter-spacing: 0.05em;&#13;
+    text-transform: uppercase;&#13;
+    color: #000091;&#13;
+    margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+.offres-title {&#13;
+    font-size: 28px;&#13;
+    font-weight: 700;&#13;
+    color: #161616;&#13;
+    margin: 0 0 12px;&#13;
+    line-height: 1.2;&#13;
+}&#13;
+&#13;
+.offres-description {&#13;
+    font-size: 16px;&#13;
+    color: #666666;&#13;
+    margin: 0;&#13;
+    line-height: 1.6;&#13;
+}&#13;
+&#13;
+/* Filters */&#13;
+.offres-filters {&#13;
+    display: flex;&#13;
+    gap: 24px;&#13;
+    margin-bottom: 32px;&#13;
+    flex-wrap: wrap;&#13;
+    background-color: #F5F5FE;&#13;
+    padding: 24px;&#13;
+    border-left: 4px solid #000091;&#13;
+}&#13;
+&#13;
+.offres-filter-group {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    gap: 6px;&#13;
+    flex: 0 0 260px;&#13;
+}&#13;
+&#13;
+.offres-filter-label {&#13;
+    font-size: 14px;&#13;
+    font-weight: 700;&#13;
+    color: #161616;&#13;
+}&#13;
+&#13;
+.offres-filter-select {&#13;
+    display: block;&#13;
+    width: 100%;&#13;
+    padding: 10px 36px 10px 12px;&#13;
+    font-size: 14px;&#13;
+    font-family: 'Marianne', Arial, sans-serif;&#13;
+    color: #161616;&#13;
+    background-color: #FFFFFF;&#13;
+    border: 1px solid #929292;&#13;
+    border-radius: 0;&#13;
+    outline: none;&#13;
+    -webkit-appearance: none;&#13;
+    appearance: none;&#13;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%23161616' d='M6 8L0 0h12z'/%3E%3C/svg%3E");&#13;
+    background-repeat: no-repeat;&#13;
+    background-position: right 12px center;&#13;
+    transition: border-color 0.15s, box-shadow 0.15s;&#13;
+}&#13;
+&#13;
+.offres-filter-select:focus {&#13;
+    border-color: #000091;&#13;
+    box-shadow: 0 0 0 2px rgba(0, 0, 145, 0.2);&#13;
+}&#13;
+&#13;
+/* Trajet résumé */&#13;
+.offres-trajet {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 12px;&#13;
+    margin-bottom: 24px;&#13;
+    font-size: 15px;&#13;
+    color: #161616;&#13;
+    flex-wrap: wrap;&#13;
+}&#13;
+&#13;
+.offres-trajet__site {&#13;
+    font-weight: 700;&#13;
+    color: #000091;&#13;
+    background-color: #E3E3FD;&#13;
+    padding: 4px 12px;&#13;
+}&#13;
+&#13;
+.offres-trajet__arrow {&#13;
+    color: #929292;&#13;
+    font-size: 18px;&#13;
+}&#13;
+&#13;
+.offres-trajet__statut {&#13;
+    font-weight: 700;&#13;
+    color: #ffffff;&#13;
+    background-color: #000091;&#13;
+    padding: 4px 12px;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+/* Loading */&#13;
+.offres-loading {&#13;
+    text-align: center;&#13;
+    padding: 32px;&#13;
+    font-size: 14px;&#13;
+    color: #666666;&#13;
+}&#13;
+&#13;
+/* Results cards */&#13;
+.offres-results {&#13;
+    margin-top: 8px;&#13;
+}&#13;
+&#13;
+.offres-card {&#13;
+    border: 1px solid #E5E5E5;&#13;
+    background-color: #FFFFFF;&#13;
+    padding: 0;&#13;
+    margin-bottom: 24px;&#13;
+    min-height: 200px;&#13;
+    box-shadow: 0 2px 6px rgba(0, 0, 18, 0.06);&#13;
+    transition: box-shadow 0.2s ease;&#13;
+    animation: offres-fade-in 0.4s ease both;&#13;
+}&#13;
+&#13;
+.offres-card:hover {&#13;
+    box-shadow: 0 6px 16px rgba(0, 0, 18, 0.12);&#13;
+}&#13;
+&#13;
+.col-md-4:nth-child(1) .offres-card { animation-delay: 0s; }&#13;
+.col-md-4:nth-child(2) .offres-card { animation-delay: 0.08s; }&#13;
+.col-md-4:nth-child(3) .offres-card { animation-delay: 0.16s; }&#13;
+&#13;
+@keyframes offres-fade-in {&#13;
+    from { opacity: 0; transform: translateY(12px); }&#13;
+    to   { opacity: 1; transform: translateY(0); }&#13;
+}&#13;
+&#13;
+.offres-card__header {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 12px;&#13;
+    padding: 16px 20px;&#13;
+    border-bottom: 2px solid #000091;&#13;
+    background-color: #F5F5FE;&#13;
+}&#13;
+&#13;
+.offres-card__icon-badge {&#13;
+    width: 40px;&#13;
+    height: 40px;&#13;
+    background-color: #ffffff;&#13;
+    border: 1px solid #E3E3FD;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    flex-shrink: 0;&#13;
+}&#13;
+&#13;
+.offres-card__icon-badge svg {&#13;
+    width: 24px;&#13;
+    height: 24px;&#13;
+}&#13;
+&#13;
+.offres-card__title {&#13;
+    font-size: 16px;&#13;
+    font-weight: 700;&#13;
+    color: #161616;&#13;
+    margin: 0;&#13;
+}&#13;
+&#13;
+.offres-card__count {&#13;
+    margin-left: auto;&#13;
+    font-size: 13px;&#13;
+    font-weight: 700;&#13;
+    color: #000091;&#13;
+    background-color: #E3E3FD;&#13;
+    min-width: 24px;&#13;
+    height: 24px;&#13;
+    padding: 0 8px;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+}&#13;
+&#13;
+.offres-card__list {&#13;
+    list-style: none;&#13;
+    padding: 0;&#13;
+    margin: 0;&#13;
+}&#13;
+&#13;
+.offres-card__item {&#13;
+    display: flex;&#13;
+    align-items: flex-start;&#13;
+    gap: 12px;&#13;
+    padding: 14px 20px;&#13;
+    border-bottom: 1px solid #F0F0F0;&#13;
+}&#13;
+&#13;
+.offres-card__item:last-child {&#13;
+    border-bottom: none;&#13;
+}&#13;
+&#13;
+.offres-card__check {&#13;
+    color: #18753C;&#13;
+    flex-shrink: 0;&#13;
+    margin-top: 1px;&#13;
+    width: 18px;&#13;
+    height: 18px;&#13;
+}&#13;
+&#13;
+.offres-card__text {&#13;
+    font-size: 14px;&#13;
+    color: #161616;&#13;
+    line-height: 1.5;&#13;
+}&#13;
+&#13;
+.offres-card__condition {&#13;
+    display: inline-block;&#13;
+    font-size: 12px;&#13;
+    color: #b34000;&#13;
+    background-color: #fdeee7;&#13;
+    padding: 1px 8px;&#13;
+    margin-top: 4px;&#13;
+    font-style: normal;&#13;
+}&#13;
+&#13;
+.offres-card__empty {&#13;
+    padding: 20px;&#13;
+    margin: 0;&#13;
+    font-size: 14px;&#13;
+    color: #929292;&#13;
+    font-style: italic;&#13;
+}&#13;
+&#13;
+/* Empty state */&#13;
+.offres-empty {&#13;
+    text-align: center;&#13;
+    padding: 48px 32px;&#13;
+    color: #666666;&#13;
+    font-size: 14px;&#13;
+    background-color: #F6F6F6;&#13;
+    border: 1px dashed #cccccc;&#13;
+}&#13;
+&#13;
+.offres-empty svg {&#13;
+    width: 40px;&#13;
+    height: 40px;&#13;
+    stroke: #929292;&#13;
+    margin-bottom: 12px;&#13;
+}&#13;
+&#13;
+/* Placeholder initial */&#13;
+.offres-placeholder {&#13;
+    text-align: center;&#13;
+    padding: 48px 32px;&#13;
+    color: #666666;&#13;
+    font-size: 14px;&#13;
+    background-color: #F6F6F6;&#13;
+}&#13;
+&#13;
+.offres-placeholder svg {&#13;
+    width: 44px;&#13;
+    height: 44px;&#13;
+    stroke: #000091;&#13;
+    margin-bottom: 12px;&#13;
+    opacity: 0.6;&#13;
+}&#13;
+&#13;
+/* Responsive */&#13;
+@media (max-width: 767px) {&#13;
+    .offres-filters {&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+    .offres-filter-group {&#13;
+        flex: none;&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+    .offres-title {&#13;
+        font-size: 22px;&#13;
+    }&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id/>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+}]]></link>
+        <name>Habitat - Offres par Destination</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+    // Choice lists for filters
+    data.sitesChoices = [
+        {value: 'metropole_idf', label: 'Métropole et IDF'},
+        {value: 'europe', label: 'Europe'},
+        {value: 'pf_reu_may', label: 'PF, REU et MAY'},
+        {value: 'dji', label: 'DJI'},
+        {value: 'autre_om', label: 'Autre OM'},
+        {value: 'autres_etranger', label: 'Autres étranger'}
+    ];
+
+    data.statutChoices = [
+        {value: 'militaire', label: 'Militaire'},
+        {value: 'civil', label: 'Civil'}
+    ];
+
+    // Handle filter action from client
+    if (input && input.action === 'filter') {
+        data.offres = {logement: [], demenagement: [], accompagnement: []};
+        if (input.site_depart && input.site_arrivee) {
+            var gr = new GlideRecord('x_snc_habitat_matrice_eligibilite');
+            gr.addQuery('site_depart', input.site_depart);
+            gr.addQuery('site_arrivee', input.site_arrivee);
+            // Filtre statut optionnel : si vide, on ne filtre pas
+            if (input.statut) {
+                gr.addQuery('statut', input.statut);
+            }
+            gr.orderBy('ordre');
+            gr.setLimit(50);
+            gr.query();
+            while (gr.next()) {
+                var cat = gr.getValue('categorie') + '';
+                var item = {
+                    offre: gr.getValue('offre') + '',
+                    condition_text: gr.getValue('condition_text') || ''
+                };
+                if (item.condition_text === 'null') item.condition_text = '';
+                if (cat === 'logement') {
+                    data.offres.logement.push(item);
+                } else if (cat === 'demenagement') {
+                    data.offres.demenagement.push(item);
+                } else if (cat === 'accompagnement') {
+                    data.offres.accompagnement.push(item);
+                }
+            }
+        }
+        return;
+    }
+
+    // Initial load: no results until user filters
+    data.offres = {logement: [], demenagement: [], accompagnement: []};
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-05 16:36:26</sys_created_on>
+        <sys_id>fb4cee769d4f4a88a9739de024de31d9</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Habitat - Offres par Destination</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sp_widget_fb4cee769d4f4a88a9739de024de31d9</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-07-16 07:14:10</sys_updated_on>
+        <template><![CDATA[<div class="offres-destination">
+  <!-- Breadcrumb -->
+  <nav class="offres-breadcrumb" aria-label="Fil d'Ariane">
+    <ol>
+      <li><a href="?id=x_snc_habitat_familles_home">Accueil</a></li>
+      <li aria-current="page">Offres par destination</li>
+    </ol>
+  </nav>
+
+  <!-- Header -->
+  <div class="offres-header">
+    <span class="offres-tag">RÉFÉRENTIEL</span>
+    <h1 class="offres-title">Offres par destination</h1>
+    <p class="offres-description">Matrice d'éligibilité des offres selon le site de départ, le site d'arrivée et le statut. Sélectionnez votre trajet pour filtrer.</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="offres-filters">
+    <div class="offres-filter-group">
+      <label class="offres-filter-label" for="filter_depart">Site de départ</label>
+      <select class="offres-filter-select" id="filter_depart" ng-model="c.siteDepart">
+        <option value="">Sélectionner</option>
+        <option ng-repeat="s in c.data.sitesChoices" value="{{s.value}}">{{s.label}}</option>
+      </select>
+    </div>
+    <div class="offres-filter-group">
+      <label class="offres-filter-label" for="filter_arrivee">Site d'arrivée</label>
+      <select class="offres-filter-select" id="filter_arrivee" ng-model="c.siteArrivee">
+        <option value="">Sélectionner</option>
+        <option ng-repeat="s in c.data.sitesChoices" value="{{s.value}}">{{s.label}}</option>
+      </select>
+    </div>
+    <div class="offres-filter-group">
+      <label class="offres-filter-label" for="filter_statut">Statut</label>
+      <select class="offres-filter-select" id="filter_statut" ng-model="c.statut">
+        <option value="">Tous</option>
+        <option ng-repeat="st in c.data.statutChoices" value="{{st.value}}">{{st.label}}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Trajet résumé -->
+  <div class="offres-trajet" ng-if="c.hasResults && !c.loading">
+    <span class="offres-trajet__site">{{c.getLabel(c.siteDepart, c.data.sitesChoices)}}</span>
+    <span class="offres-trajet__arrow">→</span>
+    <span class="offres-trajet__site">{{c.getLabel(c.siteArrivee, c.data.sitesChoices)}}</span>
+    <span class="offres-trajet__statut" ng-if="c.statut">{{c.getLabel(c.statut, c.data.statutChoices)}}</span>
+  </div>
+
+  <!-- Loading -->
+  <div class="offres-loading" ng-if="c.loading">
+    <span class="fa fa-spinner fa-spin"></span> Chargement des offres...
+  </div>
+
+  <!-- Placeholder initial (aucune sélection) -->
+  <div class="offres-placeholder" ng-if="!c.loading && (!c.siteDepart || !c.siteArrivee)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+    <p>Sélectionnez un site de départ et un site d'arrivée pour afficher les offres éligibles.</p>
+  </div>
+
+  <!-- Results: 3 columns -->
+  <div class="offres-results" ng-if="c.hasResults && !c.loading">
+    <div class="row">
+      <!-- Logement -->
+      <div class="col-xs-12 col-md-4">
+        <div class="offres-card">
+          <div class="offres-card__header">
+            <span class="offres-card__icon-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 11l9-7 9 7" stroke="#000091" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v10h14V10" stroke="#000091" stroke-width="2" stroke-linejoin="round"/><path d="M10 20v-6h4v6" stroke="#E1000F" stroke-width="2" stroke-linejoin="round"/></svg>
+            </span>
+            <h3 class="offres-card__title">Logement</h3>
+            <span class="offres-card__count" ng-if="c.offres.logement.length">{{c.offres.logement.length}}</span>
+          </div>
+          <ul class="offres-card__list">
+            <li ng-repeat="item in c.offres.logement" class="offres-card__item">
+              <svg class="offres-card__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="offres-card__text">
+                {{item.offre}}
+                <span class="offres-card__condition" ng-if="item.condition_text">{{item.condition_text}}</span>
+              </span>
+            </li>
+          </ul>
+          <p class="offres-card__empty" ng-if="c.offres.logement.length === 0">Aucune offre pour ce trajet</p>
+        </div>
+      </div>
+
+      <!-- Déménagement -->
+      <div class="col-xs-12 col-md-4">
+        <div class="offres-card">
+          <div class="offres-card__header">
+            <span class="offres-card__icon-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M21 8l-9-5-9 5 9 5 9-5z" stroke="#000091" stroke-width="2" stroke-linejoin="round"/><path d="M3 8v8l9 5 9-5V8" stroke="#000091" stroke-width="2" stroke-linejoin="round"/><path d="M8.5 5.5l7 4" stroke="#E1000F" stroke-width="2" stroke-linecap="round"/></svg>
+            </span>
+            <h3 class="offres-card__title">Déménagement</h3>
+            <span class="offres-card__count" ng-if="c.offres.demenagement.length">{{c.offres.demenagement.length}}</span>
+          </div>
+          <ul class="offres-card__list">
+            <li ng-repeat="item in c.offres.demenagement" class="offres-card__item">
+              <svg class="offres-card__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="offres-card__text">
+                {{item.offre}}
+                <span class="offres-card__condition" ng-if="item.condition_text">{{item.condition_text}}</span>
+              </span>
+            </li>
+          </ul>
+          <p class="offres-card__empty" ng-if="c.offres.demenagement.length === 0">Aucune offre pour ce trajet</p>
+        </div>
+      </div>
+
+      <!-- Accompagnement -->
+      <div class="col-xs-12 col-md-4">
+        <div class="offres-card">
+          <div class="offres-card__header">
+            <span class="offres-card__icon-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="#000091" stroke-width="2"/><circle cx="17" cy="9" r="2.5" stroke="#000091" stroke-width="2"/><path d="M3 20c0-3.5 3-5.5 6-5.5s6 2 6 5.5" stroke="#000091" stroke-width="2" stroke-linecap="round"/><path d="M14 20c0-2.5 1.8-4 4.5-4" stroke="#E1000F" stroke-width="2" stroke-linecap="round"/></svg>
+            </span>
+            <h3 class="offres-card__title">Accompagnement</h3>
+            <span class="offres-card__count" ng-if="c.offres.accompagnement.length">{{c.offres.accompagnement.length}}</span>
+          </div>
+          <ul class="offres-card__list">
+            <li ng-repeat="item in c.offres.accompagnement" class="offres-card__item">
+              <svg class="offres-card__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="offres-card__text">
+                {{item.offre}}
+                <span class="offres-card__condition" ng-if="item.condition_text">{{item.condition_text}}</span>
+              </span>
+            </li>
+          </ul>
+          <p class="offres-card__empty" ng-if="c.offres.accompagnement.length === 0">Aucune offre pour ce trajet</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="offres-empty" ng-if="!c.hasResults && !c.loading && c.siteDepart && c.siteArrivee">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12" stroke-linecap="round"/></svg>
+    <p>Aucune offre trouvée pour ce trajet. Vérifiez la combinaison site de départ / site d'arrivée{{c.statut ? ' / statut' : ''}}.</p>
+  </div>
+</div>]]></template>
+    </sp_widget>
+</record_update>

@@ -1,0 +1,1011 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($sce, $scope, $timeout) {
+  var c = this;
+
+  c.bases = c.data.bases || [];
+  c.baseChoisie = '';
+  c.bureau = c.data.bureau || null;
+  c.loading = false;
+  c.onglet = 'contact';
+  c.widgetId = Math.random().toString(36).substr(2, 8);
+  var mapInstance = null;
+
+  function loadLeaflet(callback) {
+    if (window.L) { callback(); return; }
+    if (!document.getElementById('leaflet-css')) {
+      var link = document.createElement('link');
+      link.id = 'leaflet-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
+    var script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = callback;
+    document.body.appendChild(script);
+  }
+
+  function renderMap() {
+    if (!c.bureau || c.onglet !== 'contact') return;
+    var lat = parseFloat(c.bureau.latitude);
+    var lng = parseFloat(c.bureau.longitude);
+    if (isNaN(lat) || isNaN(lng)) return;
+
+    loadLeaflet(function() {
+      $timeout(function() {
+        var el = document.getElementById('map-' + c.widgetId);
+        if (!el) return;
+
+        if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+
+        mapInstance = L.map(el).setView([lat, lng], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '© OpenStreetMap'
+        }).addTo(mapInstance);
+        L.marker([lat, lng]).addTo(mapInstance)
+          .bindPopup('Bureau logement : ' + c.bureau.base);
+
+        $timeout(function() { mapInstance.invalidateSize(); }, 200);
+      }, 100);
+    });
+  }
+
+  c.onBaseChange = function() {
+    if (!c.baseChoisie) { c.bureau = null; return; }
+    c.loading = true;
+    c.onglet = 'contact';
+    c.server.get({ base: c.baseChoisie }).then(function(r) {
+      c.bureau = r.data.bureau;
+      c.loading = false;
+      renderMap();
+    });
+  };
+
+  $scope.$watch('c.onglet', function(val) {
+    if (val === 'contact' && c.bureau) { renderMap(); }
+  });
+
+  c.telLink = function(tel) {
+    return 'tel:' + (tel || '').replace(/\s+/g, '');
+  };
+
+  c.nl2br = function(txt) {
+    if (!txt) return '';
+    return $sce.trustAsHtml(txt.replace(/\n/g, '<br>'));
+  };
+
+  c.bannerStyle = function() {
+    if (c.bureau && c.bureau.photo) {
+      return { 'background-image': 'linear-gradient(180deg, rgba(0,0,90,0.15) 0%, rgba(0,0,90,0.55) 100%), url(' + c.bureau.photo + ')' };
+    }
+    return {};
+  };
+  // Formulaire de question
+  c.userName = c.data.userName || '';
+  c.q = { type: '', message: '' };
+  c.qLoading = false;
+  c.qEnvoyee = false;
+
+  c.envoyerQuestion = function() {
+    if (!c.q.type || !c.q.message) return;
+    c.qLoading = true;
+    c.server.get({
+      action: 'poser_question',
+      base: c.bureau.base,
+      type_demande: c.q.type,
+      question: c.q.message
+    }).then(function(r) {
+      c.qLoading = false;
+      if (r.data.questionOk) {
+        c.qEnvoyee = true;
+        c.q = { type: '', message: '' };
+      }
+    });
+  };
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.bureau-page {&#13;
+  font-family: 'Marianne', -apple-system, 'Segoe UI', Arial, sans-serif;&#13;
+  -webkit-font-smoothing: antialiased;&#13;
+  max-width: 1100px;&#13;
+  margin: 0 auto;&#13;
+  padding: 24px 16px 80px;&#13;
+  background-color: #ffffff;&#13;
+  color: #161616;&#13;
+}&#13;
+&#13;
+/* Breadcrumb */&#13;
+.breadcrumb {&#13;
+  margin: 0 0 24px;&#13;
+  padding: 12px 16px;&#13;
+  background-color: #F6F6F6;&#13;
+  border-radius: 8px;&#13;
+  font-size: 14px;&#13;
+}&#13;
+&#13;
+.breadcrumb ol {&#13;
+  list-style: none;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  padding: 0;&#13;
+  margin: 0;&#13;
+  flex-wrap: wrap;&#13;
+}&#13;
+&#13;
+.breadcrumb ol li {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+}&#13;
+&#13;
+.breadcrumb ol li + li::before {&#13;
+  content: '›';&#13;
+  margin: 0 8px;&#13;
+  color: #929292;&#13;
+}&#13;
+&#13;
+.breadcrumb ol li a {&#13;
+  color: #000091;&#13;
+  text-decoration: none;&#13;
+}&#13;
+&#13;
+.breadcrumb ol li a:hover {&#13;
+  text-decoration: underline;&#13;
+}&#13;
+&#13;
+.breadcrumb ol li[aria-current="page"] {&#13;
+  color: #666666;&#13;
+}&#13;
+&#13;
+/* En-tête de page */&#13;
+.head {&#13;
+  margin-bottom: 36px;&#13;
+  max-width: 680px;&#13;
+}&#13;
+&#13;
+.head__label {&#13;
+  display: inline-block;&#13;
+  font-size: 12px;&#13;
+  font-weight: 700;&#13;
+  letter-spacing: 0.06em;&#13;
+  text-transform: uppercase;&#13;
+  color: #000091;&#13;
+  background-color: #F0F0FB;&#13;
+  padding: 6px 14px;&#13;
+  border-radius: 20px;&#13;
+  margin: 0 0 16px;&#13;
+}&#13;
+&#13;
+.head__title {&#13;
+  font-size: 40px;&#13;
+  font-weight: 800;&#13;
+  letter-spacing: -0.02em;&#13;
+  line-height: 1.1;&#13;
+  margin: 0 0 14px;&#13;
+}&#13;
+&#13;
+.head__text {&#13;
+  font-size: 17px;&#13;
+  line-height: 1.6;&#13;
+  color: #5a5a5a;&#13;
+  margin: 0;&#13;
+}&#13;
+&#13;
+/* Sélecteur de Base de Défense */&#13;
+.selector {&#13;
+  background: linear-gradient(135deg, #000091 0%, #1a1ab0 100%);&#13;
+  border-radius: 20px;&#13;
+  padding: 32px 32px;&#13;
+  margin-bottom: 44px;&#13;
+  position: relative;&#13;
+  overflow: hidden;&#13;
+}&#13;
+&#13;
+.selector::after {&#13;
+  content: '';&#13;
+  position: absolute;&#13;
+  bottom: -70px;&#13;
+  right: -40px;&#13;
+  width: 240px;&#13;
+  height: 240px;&#13;
+  border-radius: 50%;&#13;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 70%);&#13;
+}&#13;
+&#13;
+.selector__label {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 10px;&#13;
+  font-size: 15px;&#13;
+  font-weight: 700;&#13;
+  color: #ffffff;&#13;
+  margin: 0 0 16px;&#13;
+  position: relative;&#13;
+  z-index: 1;&#13;
+}&#13;
+&#13;
+.selector__label svg {&#13;
+  width: 22px;&#13;
+  height: 22px;&#13;
+  stroke: #ffffff;&#13;
+}&#13;
+&#13;
+.selector__control {&#13;
+  position: relative;&#13;
+  z-index: 1;&#13;
+  max-width: 460px;&#13;
+}&#13;
+&#13;
+.selector__select {&#13;
+  width: 100%;&#13;
+  padding: 16px 46px 16px 18px;&#13;
+  font-size: 16px;&#13;
+  font-weight: 600;&#13;
+  font-family: inherit;&#13;
+  color: #161616;&#13;
+  background-color: #ffffff;&#13;
+  border: none;&#13;
+  border-radius: 12px;&#13;
+  outline: none;&#13;
+  cursor: pointer;&#13;
+  -webkit-appearance: none;&#13;
+  appearance: none;&#13;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath fill='%23000091' d='M7 9L0 0h14z'/%3E%3C/svg%3E");&#13;
+  background-repeat: no-repeat;&#13;
+  background-position: right 18px center;&#13;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);&#13;
+}&#13;
+&#13;
+.selector__select:focus {&#13;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4);&#13;
+}&#13;
+&#13;
+.selector__hint {&#13;
+  font-size: 13px;&#13;
+  color: rgba(255, 255, 255, 0.75);&#13;
+  margin: 14px 0 0;&#13;
+  position: relative;&#13;
+  z-index: 1;&#13;
+}&#13;
+&#13;
+/* État initial (aucun bureau sélectionné) */&#13;
+.placeholder {&#13;
+  text-align: center;&#13;
+  padding: 64px 32px;&#13;
+  color: #8a8a8a;&#13;
+}&#13;
+&#13;
+.placeholder svg {&#13;
+  width: 56px;&#13;
+  height: 56px;&#13;
+  stroke: #c4c4d4;&#13;
+  margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+.placeholder p {&#13;
+  font-size: 16px;&#13;
+  margin: 0;&#13;
+}&#13;
+&#13;
+/* Fiche bureau */&#13;
+.office {&#13;
+  border: 1px solid #ECECEC;&#13;
+  border-radius: 22px;&#13;
+  overflow: hidden;&#13;
+  box-shadow: 0 8px 30px rgba(0, 0, 30, 0.07);&#13;
+  animation: fadeUp 0.45s ease both;&#13;
+}&#13;
+&#13;
+@keyframes fadeUp {&#13;
+  from {&#13;
+    opacity: 0;&#13;
+    transform: translateY(16px);&#13;
+  }&#13;
+  to {&#13;
+    opacity: 1;&#13;
+    transform: translateY(0);&#13;
+  }&#13;
+}&#13;
+&#13;
+/* Bandeau photo */&#13;
+.office__banner {&#13;
+  position: relative;&#13;
+  height: 200px;&#13;
+  background:&#13;
+    linear-gradient(180deg, rgba(0, 0, 90, 0.15) 0%, rgba(0, 0, 90, 0.55) 100%),&#13;
+    linear-gradient(135deg, #4a5aa8 0%, #7a88c4 50%, #3a4a90 100%);&#13;
+  background-size: cover;&#13;
+  background-position: center;&#13;
+  display: flex;&#13;
+  align-items: flex-end;&#13;
+}&#13;
+&#13;
+.office__banner-inner {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 14px;&#13;
+  padding: 24px 32px;&#13;
+  width: 100%;&#13;
+  box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.office__pin {&#13;
+  width: 48px;&#13;
+  height: 48px;&#13;
+  background-color: rgba(255, 255, 255, 0.95);&#13;
+  border-radius: 12px;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  flex-shrink: 0;&#13;
+}&#13;
+&#13;
+.office__pin svg {&#13;
+  width: 26px;&#13;
+  height: 26px;&#13;
+}&#13;
+&#13;
+.office__title {&#13;
+  font-size: 26px;&#13;
+  font-weight: 800;&#13;
+  color: #ffffff;&#13;
+  margin: 0;&#13;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);&#13;
+}&#13;
+&#13;
+/* Onglets */&#13;
+.tabs {&#13;
+  display: flex;&#13;
+  gap: 4px;&#13;
+  background-color: #F6F6F6;&#13;
+  padding: 6px;&#13;
+  overflow-x: auto;&#13;
+}&#13;
+&#13;
+.tab {&#13;
+  flex: 1;&#13;
+  min-width: max-content;&#13;
+  background: transparent;&#13;
+  border: none;&#13;
+  border-radius: 10px;&#13;
+  padding: 14px 20px;&#13;
+  font-family: inherit;&#13;
+  font-size: 14px;&#13;
+  font-weight: 600;&#13;
+  color: #5a5a5a;&#13;
+  cursor: pointer;&#13;
+  white-space: nowrap;&#13;
+  transition: background-color 0.2s ease, color 0.2s ease;&#13;
+}&#13;
+&#13;
+.tab:hover {&#13;
+  color: #000091;&#13;
+}&#13;
+&#13;
+.tab.is-active {&#13;
+  background-color: #ffffff;&#13;
+  color: #000091;&#13;
+  box-shadow: 0 2px 8px rgba(0, 0, 40, 0.08);&#13;
+}&#13;
+&#13;
+/* Contenu des onglets */&#13;
+.tab-content {&#13;
+  padding: 36px 36px;&#13;
+}&#13;
+&#13;
+/* Onglet Contact : infos à gauche, carte à droite */&#13;
+.contact-layout {&#13;
+  display: flex;&#13;
+  flex-wrap: wrap;&#13;
+  gap: 40px;&#13;
+  align-items: stretch;&#13;
+}&#13;
+&#13;
+.contact-info {&#13;
+  flex: 1;&#13;
+  min-width: 300px;&#13;
+  display: flex;&#13;
+  flex-direction: column;&#13;
+  gap: 32px;&#13;
+}&#13;
+&#13;
+.contact-map {&#13;
+  flex: 1;&#13;
+  min-width: 300px;&#13;
+}&#13;
+&#13;
+.contact-block h3 {&#13;
+  font-size: 19px;&#13;
+  font-weight: 700;&#13;
+  margin: 0 0 16px;&#13;
+  padding-bottom: 12px;&#13;
+  border-bottom: 2px solid #000091;&#13;
+  display: inline-block;&#13;
+}&#13;
+&#13;
+/* Lignes d'information */&#13;
+.info-row {&#13;
+  display: flex;&#13;
+  align-items: flex-start;&#13;
+  gap: 14px;&#13;
+  padding: 14px 0;&#13;
+  border-bottom: 1px solid #F0F0F0;&#13;
+}&#13;
+&#13;
+.info-row:last-child {&#13;
+  border-bottom: none;&#13;
+}&#13;
+&#13;
+.info-row__icon {&#13;
+  width: 42px;&#13;
+  height: 42px;&#13;
+  background-color: #F5F5FE;&#13;
+  border-radius: 11px;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  flex-shrink: 0;&#13;
+}&#13;
+&#13;
+.info-row__icon svg {&#13;
+  width: 21px;&#13;
+  height: 21px;&#13;
+  stroke: #000091;&#13;
+}&#13;
+&#13;
+.info-row__label {&#13;
+  font-size: 12px;&#13;
+  font-weight: 700;&#13;
+  letter-spacing: 0.03em;&#13;
+  text-transform: uppercase;&#13;
+  color: #929292;&#13;
+  margin: 0 0 4px;&#13;
+}&#13;
+&#13;
+.info-row__value {&#13;
+  font-size: 15px;&#13;
+  color: #161616;&#13;
+  margin: 0;&#13;
+  line-height: 1.55;&#13;
+}&#13;
+&#13;
+.info-row__value a {&#13;
+  color: #000091;&#13;
+  text-decoration: none;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+.info-row__value a:hover {&#13;
+  text-decoration: underline;&#13;
+}&#13;
+&#13;
+.info-row__value .muted {&#13;
+  color: #888888;&#13;
+  font-weight: 400;&#13;
+}&#13;
+&#13;
+/* Carte */&#13;
+.map-frame {&#13;
+  width: 100%;&#13;
+  height: 100%;&#13;
+  min-height: 380px;&#13;
+  border-radius: 16px;&#13;
+  overflow: hidden;&#13;
+  border: 1px solid #E5E5E5;&#13;
+  box-shadow: 0 4px 16px rgba(0, 0, 30, 0.06);&#13;
+}&#13;
+&#13;
+.office-map {&#13;
+  width: 100%;&#13;
+  height: 100%;&#13;
+  min-height: 380px;&#13;
+}&#13;
+&#13;
+/* Onglets à venir (placeholder) */&#13;
+.tab-placeholder {&#13;
+  padding: 32px;&#13;
+  text-align: center;&#13;
+  color: #8a8a8a;&#13;
+  font-size: 15px;&#13;
+}&#13;
+&#13;
+/* Formulaire de question */&#13;
+.qform {&#13;
+  border: 1px solid #ECECEC;&#13;
+  border-radius: 22px;&#13;
+  overflow: hidden;&#13;
+  box-shadow: 0 8px 30px rgba(0, 0, 30, 0.07);&#13;
+  margin-top: 40px;&#13;
+}&#13;
+&#13;
+.qform__head {&#13;
+  background: linear-gradient(135deg, #F5F5FE 0%, #EAEAFB 100%);&#13;
+  padding: 32px 36px;&#13;
+  border-bottom: 1px solid #E8E8F5;&#13;
+}&#13;
+&#13;
+.qform__eyebrow {&#13;
+  display: inline-block;&#13;
+  font-size: 12px;&#13;
+  font-weight: 700;&#13;
+  letter-spacing: 0.06em;&#13;
+  text-transform: uppercase;&#13;
+  color: #000091;&#13;
+  background-color: #ffffff;&#13;
+  padding: 6px 14px;&#13;
+  border-radius: 20px;&#13;
+  margin: 0 0 14px;&#13;
+}&#13;
+&#13;
+.qform__title {&#13;
+  font-size: 24px;&#13;
+  font-weight: 800;&#13;
+  letter-spacing: -0.01em;&#13;
+  margin: 0 0 8px;&#13;
+}&#13;
+&#13;
+.qform__sub {&#13;
+  font-size: 15px;&#13;
+  color: #5a5a5a;&#13;
+  margin: 0;&#13;
+}&#13;
+&#13;
+.qform__sub strong {&#13;
+  color: #000091;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+.qform__body {&#13;
+  padding: 32px 36px 36px;&#13;
+}&#13;
+&#13;
+/* Badge usager connecté */&#13;
+.user-badge {&#13;
+  display: inline-flex;&#13;
+  align-items: center;&#13;
+  gap: 10px;&#13;
+  background-color: #F0F0FB;&#13;
+  border-radius: 12px;&#13;
+  padding: 12px 18px;&#13;
+  margin-bottom: 28px;&#13;
+}&#13;
+&#13;
+.user-badge svg {&#13;
+  width: 20px;&#13;
+  height: 20px;&#13;
+  stroke: #000091;&#13;
+  flex-shrink: 0;&#13;
+}&#13;
+&#13;
+.user-badge span {&#13;
+  font-size: 15px;&#13;
+  font-weight: 700;&#13;
+  color: #000091;&#13;
+}&#13;
+&#13;
+/* Champs du formulaire */&#13;
+.field {&#13;
+  margin-bottom: 24px;&#13;
+}&#13;
+&#13;
+.field__label {&#13;
+  display: block;&#13;
+  font-size: 15px;&#13;
+  font-weight: 700;&#13;
+  color: #161616;&#13;
+  margin: 0 0 10px;&#13;
+}&#13;
+&#13;
+.field__select {&#13;
+  width: 100%;&#13;
+  padding: 15px 46px 15px 16px;&#13;
+  font-size: 15px;&#13;
+  font-family: inherit;&#13;
+  font-weight: 500;&#13;
+  color: #161616;&#13;
+  background-color: #F6F6F6;&#13;
+  border: none;&#13;
+  border-radius: 12px;&#13;
+  outline: none;&#13;
+  cursor: pointer;&#13;
+  -webkit-appearance: none;&#13;
+  appearance: none;&#13;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath fill='%23000091' d='M7 9L0 0h14z'/%3E%3C/svg%3E");&#13;
+  background-repeat: no-repeat;&#13;
+  background-position: right 16px center;&#13;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;&#13;
+}&#13;
+&#13;
+.field__select:focus {&#13;
+  background-color: #ffffff;&#13;
+  box-shadow: 0 0 0 3px rgba(0, 0, 145, 0.15);&#13;
+}&#13;
+&#13;
+.field__textarea {&#13;
+  width: 100%;&#13;
+  box-sizing: border-box;&#13;
+  min-height: 130px;&#13;
+  padding: 16px;&#13;
+  font-size: 15px;&#13;
+  font-family: inherit;&#13;
+  line-height: 1.6;&#13;
+  color: #161616;&#13;
+  background-color: #F6F6F6;&#13;
+  border: none;&#13;
+  border-radius: 12px;&#13;
+  outline: none;&#13;
+  resize: vertical;&#13;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;&#13;
+}&#13;
+&#13;
+.field__textarea:focus {&#13;
+  background-color: #ffffff;&#13;
+  box-shadow: 0 0 0 3px rgba(0, 0, 145, 0.15);&#13;
+}&#13;
+&#13;
+.field__textarea::placeholder {&#13;
+  color: #9a9a9a;&#13;
+}&#13;
+&#13;
+.field__counter {&#13;
+  text-align: right;&#13;
+  font-size: 13px;&#13;
+  color: #8a8a8a;&#13;
+  margin: 8px 0 0;&#13;
+}&#13;
+&#13;
+/* Bouton d'envoi */&#13;
+.qform__actions {&#13;
+  display: flex;&#13;
+  justify-content: flex-start;&#13;
+  margin-top: 28px;&#13;
+}&#13;
+&#13;
+.btn-send {&#13;
+  display: inline-flex;&#13;
+  align-items: center;&#13;
+  gap: 12px;&#13;
+  background-color: #000091;&#13;
+  color: #ffffff;&#13;
+  border: none;&#13;
+  border-radius: 12px;&#13;
+  padding: 16px 30px;&#13;
+  font-size: 16px;&#13;
+  font-weight: 700;&#13;
+  font-family: inherit;&#13;
+  cursor: pointer;&#13;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;&#13;
+  box-shadow: 0 6px 18px rgba(0, 0, 145, 0.22);&#13;
+}&#13;
+&#13;
+.btn-send:hover {&#13;
+  transform: translateY(-2px);&#13;
+  box-shadow: 0 10px 26px rgba(0, 0, 145, 0.30);&#13;
+}&#13;
+&#13;
+.btn-send:disabled {&#13;
+  opacity: 0.5;&#13;
+  cursor: not-allowed;&#13;
+  transform: none;&#13;
+  box-shadow: none;&#13;
+}&#13;
+&#13;
+.btn-send svg {&#13;
+  width: 20px;&#13;
+  height: 20px;&#13;
+}&#13;
+&#13;
+/* Message de succès */&#13;
+.success {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 14px;&#13;
+  background-color: #E8F5E9;&#13;
+  border-radius: 14px;&#13;
+  padding: 20px 24px;&#13;
+  margin-top: 24px;&#13;
+}&#13;
+&#13;
+.success svg {&#13;
+  width: 26px;&#13;
+  height: 26px;&#13;
+  stroke: #18753C;&#13;
+  flex-shrink: 0;&#13;
+}&#13;
+&#13;
+.success p {&#13;
+  margin: 0;&#13;
+  font-size: 15px;&#13;
+  color: #18753C;&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+/* Responsive */&#13;
+@media (max-width: 768px) {&#13;
+  .head__title {&#13;
+    font-size: 30px;&#13;
+  }&#13;
+&#13;
+  .selector {&#13;
+    padding: 26px 22px;&#13;
+  }&#13;
+&#13;
+  .office__title {&#13;
+    font-size: 20px;&#13;
+  }&#13;
+&#13;
+  .contact-layout {&#13;
+    flex-direction: column;&#13;
+    gap: 32px;&#13;
+  }&#13;
+&#13;
+  .contact-map {&#13;
+    min-height: 320px;&#13;
+  }&#13;
+&#13;
+  .map-frame,&#13;
+  .office-map {&#13;
+    min-height: 320px;&#13;
+  }&#13;
+&#13;
+  .tab {&#13;
+    flex: 0 0 auto;&#13;
+  }&#13;
+&#13;
+  .qform__head,&#13;
+  .qform__body {&#13;
+    padding-left: 22px;&#13;
+    padding-right: 22px;&#13;
+  }&#13;
+&#13;
+  .qform__title {&#13;
+    font-size: 20px;&#13;
+  }&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>bureau_logement_content</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Bureau logement - content</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  data.bases = [];
+  var grB = new GlideRecord('x_snc_habitat_bureau_logement');
+  grB.addQuery('actif', true);
+  grB.orderBy('base_de_defense');
+  grB.query();
+  while (grB.next()) {
+    data.bases.push(grB.getValue('base_de_defense') + '');
+  }
+
+  data.bureau = null;
+  if (input && input.base) {
+    var gr = new GlideRecord('x_snc_habitat_bureau_logement');
+    gr.addQuery('base_de_defense', input.base);
+    gr.addQuery('actif', true);
+    gr.setLimit(1);
+    gr.query();
+    if (gr.next()) {
+      data.bureau = {
+        base: gr.getValue('base_de_defense') + '',
+        nom: gr.getValue('nom_du_bureau') + '',
+        photo: gr.getValue('photo') + '',
+        adresse: gr.getValue('adresse') + '',
+        horaires: gr.getValue('horaires') + '',
+        telephone: gr.getValue('telephone') + '',
+        pnia: gr.getValue('pnia') + '',
+        email: gr.getValue('email') + '',
+        latitude: gr.getValue('latitude') + '',
+        longitude: gr.getValue('longitude') + ''
+      };
+    }
+  }
+  // Nom de l'usager connecté (pour le badge)
+  data.userName = gs.getUser().getFirstName() || gs.getUserDisplayName();
+
+  // Enregistrement d'une question
+  if (input && input.action === 'poser_question') {
+    var q = new GlideRecord('x_snc_habitat_question_bureau');
+    q.initialize();
+    q.setValue('type_demande', input.type_demande);
+    q.setValue('question', input.question);
+    q.setValue('usager', gs.getUserID());          // identité serveur, non falsifiable
+
+    // Retrouve le bureau par son nom de base pour lier la référence
+    var grBur = new GlideRecord('x_snc_habitat_bureau_logement');
+    grBur.addQuery('base_de_defense', input.base);
+    grBur.setLimit(1);
+    grBur.query();
+    if (grBur.next()) {
+      q.setValue('bureau', grBur.getUniqueValue());
+    }
+    q.insert();
+    data.questionOk = true;
+  }
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-08-12 13:41:50</sys_created_on>
+        <sys_id>a54517932b264710d2bef8c76e91bf07</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>Bureau logement - content</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sp_widget_a54517932b264710d2bef8c76e91bf07</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-08-14 07:09:20</sys_updated_on>
+        <template><![CDATA[<div class="bureau-page">
+
+  <nav class="breadcrumb" aria-label="Fil d'Ariane">
+    <ol>
+      <li><a href="?id=x_snc_habitat_familles_home">Accueil</a></li>
+      <li aria-current="page">Trouver mon bureau logement</li>
+    </ol>
+  </nav>
+
+  <div class="head">
+    <span class="head__label">Ressources</span>
+    <h1 class="head__title">Trouvez votre bureau logement</h1>
+    <p class="head__text">Retrouvez ici le bureau logement dont vous dépendez ainsi que sa carte des zones. Nous pouvons vous aider à constituer votre dossier ou répondre à vos questions.</p>
+  </div>
+
+  <div class="selector">
+    <label class="selector__label" for="base">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9"><path d="M12 21s7-6 7-11a7 7 0 10-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+      Sélectionnez votre Base de Défense
+    </label>
+    <div class="selector__control">
+      <select class="selector__select" ng-model="c.baseChoisie" ng-change="c.onBaseChange()">
+        <option value="">Choisir une Base de Défense…</option>
+        <option ng-repeat="b in c.bases" value="{{b}}">{{b}}</option>
+      </select>
+    </div>
+    <p class="selector__hint">Les bases sont classées par ordre alphabétique.</p>
+  </div>
+
+  <div class="placeholder" ng-if="!c.bureau && !c.loading">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+    <p>Choisissez une Base de Défense pour afficher votre bureau.</p>
+  </div>
+
+  <div class="office" ng-if="c.bureau && !c.loading">
+    <div class="office__banner" ng-style="c.bannerStyle()">
+      <div class="office__banner-inner">
+        <div class="office__pin"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6 7-11a7 7 0 10-14 0c0 5 7 11 7 11z" stroke="#000091" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.5" stroke="#E1000F" stroke-width="1.8"/></svg></div>
+        <h2 class="office__title">Bureau logement : {{c.bureau.base}}</h2>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab" type="button" ng-class="{'is-active': c.onglet === 'contact'}" ng-click="c.onglet = 'contact'">Contact</button>
+      <button class="tab" type="button" ng-class="{'is-active': c.onglet === 'commandant'}" ng-click="c.onglet = 'commandant'">Le mot du commandant</button>
+      <button class="tab" type="button" ng-class="{'is-active': c.onglet === 'actualites'}" ng-click="c.onglet = 'actualites'">Actualités</button>
+      <button class="tab" type="button" ng-class="{'is-active': c.onglet === 'infos'}" ng-click="c.onglet = 'infos'">Informations utiles</button>
+    </div>
+
+    <div class="tab-content">
+
+      <div class="contact-layout" ng-if="c.onglet === 'contact'">
+
+        <div class="contact-info">
+          <div class="contact-block">
+            <h3>Adresse postale</h3>
+            <div class="info-row">
+              <div class="info-row__icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9"><path d="M12 21s7-6 7-11a7 7 0 10-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+              <div>
+                <p class="info-row__label">Adresse à utiliser dans vos courriers</p>
+                <p class="info-row__value" ng-bind-html="c.nl2br(c.bureau.adresse)"></p>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-row__icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div>
+                <p class="info-row__label">Horaires d'ouverture au public</p>
+                <p class="info-row__value" ng-bind-html="c.nl2br(c.bureau.horaires)"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-block">
+            <h3>Nous contacter</h3>
+            <div class="info-row">
+              <div class="info-row__icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9"><path d="M5 4h4l2 5-3 2a11 11 0 005 5l2-3 5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z" stroke-linejoin="round"/></svg></div>
+              <div>
+                <p class="info-row__label">Par téléphone</p>
+                <p class="info-row__value">
+                  <a href="{{c.telLink(c.bureau.telephone)}}">{{c.bureau.telephone}}</a>
+                  <br ng-if="c.bureau.pnia"><span class="muted" ng-if="c.bureau.pnia">PNIA : {{c.bureau.pnia}}</span>
+                </p>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-row__icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div>
+                <p class="info-row__label">Par e-mail</p>
+                <p class="info-row__value"><a href="mailto:{{c.bureau.email}}">{{c.bureau.email}}</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-map">
+          <div class="map-frame"><div id="map-{{::c.widgetId}}" class="office-map"></div></div>
+        </div>
+
+      </div>
+
+      <div class="tab-placeholder" ng-if="c.onglet === 'commandant'">
+        <p>Le mot du commandant sera disponible prochainement.</p>
+      </div>
+      <div class="tab-placeholder" ng-if="c.onglet === 'actualites'">
+        <p>Les actualités du bureau seront disponibles prochainement.</p>
+      </div>
+      <div class="tab-placeholder" ng-if="c.onglet === 'infos'">
+        <p>Les informations utiles seront disponibles prochainement.</p>
+      </div>
+
+    </div>
+  </div>
+  <div class="qform" ng-if="c.bureau">
+  <div class="qform__head">
+    <span class="qform__eyebrow">Une question ?</span>
+    <h2 class="qform__title">Contactez le bureau logement</h2>
+    <p class="qform__sub">Votre message sera transmis au <strong>Bureau logement : {{c.bureau.base}}</strong>. Vous recevrez une réponse par courriel.</p>
+  </div>
+
+  <div class="qform__body">
+    <div class="user-badge" ng-if="c.userName">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6" stroke-linecap="round"/></svg>
+      <span>Connectée en tant que {{c.userName}}</span>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="q-type">Type de demande</label>
+      <select class="field__select" id="q-type" ng-model="c.q.type">
+        <option value="">Choisir un type de demande</option>
+        <option>Logement</option>
+        <option>Déménagement</option>
+        <option>Prestations famille</option>
+        <option>Constitution de dossier</option>
+        <option>Autre question</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="q-msg">Votre question</label>
+      <textarea class="field__textarea" id="q-msg" ng-model="c.q.message" maxlength="500"
+                placeholder="Expliquez votre situation ou votre question en quelques phrases"></textarea>
+      <p class="field__counter">{{500 - (c.q.message.length || 0)}} caractères restants</p>
+    </div>
+
+    <div class="qform__actions">
+      <button class="btn-send" type="button" ng-click="c.envoyerQuestion()"
+              ng-disabled="!c.q.type || !c.q.message || c.qLoading">
+        {{c.qLoading ? 'Envoi…' : 'Envoyer ma question'}}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="success" ng-if="c.qEnvoyee">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <p>Votre question a bien été transmise au bureau logement. Vous recevrez une réponse par courriel.</p>
+    </div>
+  </div>
+</div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

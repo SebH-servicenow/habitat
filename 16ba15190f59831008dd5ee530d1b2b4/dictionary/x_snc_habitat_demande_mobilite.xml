@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="ac7565190f99831008dd5ee530d1b2ca" extends="task" label="Demande de mobilité" max_length="40" name="x_snc_habitat_demande_mobilite" type="collection">
+        <element label="Consentement administré" max_length="40" name="consentement_administre" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="En attente" sequence="0" value="en_attente"/>
+                <element inactive_on_update="false" label="Accordé" sequence="1" value="accorde"/>
+                <element inactive_on_update="false" label="Refusé" sequence="2" value="refuse"/>
+            </choice>
+        </element>
+        <element label="Demandeur" max_length="32" name="demandeur" reference="sys_user" type="reference"/>
+        <element label="Document ouvrant droit" max_length="40" name="document_ouvrant_droit" type="string"/>
+        <element label="Armée / direction" max_length="40" name="armee_direction" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Armée de l'Air et de l'Espace" sequence="2" value="armee_de_lair"/>
+                <element inactive_on_update="false" label="Autre direction" sequence="7" value="autre"/>
+                <element inactive_on_update="false" label="Armée de Terre" sequence="0" value="armee_de_terre"/>
+                <element inactive_on_update="false" label="Gendarmerie Nationale" sequence="3" value="gendarmerie"/>
+                <element inactive_on_update="false" label="DGA" sequence="5" value="dga"/>
+                <element inactive_on_update="false" label="SGA" sequence="6" value="sga"/>
+                <element inactive_on_update="false" label="Service de Santé des Armées" sequence="4" value="ssa"/>
+                <element inactive_on_update="false" label="Marine Nationale" sequence="1" value="marine_nationale"/>
+            </choice>
+        </element>
+        <element label="Étape courante du formulaire" max_length="10" name="etape_courante" type="string"/>
+        <element label="Accompagnement au déménagement" max_length="40" name="besoin_demenagement" type="boolean"/>
+        <element label="Ma famille me suit sur le nouveau lieu d'affectation" max_length="40" name="famille_suit" type="boolean"/>
+        <element label="Demande pour autrui" max_length="40" name="demande_pour_autrui" type="boolean"/>
+        <element label="Est un brouillon" max_length="40" name="est_brouillon" type="boolean"/>
+        <element label="Ma famille reste en métropole" max_length="40" name="famille_reste_metropole" type="boolean"/>
+        <element label="Type de logement souhaité" max_length="40" name="type_logement" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Hébergement BCC-Week Away" sequence="0" value="hebergement_bcc"/>
+                <element inactive_on_update="false" label="Logement privé" sequence="2" value="logement_prive"/>
+                <element inactive_on_update="false" label="Logement patrimonial" sequence="1" value="logement_patrimonial"/>
+            </choice>
+        </element>
+        <element label="Site d'arrivée" max_length="40" name="site_arrivee" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Métropole et IDF" sequence="0" value="metropole_idf"/>
+                <element inactive_on_update="false" label="Autre OM" sequence="4" value="autre_om"/>
+                <element inactive_on_update="false" label="Europe" sequence="1" value="europe"/>
+                <element inactive_on_update="false" label="Autres étranger" sequence="5" value="autres_etranger"/>
+                <element inactive_on_update="false" label="DJI" sequence="3" value="dji"/>
+                <element inactive_on_update="false" label="PF, REU et MAY" sequence="2" value="pf_reu_may"/>
+            </choice>
+        </element>
+        <element label="Site de départ" max_length="40" name="site_depart" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Europe" sequence="1" value="europe"/>
+                <element inactive_on_update="false" label="Métropole et IDF" sequence="0" value="metropole_idf"/>
+                <element inactive_on_update="false" label="Autre OM" sequence="4" value="autre_om"/>
+                <element inactive_on_update="false" label="DJI" sequence="3" value="dji"/>
+                <element inactive_on_update="false" label="PF, REU et MAY" sequence="2" value="pf_reu_may"/>
+                <element inactive_on_update="false" label="Autres étranger" sequence="5" value="autres_etranger"/>
+            </choice>
+        </element>
+        <element label="Accompagnement de la famille &amp; prestations diverses" max_length="40" name="besoin_accompagnement" type="boolean"/>
+        <element label="Date prévisionnelle de prise de fonction" max_length="40" name="date_prise_fonction" type="glide_date"/>
+        <element label="Étape visible usager" max_length="200" name="etape_visible_usager" type="string"/>
+        <element label="NIGEND" max_length="40" name="nigend" type="string"/>
+        <element label="Type de déménagement" max_length="40" name="type_demenagement" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="L'administration prend en charge mon déménagement" sequence="0" value="prise_en_charge_admin"/>
+                <element inactive_on_update="false" label="Je recherche mon déménageur" sequence="2" value="recherche_demenageur"/>
+                <element inactive_on_update="false" label="Je déménage par mes propres moyens" sequence="1" value="propres_moyens"/>
+            </choice>
+        </element>
+        <element label="Accompagnement au logement" max_length="40" name="besoin_logement" type="boolean"/>
+        <element label="Grade" max_length="100" name="grade" type="string"/>
+        <element label="L'administré" mandatory="true" max_length="32" name="administre" reference="sys_user" type="reference"/>
+    </element>
+</database>

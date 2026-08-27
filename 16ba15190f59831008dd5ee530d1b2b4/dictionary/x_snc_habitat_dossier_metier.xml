@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="a87565190f99831008dd5ee530d1b2fc" extends="task" label="Dossier métier" max_length="40" name="x_snc_habitat_dossier_metier" type="collection">
+        <element label="Demande parente" max_length="32" name="demande_parente" reference="x_snc_habitat_demande_mobilite" type="reference"/>
+        <element label="Acteur en charge" max_length="200" name="acteur_en_charge" type="string"/>
+        <element label="Nombre total étapes" max_length="40" name="nb_etapes_total" type="integer"/>
+        <element label="Étapes (JSON)" max_length="4000" name="etapes_json" type="string"/>
+        <element label="Numéro étape courante" max_length="40" name="etape_courante_num" type="integer"/>
+        <element label="Type de flux" max_length="40" name="type_flux" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="PFMD" sequence="0" value="pfmd"/>
+                <element inactive_on_update="false" label="Défense Mobilité" sequence="3" value="defense_mobilite"/>
+                <element inactive_on_update="false" label="SCA" sequence="6" value="sca"/>
+                <element inactive_on_update="false" label="Logement Atrium" sequence="1" value="logement_atrium"/>
+                <element inactive_on_update="false" label="PCD OM" sequence="4" value="pcd_om"/>
+                <element inactive_on_update="false" label="Mut'Actions" sequence="2" value="mut_actions"/>
+                <element inactive_on_update="false" label="BCC" sequence="5" value="bcc"/>
+            </choice>
+        </element>
+        <element label="Étape visible usager" max_length="200" name="etape_visible_usager" type="string"/>
+        <element label="Ville de destination" max_length="100" name="ville_destination" type="string"/>
+    </element>
+</database>

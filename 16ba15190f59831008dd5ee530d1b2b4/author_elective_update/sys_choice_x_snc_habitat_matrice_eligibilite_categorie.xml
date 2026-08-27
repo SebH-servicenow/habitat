@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_choice action="INSERT_OR_UPDATE" field="categorie" table="x_snc_habitat_matrice_eligibilite" version="3">
+        <sys_choice_set action="INSERT_OR_UPDATE">
+            <element>categorie</element>
+            <name>x_snc_habitat_matrice_eligibilite</name>
+            <sys_class_name>sys_choice_set</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-04 21:06:26</sys_created_on>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>categorie</sys_name>
+            <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+            <sys_update_name>sys_choice_x_snc_habitat_matrice_eligibilite_categorie</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-04 21:06:26</sys_updated_on>
+        </sys_choice_set>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>categorie</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Logement</label>
+            <language>en</language>
+            <name>x_snc_habitat_matrice_eligibilite</name>
+            <sequence>0</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:27</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:27</sys_updated_on>
+            <value>logement</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>categorie</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Déménagement</label>
+            <language>en</language>
+            <name>x_snc_habitat_matrice_eligibilite</name>
+            <sequence>1</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:27</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:27</sys_updated_on>
+            <value>demenagement</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>categorie</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Accompagnement</label>
+            <language>en</language>
+            <name>x_snc_habitat_matrice_eligibilite</name>
+            <sequence>2</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:27</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:27</sys_updated_on>
+            <value>accompagnement</value>
+        </sys_choice>
+    </sys_choice>
+</record_update>

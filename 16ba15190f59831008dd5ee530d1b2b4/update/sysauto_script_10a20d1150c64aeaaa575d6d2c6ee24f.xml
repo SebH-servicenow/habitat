@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sysauto_script">
+    <sysauto_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <advanced>false</advanced>
+        <business_calendar/>
+        <condition/>
+        <conditional>false</conditional>
+        <entered_run_end/>
+        <entered_run_start/>
+        <entered_time/>
+        <max_drift/>
+        <name>Habitat - Détection SLA breach quotidienne</name>
+        <offset/>
+        <offset_type/>
+        <repeat_every/>
+        <run_as/>
+        <run_as_tz/>
+        <run_dayofmonth/>
+        <run_dayofweek/>
+        <run_daysofweek/>
+        <run_end/>
+        <run_month/>
+        <run_period/>
+        <run_start/>
+        <run_time/>
+        <run_type>daily</run_type>
+        <run_weekinmonth/>
+        <script><![CDATA[
+(function() {
+    var now = new GlideDateTime();
+    var gr = new GlideRecord('x_snc_habitat_dossier_metier');
+    gr.addQuery('state', 'IN', '1,2,3');
+    gr.addQuery('due_date', '<', now);
+    gr.addQuery('priority', '!=', '1');
+    gr.query();
+    
+    var count = 0;
+    while (gr.next()) {
+        gr.setValue('priority', '1');
+        gr.update();
+        count++;
+    }
+    
+    gs.info('Habitat SLA Breach: ' + count + ' dossier(s) escaladé(s) en priorité critique');
+})();
+]]></script>
+        <sys_class_name>sysauto_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-08 14:36:29</sys_created_on>
+        <sys_id>10a20d1150c64aeaaa575d6d2c6ee24f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Habitat - Détection SLA breach quotidienne</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sysauto_script_10a20d1150c64aeaaa575d6d2c6ee24f</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-08 14:36:29</sys_updated_on>
+        <time_zone/>
+        <upgrade_safe>false</upgrade_safe>
+    </sysauto_script>
+</record_update>

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_section caption="Identité de l'administré" section_id="61cc5cb30dde45738a68ce0ce68f19fa" sys_domain="global" table="x_snc_habitat_demande_mobilite" version="3" view="x_snc_habitat_ws">
+        <sys_ui_annotation action="INSERT_OR_UPDATE">
+            <is_plain_text>true</is_plain_text>
+            <name/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>812b249fb6d44dbe86aec8baf9a3da80</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <text>Informations sur l'administré et le demandeur de la mobilité.</text>
+            <type display_value="Info Box Blue">753f88a80f930000b12e6903cfe01206</type>
+        </sys_ui_annotation>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>812b249fb6d44dbe86aec8baf9a3da80</element>
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>1c1e422e9e8b4ee9922d647a5d0ce71b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type>annotation</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.begin_split</element>
+            <position>1</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>81fda97b9dd549afbb0e9ad492f924c9</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type>.begin_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>administre</element>
+            <position>2</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>12ef158c7d474b10843baac9d1ec688f</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>grade</element>
+            <position>3</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>955a42af7bea48d6a5b52d34e5f5c287</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>armee_direction</element>
+            <position>4</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>4f018ed2dd4648a0a4170bd20558825b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>5</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>2d4bee8d3dcc4c4eb73eacff5dd1d702</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>demandeur</element>
+            <position>6</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>0f99b9b199304176a05b7c972ee6af7d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>nigend</element>
+            <position>7</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>2ea43401a7344effb304c3c17c69fc4b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>demande_pour_autrui</element>
+            <position>8</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>2db5f4b992ee447ba8911838ff2fa2e9</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.end_split</element>
+            <position>9</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>027b028e5a1d4e688c3fc67f0899ebcc</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type>.end_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.begin_split</element>
+            <position>10</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>3ed064d3eb4448c59bccdb8d8ff23dda</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type>.begin_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>consentement_administre</element>
+            <position>11</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>267a23de21284b5193bf44f7012f34dd</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>12</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>0190f595cf1843e5ba220070d2ac3e28</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.end_split</element>
+            <position>13</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 20:52:23</sys_created_on>
+            <sys_id>897c1883fe254eaaaeab76f781da7225</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Identité de l'administré" display_value="Identité de l'administré" name="x_snc_habitat_demande_mobilite" sys_domain="global" view="cc7d063d32624b0cacb68f3f3f5c751f">61cc5cb30dde45738a68ce0ce68f19fa</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 20:52:23</sys_updated_on>
+            <sys_user/>
+            <type>.end_split</type>
+        </sys_ui_element>
+        <sys_ui_section action="INSERT_OR_UPDATE">
+            <caption>Identité de l'administré</caption>
+            <header>false</header>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 19:15:49</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>61cc5cb30dde45738a68ce0ce68f19fa</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_habitat_demande_mobilite</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+            <sys_update_name>sys_ui_section_61cc5cb30dde45738a68ce0ce68f19fa</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 19:15:49</sys_updated_on>
+            <sys_user/>
+            <title>false</title>
+            <view display_value="Habitat Workspace" name="x_snc_habitat_ws">cc7d063d32624b0cacb68f3f3f5c751f</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+</record_update>

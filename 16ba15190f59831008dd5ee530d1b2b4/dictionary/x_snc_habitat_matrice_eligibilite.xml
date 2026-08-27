@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="3475a5190f99831008dd5ee530d1b28e" label="Matrice d'éligibilité" max_length="40" name="x_snc_habitat_matrice_eligibilite" type="collection">
+        <element label="Code offre" max_length="80" name="code_offre" type="string"/>
+        <element label="Condition" max_length="500" name="condition_text" type="string"/>
+        <element label="Site d'arrivée" max_length="40" name="site_arrivee" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Autre OM" sequence="4" value="autre_om"/>
+                <element inactive_on_update="false" label="Europe" sequence="1" value="europe"/>
+                <element inactive_on_update="false" label="DJI" sequence="3" value="dji"/>
+                <element inactive_on_update="false" label="PF, REU et MAY" sequence="2" value="pf_reu_may"/>
+                <element inactive_on_update="false" label="Autres étranger" sequence="5" value="autres_etranger"/>
+                <element inactive_on_update="false" label="Métropole et IDF" sequence="0" value="metropole_idf"/>
+            </choice>
+        </element>
+        <element label="Site de départ" max_length="40" name="site_depart" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Métropole et IDF" sequence="0" value="metropole_idf"/>
+                <element inactive_on_update="false" label="Autre OM" sequence="4" value="autre_om"/>
+                <element inactive_on_update="false" label="Autres étranger" sequence="5" value="autres_etranger"/>
+                <element inactive_on_update="false" label="Europe" sequence="1" value="europe"/>
+                <element inactive_on_update="false" label="PF, REU et MAY" sequence="2" value="pf_reu_may"/>
+                <element inactive_on_update="false" label="DJI" sequence="3" value="dji"/>
+            </choice>
+        </element>
+        <element label="Catégorie" max_length="40" name="categorie" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Accompagnement" sequence="2" value="accompagnement"/>
+                <element inactive_on_update="false" label="Déménagement" sequence="1" value="demenagement"/>
+                <element inactive_on_update="false" label="Logement" sequence="0" value="logement"/>
+            </choice>
+        </element>
+        <element label="Offre" max_length="500" name="offre" type="string"/>
+        <element label="Ordre" max_length="40" name="ordre" type="integer"/>
+    </element>
+</database>

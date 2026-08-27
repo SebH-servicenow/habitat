@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl_role">
+    <sys_security_acl_role action="INSERT_OR_UPDATE">
+        <sys_class_name>sys_security_acl_role</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:40</sys_created_on>
+        <sys_id>19cb4928b51d4f8892acc96155964bef</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>now.habitat-pfmd.*.</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_security_acl display_value="now.habitat-pfmd.*">a0221d6ca7e34c7caef44a0c6104f48f</sys_security_acl>
+        <sys_update_name>sys_security_acl_role_19cb4928b51d4f8892acc96155964bef</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:40</sys_updated_on>
+        <sys_user_role display_value="x_snc_habitat.habitat_agent" name="x_snc_habitat.habitat_agent">3911b9c743fb4ca780f9e91aea7a5f5b</sys_user_role>
+    </sys_security_acl_role>
+</record_update>

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_choice action="INSERT_OR_UPDATE" field="armee_direction" table="x_snc_habitat_demande_mobilite" version="3">
+        <sys_choice_set action="INSERT_OR_UPDATE">
+            <element>armee_direction</element>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <sys_class_name>sys_choice_set</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 04:55:35</sys_created_on>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>armee_direction</sys_name>
+            <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+            <sys_update_name>sys_choice_x_snc_habitat_demande_mobilite_armee_direction</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 04:55:35</sys_updated_on>
+        </sys_choice_set>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>armee_direction</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Armée de Terre</label>
+            <language>en</language>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <sequence>0</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:22</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:22</sys_updated_on>
+            <value>armee_de_terre</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>armee_direction</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Marine Nationale</label>
+            <language>en</language>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <sequence>1</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:23</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:23</sys_updated_on>
+            <value>marine_nationale</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>armee_direction</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Armée de l'Air et de l'Espace</label>
+            <language>en</language>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <sequence>2</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:23</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:23</sys_updated_on>
+            <value>armee_de_lair</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>armee_direction</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Gendarmerie Nationale</label>
+            <language>en</language>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <sequence>3</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:23</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:23</sys_updated_on>
+            <value>gendarmerie</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>armee_direction</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Service de Santé des Armées</label>
+            <language>en</language>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <sequence>4</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:23</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:23</sys_updated_on>
+            <value>ssa</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>armee_direction</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>DGA</label>
+            <language>en</language>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <sequence>5</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:23</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:23</sys_updated_on>
+            <value>dga</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>armee_direction</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>SGA</label>
+            <language>en</language>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <sequence>6</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:23</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:23</sys_updated_on>
+            <value>sga</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>armee_direction</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Autre direction</label>
+            <language>en</language>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <sequence>7</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:23</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:23</sys_updated_on>
+            <value>autre</value>
+        </sys_choice>
+    </sys_choice>
+</record_update>

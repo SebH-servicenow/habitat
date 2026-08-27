@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_choice action="INSERT_OR_UPDATE" field="type_logement" table="x_snc_habitat_demande_mobilite" version="3">
+        <sys_choice_set action="INSERT_OR_UPDATE">
+            <element>type_logement</element>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <sys_class_name>sys_choice_set</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 04:55:35</sys_created_on>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>type_logement</sys_name>
+            <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+            <sys_update_name>sys_choice_x_snc_habitat_demande_mobilite_type_logement</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 04:55:35</sys_updated_on>
+        </sys_choice_set>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>type_logement</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Hébergement BCC-Week Away</label>
+            <language>en</language>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <sequence>0</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:26</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:26</sys_updated_on>
+            <value>hebergement_bcc</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>type_logement</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Logement patrimonial</label>
+            <language>en</language>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <sequence>1</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:26</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:26</sys_updated_on>
+            <value>logement_patrimonial</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>type_logement</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Logement privé</label>
+            <language>en</language>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <sequence>2</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:26</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:26</sys_updated_on>
+            <value>logement_prive</value>
+        </sys_choice>
+    </sys_choice>
+</record_update>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="1c0c86530faec31008dd5ee530d1b223" label="Bureau Logement" max_length="40" name="x_snc_habitat_bureau_logement" type="collection">
+        <element label="Actif" max_length="40" name="actif" type="boolean"/>
+        <element label="Photo" max_length="255" name="photo" type="string"/>
+        <element label="Téléphones" max_length="40" name="telephones" type="string"/>
+        <element label="PNIA" max_length="40" name="pnia" type="string"/>
+        <element label="Base de défense" max_length="100" name="base_de_defense" type="string"/>
+        <element label="Longitude" max_length="38" name="longitude" type="decimal"/>
+        <element label="Latitude" max_length="38" name="latitude" type="decimal"/>
+        <element display="true" label="Email" max_length="100" name="email" type="string"/>
+        <element label="Telephone" max_length="100" name="telephone" type="string"/>
+        <element label="Horaires" max_length="500" name="horaires" type="string"/>
+        <element label="Adresse" max_length="500" name="adresse" type="string"/>
+        <element label="Nom du bureau" max_length="100" name="nom_du_bureau" type="string"/>
+    </element>
+</database>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="d47525d10f99831008dd5ee530d1b224" label="Pièce justificative - Dossier métier" max_length="40" name="x_snc_habitat_m2m_piece_dossier" type="collection">
+        <element label="Pièce justificative" max_length="32" name="piece_justificative" reference="x_snc_habitat_piece_justificative" type="reference"/>
+        <element label="Dossier métier" max_length="32" name="dossier_metier" reference="x_snc_habitat_dossier_metier" type="reference"/>
+        <index name="index">
+            <element name="dossier_metier"/>
+        </index>
+        <index name="index2">
+            <element name="piece_justificative"/>
+        </index>
+    </element>
+</database>

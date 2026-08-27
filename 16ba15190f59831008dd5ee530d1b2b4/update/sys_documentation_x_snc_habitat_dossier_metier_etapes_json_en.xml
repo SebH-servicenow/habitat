@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_documentation element="etapes_json" label="Étapes (JSON)" language="en" table="x_snc_habitat_dossier_metier">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>etapes_json</element>
+            <help/>
+            <hint/>
+            <label>Étapes (JSON)</label>
+            <language>en</language>
+            <name>x_snc_habitat_dossier_metier</name>
+            <plural>Étapes (JSON)</plural>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-06 05:55:40</sys_created_on>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>Étapes (JSON)</sys_name>
+            <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+            <sys_update_name>sys_documentation_x_snc_habitat_dossier_metier_etapes_json_en</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-06 05:55:40</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>

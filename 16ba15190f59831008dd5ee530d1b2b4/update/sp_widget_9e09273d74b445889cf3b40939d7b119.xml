@@ -1,0 +1,669 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope) {
+    var c = this;
+
+    // Track expanded dossier
+    c.expandedDossier = null;
+
+    // Toggle dossier detail
+    c.toggleDossier = function(dossier) {
+        if (c.expandedDossier === dossier.sys_id) {
+            c.expandedDossier = null;
+        } else {
+            c.expandedDossier = dossier.sys_id;
+        }
+    };
+
+    // Check if a dossier is expanded
+    c.isExpanded = function(dossier) {
+        return c.expandedDossier === dossier.sys_id;
+    };
+};
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ===== Suivi de mes dossiers - DSFR ===== */
+.suivi-container {
+    font-family: 'Marianne', Arial, sans-serif;
+    color: #161616;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+    line-height: 1.5;
+}
+
+/* Breadcrumb */
+.suivi-breadcrumb {
+    margin-bottom: 24px;
+}
+
+.suivi-breadcrumb ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 14px;
+}
+
+.suivi-breadcrumb li {
+    display: inline-flex;
+    align-items: center;
+}
+
+.suivi-breadcrumb li + li::before {
+    content: '›';
+    margin-right: 8px;
+    margin-left: 4px;
+    color: #666666;
+}
+
+.suivi-breadcrumb a {
+    color: #000091;
+    text-decoration: underline;
+}
+
+.suivi-breadcrumb a:hover {
+    text-decoration: none;
+}
+
+.suivi-breadcrumb [aria-current] {
+    color: #161616;
+    font-weight: 500;
+}
+
+/* Header */
+.suivi-header {
+    margin-bottom: 32px;
+}
+
+.suivi-tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #000091;
+    margin-bottom: 8px;
+}
+
+.suivi-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #161616;
+    margin: 0 0 12px;
+    line-height: 1.2;
+}
+
+.suivi-description {
+    font-size: 16px;
+    color: #666666;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Empty state */
+.suivi-empty {
+    text-align: center;
+    padding: 48px 24px;
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+}
+
+.suivi-empty p {
+    font-size: 16px;
+    color: #666666;
+    margin: 0 0 20px;
+}
+
+.suivi-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Marianne', Arial, sans-serif;
+    border-radius: 0;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+}
+
+.suivi-btn--primary {
+    background-color: #000091;
+    color: #FFFFFF;
+}
+
+.suivi-btn--primary:hover {
+    background-color: #1212FF;
+    color: #FFFFFF;
+    text-decoration: none;
+}
+
+/* Dossier list */
+.suivi-dossiers {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Dossier card */
+.suivi-dossier {
+    border: 1px solid #E5E5E5;
+    border-left: 4px solid #000091;
+    background-color: #FFFFFF;
+    transition: box-shadow 0.15s;
+}
+
+.suivi-dossier:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 18, 0.1);
+}
+
+.suivi-dossier--expanded {
+    border-left-color: #000091;
+    box-shadow: 0 4px 12px rgba(0, 0, 18, 0.12);
+}
+
+.suivi-dossier__card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+.suivi-dossier__card:hover {
+    background-color: #F5F5FE;
+}
+
+.suivi-dossier__main {
+    flex: 1;
+}
+
+.suivi-dossier__titre {
+    font-size: 15px;
+    font-weight: 700;
+    color: #161616;
+    margin: 0 0 4px;
+}
+
+.suivi-dossier__meta {
+    font-size: 13px;
+    color: #666666;
+    margin: 0;
+}
+
+.suivi-dossier__badges {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+/* Badges */
+.suivi-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.suivi-badge--acteur {
+    background-color: #FEE7FC;
+    color: #6E445A;
+    border: 1px solid #D9A8CE;
+}
+
+.suivi-badge--statut {
+    background-color: transparent;
+    color: #000091;
+    border: 1px solid #000091;
+}
+
+/* Chevron */
+.suivi-dossier__chevron {
+    font-size: 20px;
+    color: #000091;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.suivi-dossier__chevron--open {
+    transform: rotate(90deg);
+}
+
+/* ===== Detail (expanded) ===== */
+.suivi-dossier__detail {
+    padding: 32px 40px 40px;
+    border-top: 1px solid #E5E5E5;
+    background-color: #F5F5FE;
+}
+
+.suivi-detail-header {
+    margin-bottom: 32px;
+}
+
+.suivi-detail-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #161616;
+    margin: 0 0 8px;
+}
+
+.suivi-detail-subtitle {
+    font-size: 15px;
+    color: #666666;
+    margin: 0;
+}
+
+/* ===== Timeline ===== */
+.suivi-timeline {
+    position: relative;
+    padding-left: 0;
+}
+
+.suivi-timeline__item {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    padding-left: 40px;
+    min-height: 56px;
+    margin-bottom: 0;
+}
+
+.suivi-timeline__item:last-child {
+    min-height: auto;
+}
+
+/* Dot */
+.suivi-timeline__dot {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+/* Vertical connecting line */
+.suivi-timeline__item::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 22px;
+    bottom: 0;
+    width: 2px;
+    background-color: #CCCCCC;
+    z-index: 1;
+}
+
+.suivi-timeline__item:last-child::before {
+    display: none;
+}
+
+/* Completed step - dark green dot */
+.suivi-timeline__item--completed .suivi-timeline__dot {
+    background-color: #3A7D44;
+    border: none;
+}
+
+/* Technical step - lighter green/gray dot */
+.suivi-timeline__item--technical .suivi-timeline__dot {
+    background-color: #8FA99B;
+    border: none;
+}
+
+/* Current step - dark navy blue dot */
+.suivi-timeline__item--current .suivi-timeline__dot {
+    background-color: #000091;
+    border: none;
+}
+
+/* Pending step - empty circle with gray border */
+.suivi-timeline__item--pending .suivi-timeline__dot {
+    background-color: #FFFFFF;
+    border: 2px solid #AAAAAA;
+}
+
+/* Timeline content - all on one line */
+.suivi-timeline__content {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding-top: 0;
+}
+
+.suivi-timeline__title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #161616;
+}
+
+.suivi-timeline__item--pending .suivi-timeline__title {
+    color: #161616;
+}
+
+.suivi-timeline__badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    background-color: #E0E0E0;
+    color: #555555;
+    letter-spacing: 0.03em;
+    vertical-align: middle;
+}
+
+.suivi-timeline__desc {
+    font-size: 15px;
+    color: #929292;
+}
+
+.suivi-timeline__item--pending .suivi-timeline__desc {
+    color: #929292;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+    .suivi-container {
+        padding: 16px 12px 32px;
+    }
+
+    .suivi-title {
+        font-size: 22px;
+    }
+
+    .suivi-dossier__card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .suivi-dossier__badges {
+        align-self: flex-start;
+    }
+
+    .suivi-dossier__detail {
+        padding: 24px 20px 32px;
+    }
+
+    .suivi-detail-title {
+        font-size: 18px;
+    }
+}
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id/>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+}]]></link>
+        <name>Habitat - Tracker Demandes</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+    var userID = gs.getUserID();
+    var dossiers = [];
+
+    // Load all dossiers métier for the current user (via demande_parente.administre or demande_parente.demandeur)
+    var grDossier = new GlideRecord('x_snc_habitat_dossier_metier');
+    grDossier.addQuery('demande_parente.administre', userID)
+        .addOrCondition('demande_parente.demandeur', userID);
+    grDossier.addQuery('demande_parente.est_brouillon', false);
+    grDossier.orderByDesc('sys_created_on');
+    grDossier.setLimit(20);
+    grDossier.query();
+
+    while (grDossier.next()) {
+        var typeFlux = grDossier.getValue('type_flux') + '';
+        var typeFluxDisplay = grDossier.getDisplayValue('type_flux') + '';
+        var villeDest = grDossier.getValue('ville_destination') || '';
+        if (villeDest === 'null') villeDest = '';
+        var siteDepart = grDossier.demande_parente.getDisplayValue('site_depart') + '';
+        var siteArrivee = grDossier.demande_parente.getDisplayValue('site_arrivee') + '';
+        if (siteDepart === 'null') siteDepart = '';
+        if (siteArrivee === 'null') siteArrivee = '';
+        var createdOn = grDossier.getDisplayValue('sys_created_on') + '';
+        var etapeCourante = parseInt(grDossier.getValue('etape_courante_num') || '1', 10);
+        var nbEtapes = parseInt(grDossier.getValue('nb_etapes_total') || '8', 10);
+        var acteur = grDossier.getValue('acteur_en_charge') || '';
+        if (acteur === 'null') acteur = '';
+        var etapesJson = grDossier.getValue('etapes_json') || '';
+        if (etapesJson === 'null') etapesJson = '';
+        var etapes = [];
+
+        // Parse étapes JSON if available
+        if (etapesJson && etapesJson !== 'null' && etapesJson !== '') {
+            try {
+                etapes = JSON.parse(etapesJson);
+            } catch (e) {
+                etapes = [];
+            }
+        }
+
+        // If no étapes stored, build default ones based on flux type
+        if (etapes.length === 0) {
+            etapes = getDefaultEtapes(typeFlux, etapeCourante);
+        } else {
+            // Mark step statuses based on etape_courante_num
+            for (var i = 0; i < etapes.length; i++) {
+                if (i < etapeCourante - 1) {
+                    etapes[i].status = etapes[i].badge ? 'technical' : 'completed';
+                } else if (i === etapeCourante - 1) {
+                    etapes[i].status = 'current';
+                } else {
+                    etapes[i].status = 'pending';
+                }
+            }
+        }
+
+        // Build display title from short_description (most descriptive)
+        var number = grDossier.getDisplayValue('number') + '';
+        if (number === 'null') number = '';
+        var shortDesc = grDossier.getValue('short_description') || '';
+        if (shortDesc === 'null') shortDesc = '';
+        
+        // Title: use short_description if available, else fallback to number + type + ville
+        var titre = '';
+        if (shortDesc) {
+            titre = shortDesc;
+        } else {
+            titre = number;
+            if (typeFluxDisplay && typeFluxDisplay !== 'null') {
+                titre += ' — ' + typeFluxDisplay;
+            }
+            if (villeDest) {
+                titre += ' — ' + villeDest;
+            }
+        }
+
+        dossiers.push({
+            sys_id: grDossier.getUniqueValue() + '',
+            number: number,
+            titre: titre,
+            type_flux: typeFlux,
+            type_flux_display: typeFluxDisplay,
+            acteur: acteur,
+            ville: villeDest,
+            site_depart: siteDepart,
+            site_arrivee: siteArrivee,
+            created_on: createdOn,
+            etape_courante: etapeCourante,
+            nb_etapes: nbEtapes,
+            etape_visible: grDossier.getValue('etape_visible_usager') + '',
+            acteur_badge: getActeurBadge(typeFlux),
+            statut_badge: getStatutBadge(etapeCourante, nbEtapes),
+            etapes: etapes
+        });
+    }
+
+    data.dossiers = dossiers;
+
+    // Helper: default steps per flux type
+    function getDefaultEtapes(flux, currentStep) {
+        var steps = [];
+        if (flux === 'logement_atrium') {
+            steps = [
+                {title: 'Validation du formulaire', desc: "Vérification de l'intégrité des données"},
+                {title: 'Création du ticket Atrium', desc: 'Étape technique — API SI Atrium', badge: 'TECHNIQUE'},
+                {title: 'Prise en compte de la demande', desc: 'Équipe Atrium'},
+                {title: 'Décision : prise en compte validée', desc: 'Équipe Atrium — via API'},
+                {title: 'Traitement en cours', desc: 'DTIE'},
+                {title: 'Décision : dossier validé', desc: 'DTIE'},
+                {title: 'Signature du protocole', desc: 'Action requise'},
+                {title: 'Clôture du dossier', desc: 'Visible usager'}
+            ];
+        } else if (flux === 'pfmd') {
+            steps = [
+                {title: 'Validation du formulaire', desc: "Vérification des données"},
+                {title: 'Création du dossier SCA', desc: 'Étape technique', badge: 'TECHNIQUE'},
+                {title: 'Instruction du dossier', desc: 'SCA · PFMD'},
+                {title: 'Décision : accord de prise en charge', desc: 'SCA'},
+                {title: 'Programmation du déménagement', desc: 'Déménageur'},
+                {title: 'Déménagement réalisé', desc: 'Confirmation'},
+                {title: 'Clôture du dossier', desc: 'Visible usager'}
+            ];
+        } else if (flux === 'mut_actions') {
+            steps = [
+                {title: 'Validation du formulaire', desc: "Vérification des données"},
+                {title: 'Transmission au prestataire', desc: "Mut'Actions", badge: 'TECHNIQUE'},
+                {title: 'Prise en charge', desc: "Mut'Actions"},
+                {title: 'Recherche en cours', desc: "Mut'Actions"},
+                {title: 'Proposition de logement', desc: 'Action requise'},
+                {title: 'Clôture du dossier', desc: 'Visible usager'}
+            ];
+        } else {
+            steps = [
+                {title: 'Validation du formulaire', desc: "Vérification des données"},
+                {title: 'Création du dossier', desc: 'Étape technique', badge: 'TECHNIQUE'},
+                {title: 'Traitement en cours', desc: 'Service compétent'},
+                {title: 'Décision', desc: 'Service compétent'},
+                {title: 'Clôture du dossier', desc: 'Visible usager'}
+            ];
+        }
+
+        for (var i = 0; i < steps.length; i++) {
+            if (i < currentStep - 1) {
+                steps[i].status = steps[i].badge ? 'technical' : 'completed';
+            } else if (i === currentStep - 1) {
+                steps[i].status = 'current';
+            } else {
+                steps[i].status = 'pending';
+            }
+        }
+        return steps;
+    }
+
+    // Helper: acteur badge based on flux
+    function getActeurBadge(flux) {
+        var map = {
+            logement_atrium: 'DTIE · ATRIUM',
+            pfmd: 'SCA · PFMD',
+            mut_actions: "MUT'ACTIONS",
+            defense_mobilite: 'DÉFENSE MOBILITÉ',
+            pcd_om: 'SCA · PCD',
+            bcc: 'BCC · IGESA'
+        };
+        return map[flux] || 'SERVICE';
+    }
+
+    // Helper: status badge
+    function getStatutBadge(current, total) {
+        if (current >= total) return 'TERMINÉ';
+        if (current > 1) return 'EN COURS';
+        return 'DÉPOSÉ';
+    }
+})();
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:37</sys_created_on>
+        <sys_id>9e09273d74b445889cf3b40939d7b119</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Habitat - Tracker Demandes</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sp_widget_9e09273d74b445889cf3b40939d7b119</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:37</sys_updated_on>
+        <template><![CDATA[<div class="suivi-container">
+  <!-- Breadcrumb -->
+  <nav class="suivi-breadcrumb" aria-label="Fil d'Ariane">
+    <ol>
+      <li><a href="?id=x_snc_habitat_familles_home">Accueil</a></li>
+      <li aria-current="page">Suivi de mes dossiers</li>
+    </ol>
+  </nav>
+
+  <!-- Header -->
+  <div class="suivi-header">
+    <span class="suivi-tag">TRACKERS · SUIVI TRANSVERSE</span>
+    <h1 class="suivi-title">Suivi de mes dossiers</h1>
+    <p class="suivi-description">Rattachés à votre compte usager (DLNUF). Cliquez sur un dossier pour afficher le détail des états.</p>
+  </div>
+
+  <!-- Empty state -->
+  <div class="suivi-empty" ng-if="!c.data.dossiers.length">
+    <p>Vous n'avez aucun dossier en cours.</p>
+    <a href="?id=x_snc_habitat_familles_mobilite" class="suivi-btn suivi-btn--primary">Nouvelle demande de mobilité</a>
+  </div>
+
+  <!-- Dossier list -->
+  <div class="suivi-dossiers" ng-if="c.data.dossiers.length">
+    <div ng-repeat="dossier in c.data.dossiers" class="suivi-dossier" ng-class="{'suivi-dossier--expanded': c.isExpanded(dossier)}">
+
+      <!-- Card (collapsed view) -->
+      <div class="suivi-dossier__card" ng-click="c.toggleDossier(dossier)">
+        <div class="suivi-dossier__main">
+          <h3 class="suivi-dossier__titre">{{dossier.titre}}</h3>
+          <p class="suivi-dossier__meta">Déposé le {{dossier.created_on}} · {{dossier.site_depart}} → {{dossier.site_arrivee}}</p>
+        </div>
+        <div class="suivi-dossier__badges">
+          <span class="suivi-badge suivi-badge--acteur">{{dossier.acteur_badge}}</span>
+          <span class="suivi-badge suivi-badge--statut">{{dossier.statut_badge}}</span>
+        </div>
+        <span class="suivi-dossier__chevron" ng-class="{'suivi-dossier__chevron--open': c.isExpanded(dossier)}" aria-hidden="true">›</span>
+      </div>
+
+      <!-- Detail (expanded view with timeline) -->
+      <div class="suivi-dossier__detail" ng-if="c.isExpanded(dossier)">
+        <div class="suivi-detail-header">
+          <h4 class="suivi-detail-title">{{dossier.titre}}</h4>
+          <p class="suivi-detail-subtitle">Acteur en charge : {{dossier.acteur || dossier.acteur_badge}} · Étape {{dossier.etape_courante}} sur {{dossier.nb_etapes}}.</p>
+        </div>
+
+        <!-- Timeline -->
+        <div class="suivi-timeline">
+          <div ng-repeat="etape in dossier.etapes" class="suivi-timeline__item" ng-class="'suivi-timeline__item--' + etape.status">
+            <div class="suivi-timeline__dot"></div>
+            <div class="suivi-timeline__content">
+              <span class="suivi-timeline__title">{{etape.title}}</span>
+              <span class="suivi-timeline__badge" ng-if="etape.badge">{{etape.badge}}</span>
+              <span class="suivi-timeline__desc">{{etape.desc}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+]]></template>
+    </sp_widget>
+</record_update>

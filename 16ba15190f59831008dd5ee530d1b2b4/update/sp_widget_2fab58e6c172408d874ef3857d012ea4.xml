@@ -1,0 +1,2738 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope) {
+    var c = this;
+
+    // State
+    c.role = c.data.account ? c.data.account.profile : 'pfmd';
+    c.queue = '';
+    c.queueLabel = '';
+    c.tab = 'tous';
+    c.selId = null;
+    c.detail = null;
+    c.searchQ = '';
+    c.sortBy = 'priority';
+    c.dtab = 'synthese';
+    c.noteText = '';
+    c.items = [];
+    c.loading = false;
+    c.loadingDetail = false;
+    c.dashKpis = null;
+
+    c.tabs = [
+        { key: 'tous', label: 'Tous' },
+        { key: 'nouveau', label: 'Nouveaux' },
+        { key: 'encours', label: 'En cours' },
+        { key: 'attente', label: 'En attente' },
+        { key: 'cloture', label: 'Clôturés' }
+    ];
+
+    c.fluxLabels = {
+        'pfmd': 'PFMD',
+        'logement_atrium': 'DTIE Atrium',
+        'mut_actions': "Mut'Actions",
+        'defense_mobilite': 'Défense Mobilité',
+        'sca': 'SCA',
+        'pcd_om': 'PCD OM',
+        'bcc': 'BCC'
+    };
+
+    // Init
+    function init() {
+        if (c.data.queues && c.data.queues.length > 0) {
+            var firstQueue = c.data.queues[0];
+            if (firstQueue.key === '__dash' && c.data.queues.length > 1) {
+                c.setQueue(c.data.queues[0].key);
+            } else {
+                c.setQueue(firstQueue.key);
+            }
+        }
+    }
+
+    // Methods
+    c.setQueue = function(q) {
+        c.queue = q;
+        c.selId = null;
+        c.detail = null;
+        c.tab = 'tous';
+        c.searchQ = '';
+
+        // Update label
+        for (var i = 0; i < c.data.queues.length; i++) {
+            if (c.data.queues[i].key === q) {
+                c.queueLabel = c.data.queues[i].label;
+                break;
+            }
+        }
+
+        if (q === '__dash') {
+            c.loadDashboard();
+        } else {
+            c.dashKpis = null;
+            c.loadList();
+        }
+    };
+
+    c.setTab = function(t) {
+        c.tab = t;
+        c.selId = null;
+        c.detail = null;
+        c.loadList();
+    };
+
+    c.select = function(id) {
+        c.selId = id;
+        c.dtab = 'synthese';
+        c.loadDetail(id);
+    };
+
+    c.setDtab = function(t) {
+        c.dtab = t;
+    };
+
+    c.toggleSort = function() {
+        c.sortBy = (c.sortBy === 'priority') ? 'recent' : 'priority';
+        c.loadList();
+    };
+
+    // ─── Filtres rapides ───
+    c.quickFilter = '';
+
+    c.setQuickFilter = function(filter) {
+        if (c.quickFilter === filter) {
+            c.quickFilter = '';
+        } else {
+            c.quickFilter = filter;
+        }
+        c.loadList();
+    };
+
+    // ─── Actions en masse ───
+    c.bulkMode = false;
+    c.selectedItems = {};
+    c.selectedCount = 0;
+
+    c.toggleBulkMode = function() {
+        c.bulkMode = !c.bulkMode;
+        c.selectedItems = {};
+        c.selectedCount = 0;
+    };
+
+    c.toggleSelect = function(sysId) {
+        if (c.selectedItems[sysId]) {
+            delete c.selectedItems[sysId];
+        } else {
+            c.selectedItems[sysId] = true;
+        }
+        c.selectedCount = Object.keys(c.selectedItems).length;
+    };
+
+    c.selectAll = function() {
+        if (c.selectedCount === c.items.length) {
+            c.selectedItems = {};
+            c.selectedCount = 0;
+        } else {
+            c.selectedItems = {};
+            for (var i = 0; i < c.items.length; i++) {
+                c.selectedItems[c.items[i].sys_id] = true;
+            }
+            c.selectedCount = c.items.length;
+        }
+    };
+
+    c.bulkAssignToMe = function() {
+        var ids = Object.keys(c.selectedItems);
+        if (ids.length === 0) return;
+        c.server.get({ action: 'bulkAssign', ids: ids.join(',') }).then(function() {
+            c.toggleBulkMode();
+            c.loadList();
+        });
+    };
+
+    c.bulkSetPriority = function(p) {
+        var ids = Object.keys(c.selectedItems);
+        if (ids.length === 0) return;
+        c.server.get({ action: 'bulkPriority', ids: ids.join(','), priority: p }).then(function() {
+            c.toggleBulkMode();
+            c.loadList();
+        });
+    };
+
+    c.bulkClose = function() {
+        var ids = Object.keys(c.selectedItems);
+        if (ids.length === 0) return;
+        c.server.get({ action: 'bulkClose', ids: ids.join(',') }).then(function() {
+            c.toggleBulkMode();
+            c.loadList();
+        });
+    };
+
+    c.doSearch = function() {
+        c.loadList();
+    };
+
+    c.clearSearch = function() {
+        c.searchQ = '';
+        c.loadList();
+    };
+
+    c.doAction = function(action) {
+        if (!c.selId) return;
+
+        var params = { action: action, id: c.selId };
+
+        if (action === 'setState') {
+            params.state = '3'; // Demander des compléments = En attente
+        } else if (action === 'close') {
+            params.action = 'setState';
+            params.state = '7';
+        }
+
+        c.server.get(params).then(function(response) {
+            if (response.data.detail) {
+                c.detail = response.data.detail;
+            }
+            c.loadList();
+        });
+    };
+
+    // ─── Assignation à personne ou groupe ───
+    c.showAssignPanel = false;
+    c.assignMode = 'user'; // 'user' ou 'group'
+    c.assignSearchQ = '';
+    c.assignResults = [];
+    c.assignSearching = false;
+
+    c.openAssignPanel = function() {
+        c.showAssignPanel = true;
+        c.assignMode = 'user';
+        c.assignSearchQ = '';
+        c.assignResults = [];
+    };
+
+    c.closeAssignPanel = function() {
+        c.showAssignPanel = false;
+        c.assignSearchQ = '';
+        c.assignResults = [];
+    };
+
+    c.setAssignMode = function(mode) {
+        c.assignMode = mode;
+        c.assignSearchQ = '';
+        c.assignResults = [];
+    };
+
+    c.searchAssign = function() {
+        if (!c.assignSearchQ || c.assignSearchQ.length < 2) {
+            c.assignResults = [];
+            return;
+        }
+        c.assignSearching = true;
+        var action = c.assignMode === 'user' ? 'searchUsers' : 'searchGroups';
+        c.server.get({ action: action, q: c.assignSearchQ }).then(function(r) {
+            if (c.assignMode === 'user') {
+                c.assignResults = r.data.userResults || [];
+            } else {
+                c.assignResults = r.data.groupResults || [];
+            }
+            c.assignSearching = false;
+        });
+    };
+
+    c.assignTo = function(item) {
+        if (!c.selId) return;
+        var params = { action: 'assign', id: c.selId };
+        if (c.assignMode === 'user') {
+            params.user_id = item.sys_id;
+        } else {
+            params.group_id = item.sys_id;
+        }
+        c.server.get(params).then(function(response) {
+            if (response.data.detail) {
+                c.detail = response.data.detail;
+            }
+            c.showAssignPanel = false;
+            c.assignSearchQ = '';
+            c.assignResults = [];
+            c.loadList();
+        });
+    };
+
+    c.assignToMe = function() {
+        if (!c.selId) return;
+        c.server.get({ action: 'assign', id: c.selId }).then(function(response) {
+            if (response.data.detail) {
+                c.detail = response.data.detail;
+            }
+            c.showAssignPanel = false;
+            c.loadList();
+        });
+    };
+
+    c.handleAssignKeypress = function($event) {
+        if ($event.keyCode === 13) {
+            c.searchAssign();
+        }
+    };
+
+    c.addNote = function() {
+        if (!c.selId || !c.noteText.trim()) return;
+
+        c.server.get({
+            action: 'addNote',
+            id: c.selId,
+            text: c.noteText
+        }).then(function(response) {
+            c.noteText = '';
+            if (response.data.detail) {
+                c.detail = response.data.detail;
+            }
+        });
+    };
+
+    c.loadList = function() {
+        c.loading = true;
+        c.server.get({
+            action: 'list',
+            team: c.queue,
+            tab: c.tab,
+            q: c.searchQ,
+            sortBy: c.sortBy,
+            quickFilter: c.quickFilter
+        }).then(function(response) {
+            c.items = response.data.items || [];
+            c.loading = false;
+        });
+    };
+
+    c.loadDetail = function(id) {
+        c.loadingDetail = true;
+        c.server.get({
+            action: 'detail',
+            id: id
+        }).then(function(response) {
+            c.detail = response.data.detail;
+            c.loadingDetail = false;
+        });
+    };
+
+    c.loadDashboard = function() {
+        c.loading = true;
+        c.items = [];
+        c.server.get({
+            action: 'dashboard'
+        }).then(function(response) {
+            c.dashKpis = response.data.kpis;
+            c.loading = false;
+        });
+    };
+
+    c.getSlaClass = function(status) {
+        if (status === 'late') return 'agent-sla--late';
+        if (status === 'warn') return 'agent-sla--warn';
+        return 'agent-sla--ok';
+    };
+
+    c.getSlaLabel = function(status) {
+        if (status === 'late') return 'Retard';
+        if (status === 'warn') return 'Vigilance';
+        return 'OK';
+    };
+
+    c.getEtapeClass = function(etape) {
+        if (etape.status === 'done') return 'agent-etape--done';
+        if (etape.status === 'current') return 'agent-etape--current';
+        return 'agent-etape--pending';
+    };
+
+    c.getPieceStatusClass = function(statut) {
+        if (statut === 'valide' || statut === 'validé') return 'agent-piece--valide';
+        if (statut === 'refuse' || statut === 'refusé') return 'agent-piece--refuse';
+        if (statut === 'en_attente' || statut === 'en attente') return 'agent-piece--attente';
+        return 'agent-piece--soumis';
+    };
+
+    c.handleSearchKeypress = function($event) {
+        if ($event.keyCode === 13) {
+            c.doSearch();
+        }
+    };
+
+    c.getProgressPercent = function() {
+        if (!c.detail || !c.detail.nb_etapes_total) return 0;
+        return Math.round((c.detail.etape_courante_num / c.detail.nb_etapes_total) * 100);
+    };
+
+    init();
+};
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ==========================================================================
+   Espace de traitement – DSFR-compliant back-office widget
+   Design System: DSFR (Système de Design de l'État français)
+   Colors: Primary #000091, Accent #E1000F, Text #161616, BG #F5F5FE, Border #E5E5E5
+   Font: Marianne, Arial, sans-serif
+   ========================================================================== */
+
+/* --- Base &amp; Variables --- */
+.agent-app {
+  --agent-primary: #000091;
+  --agent-accent: #E1000F;
+  --agent-text: #161616;
+  --agent-text-secondary: #666666;
+  --agent-bg: #F5F5FE;
+  --agent-bg-white: #FFFFFF;
+  --agent-border: #E5E5E5;
+  --agent-border-active: #000091;
+  --agent-success: #18753C;
+  --agent-warning: #B34000;
+  --agent-danger: #CE0500;
+  --agent-info: #0063CB;
+  --agent-nav-width: 240px;
+  --agent-list-width: 420px;
+  --agent-header-height: 64px;
+  --agent-radius: 0;
+  --agent-font: 'Marianne', Arial, sans-serif;
+
+  font-family: var(--agent-font);
+  color: var(--agent-text);
+  font-size: 13px;
+  line-height: 1.5;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--agent-bg);
+}
+
+/* --- Header --- */
+.agent-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--agent-header-height);
+  padding: 0 16px;
+  background: var(--agent-bg-white);
+  border-bottom: 2px solid var(--agent-primary);
+  flex-shrink: 0;
+}
+
+.agent-header__marque {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.agent-header__rf {
+  border-left: 3px solid var(--agent-primary);
+  border-right: 3px solid var(--agent-accent);
+  padding: 2px 8px;
+}
+
+.agent-header__rf-text {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--agent-primary);
+}
+
+.agent-header__title {
+  display: flex;
+  flex-direction: column;
+}
+
+.agent-header__h1 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--agent-primary);
+}
+
+.agent-header__subtitle {
+  font-size: 11px;
+  color: var(--agent-text-secondary);
+}
+
+.agent-header__tools {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.agent-header__search {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.agent-header__search-input {
+  width: 240px;
+  height: 32px;
+  padding: 0 32px 0 10px;
+  border: 1px solid var(--agent-border);
+  border-radius: var(--agent-radius);
+  font-family: var(--agent-font);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.agent-header__search-input:focus {
+  border-color: var(--agent-primary);
+}
+
+.agent-header__search-btn {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--agent-primary);
+  font-size: 16px;
+}
+
+.agent-header__search-clear {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--agent-text-secondary);
+  font-size: 12px;
+}
+
+.agent-header__profile {
+  padding: 4px 10px;
+  background: var(--agent-bg);
+  border: 1px solid var(--agent-border);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--agent-primary);
+}
+
+.agent-header__user-name {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* --- Body (3-column layout) --- */
+.agent-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* --- Left Nav --- */
+.agent-nav {
+  width: var(--agent-nav-width);
+  min-width: var(--agent-nav-width);
+  background: var(--agent-bg-white);
+  border-right: 1px solid var(--agent-border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.agent-nav__title {
+  padding: 16px 16px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--agent-text-secondary);
+}
+
+.agent-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.agent-nav__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background-color 0.15s, border-color 0.15s;
+  font-size: 13px;
+}
+
+.agent-nav__item:hover {
+  background: var(--agent-bg);
+}
+
+.agent-nav__item--active {
+  background: var(--agent-bg);
+  border-left-color: var(--agent-primary);
+  font-weight: 600;
+  color: var(--agent-primary);
+}
+
+.agent-nav__item-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agent-nav__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  background: var(--agent-primary);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--agent-radius);
+}
+
+.agent-nav__legend {
+  margin-top: auto;
+  padding: 16px;
+  border-top: 1px solid var(--agent-border);
+}
+
+.agent-nav__legend-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--agent-text-secondary);
+  margin-bottom: 8px;
+}
+
+.agent-nav__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--agent-text-secondary);
+  margin-bottom: 4px;
+}
+
+/* --- SLA Indicator --- */
+.agent-sla {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.agent-sla--ok {
+  background: var(--agent-success);
+}
+
+.agent-sla--warn {
+  background: var(--agent-warning);
+}
+
+.agent-sla--late {
+  background: var(--agent-danger);
+}
+
+/* --- Center List --- */
+.agent-list {
+  width: var(--agent-list-width);
+  min-width: var(--agent-list-width);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--agent-border);
+  background: var(--agent-bg-white);
+  overflow: hidden;
+}
+
+.agent-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--agent-border);
+}
+
+.agent-list__title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--agent-primary);
+}
+
+.agent-list__count {
+  font-size: 11px;
+  color: var(--agent-text-secondary);
+}
+
+.agent-list__tabs {
+  display: flex;
+  border-bottom: 1px solid var(--agent-border);
+  padding: 0 8px;
+  gap: 0;
+}
+
+.agent-list__tab {
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--agent-font);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--agent-text-secondary);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.agent-list__tab:hover {
+  color: var(--agent-text);
+}
+
+.agent-list__tab--active {
+  color: var(--agent-primary);
+  border-bottom-color: var(--agent-primary);
+  font-weight: 600;
+}
+
+.agent-list__sort {
+  display: flex;
+  align-items: center;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--agent-border);
+}
+
+.agent-list__sort-btn {
+  background: none;
+  border: none;
+  font-family: var(--agent-font);
+  font-size: 11px;
+  color: var(--agent-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.agent-list__sort-btn:hover {
+  color: var(--agent-primary);
+}
+
+.agent-list__items {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.agent-list__item {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--agent-border);
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.agent-list__item:hover {
+  background: var(--agent-bg);
+}
+
+.agent-list__item--selected {
+  background: #E8E8FE;
+  border-left: 3px solid var(--agent-primary);
+}
+
+.agent-list__item-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.agent-list__item-number {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--agent-primary);
+}
+
+.agent-list__item-title {
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agent-list__item-meta {
+  margin-bottom: 3px;
+}
+
+.agent-list__item-trajet {
+  font-size: 11px;
+  color: var(--agent-text-secondary);
+}
+
+.agent-list__item-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--agent-text-secondary);
+}
+
+.agent-list__item-assigned {
+  margin-left: auto;
+}
+
+.agent-list__item-age {
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.agent-list__empty,
+.agent-list__loading {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--agent-text-secondary);
+  font-size: 13px;
+}
+
+/* --- Badges --- */
+.agent-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border: 1px solid;
+  border-radius: var(--agent-radius);
+  white-space: nowrap;
+}
+
+.agent-badge--nouveau {
+  color: var(--agent-info);
+  border-color: var(--agent-info);
+  background: #F0F5FF;
+}
+
+.agent-badge--encours {
+  color: var(--agent-primary);
+  border-color: var(--agent-primary);
+  background: #EBEBFF;
+}
+
+.agent-badge--attente {
+  color: var(--agent-warning);
+  border-color: var(--agent-warning);
+  background: #FFF4ED;
+}
+
+.agent-badge--cloture {
+  color: var(--agent-success);
+  border-color: var(--agent-success);
+  background: #EDFBF0;
+}
+
+.agent-badge--acteur {
+  color: var(--agent-text-secondary);
+  border-color: var(--agent-border);
+  background: var(--agent-bg);
+  font-size: 9px;
+}
+
+.agent-badge--piece {
+  font-size: 9px;
+  padding: 1px 6px;
+}
+
+/* --- Right Detail Panel --- */
+.agent-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--agent-bg-white);
+}
+
+.agent-detail--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agent-detail__empty-state {
+  text-align: center;
+  color: var(--agent-text-secondary);
+}
+
+.agent-detail__empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.agent-detail__empty-text {
+  font-size: 14px;
+}
+
+.agent-detail__header {
+  padding: 16px;
+  border-bottom: 1px solid var(--agent-border);
+}
+
+.agent-detail__header-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.agent-detail__number {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--agent-primary);
+}
+
+.agent-detail__header-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.agent-detail__header-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--agent-text-secondary);
+}
+
+.agent-detail__progress {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.agent-detail__progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--agent-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.agent-detail__progress-fill {
+  height: 100%;
+  background: var(--agent-primary);
+  transition: width 0.3s;
+}
+
+.agent-detail__progress-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--agent-primary);
+  white-space: nowrap;
+}
+
+/* --- Action Buttons --- */
+.agent-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--agent-border);
+}
+
+.agent-btn {
+  padding: 6px 14px;
+  font-family: var(--agent-font);
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid;
+  border-radius: var(--agent-radius);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.agent-btn--primary {
+  background: var(--agent-primary);
+  border-color: var(--agent-primary);
+  color: #FFFFFF;
+}
+
+.agent-btn--primary:hover {
+  background: #1212FF;
+}
+
+.agent-btn--secondary {
+  background: var(--agent-bg-white);
+  border-color: var(--agent-primary);
+  color: var(--agent-primary);
+}
+
+.agent-btn--secondary:hover {
+  background: var(--agent-bg);
+}
+
+.agent-btn--warning {
+  background: var(--agent-bg-white);
+  border-color: var(--agent-warning);
+  color: var(--agent-warning);
+}
+
+.agent-btn--warning:hover {
+  background: #FFF4ED;
+}
+
+.agent-btn--danger {
+  background: var(--agent-bg-white);
+  border-color: var(--agent-danger);
+  color: var(--agent-danger);
+}
+
+.agent-btn--danger:hover {
+  background: #FFF0F0;
+}
+
+.agent-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- Detail Tabs --- */
+.agent-detail__tabs {
+  display: flex;
+  border-bottom: 1px solid var(--agent-border);
+  padding: 0 8px;
+}
+
+.agent-detail__tab {
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--agent-font);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--agent-text-secondary);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.agent-detail__tab:hover {
+  color: var(--agent-text);
+}
+
+.agent-detail__tab--active {
+  color: var(--agent-primary);
+  border-bottom-color: var(--agent-primary);
+  font-weight: 600;
+}
+
+/* --- Detail Content --- */
+.agent-detail__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.agent-detail__section {
+  margin-bottom: 20px;
+}
+
+.agent-detail__section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--agent-text-secondary);
+  margin: 0 0 12px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--agent-border);
+}
+
+.agent-detail__field {
+  display: flex;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.agent-detail__field-label {
+  width: 140px;
+  min-width: 140px;
+  font-weight: 600;
+  color: var(--agent-text-secondary);
+}
+
+.agent-detail__field-value {
+  flex: 1;
+  color: var(--agent-text);
+}
+
+.agent-detail__empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--agent-text-secondary);
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* --- Etapes (Cycle de vie) --- */
+.agent-etapes {
+  position: relative;
+  padding-left: 20px;
+}
+
+.agent-etapes::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--agent-border);
+}
+
+.agent-etape {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  position: relative;
+}
+
+.agent-etape__marker {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--agent-border);
+  background: var(--agent-bg-white);
+  font-size: 11px;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.agent-etape--done .agent-etape__marker {
+  border-color: var(--agent-success);
+  background: var(--agent-success);
+  color: #FFFFFF;
+}
+
+.agent-etape--current .agent-etape__marker {
+  border-color: var(--agent-primary);
+  background: var(--agent-primary);
+  color: #FFFFFF;
+}
+
+.agent-etape--pending .agent-etape__marker {
+  border-color: var(--agent-border);
+  color: var(--agent-text-secondary);
+}
+
+.agent-etape__content {
+  display: flex;
+  flex-direction: column;
+  padding-top: 4px;
+}
+
+.agent-etape__label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.agent-etape--done .agent-etape__label {
+  color: var(--agent-success);
+}
+
+.agent-etape--current .agent-etape__label {
+  color: var(--agent-primary);
+  font-weight: 700;
+}
+
+.agent-etape__status {
+  font-size: 10px;
+  color: var(--agent-text-secondary);
+  margin-top: 2px;
+}
+
+/* --- Pieces justificatives --- */
+.agent-pieces {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.agent-piece {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid var(--agent-border);
+  border-left: 3px solid var(--agent-border);
+}
+
+.agent-piece--valide {
+  border-left-color: var(--agent-success);
+}
+
+.agent-piece--refuse {
+  border-left-color: var(--agent-danger);
+}
+
+.agent-piece--attente {
+  border-left-color: var(--agent-warning);
+}
+
+.agent-piece--soumis {
+  border-left-color: var(--agent-info);
+}
+
+.agent-piece__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agent-piece__nom {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.agent-piece__type {
+  font-size: 11px;
+  color: var(--agent-text-secondary);
+}
+
+.agent-piece__obligatoire {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--agent-accent);
+  padding: 1px 4px;
+  border: 1px solid var(--agent-accent);
+}
+
+/* --- Activity / Notes --- */
+.agent-note-form {
+  margin-bottom: 16px;
+}
+
+.agent-note-form__input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--agent-border);
+  border-radius: var(--agent-radius);
+  font-family: var(--agent-font);
+  font-size: 12px;
+  resize: vertical;
+  min-height: 60px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.agent-note-form__input:focus {
+  border-color: var(--agent-primary);
+}
+
+.agent-note-form__btn {
+  margin-top: 8px;
+}
+
+.agent-activity {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.agent-activity__item {
+  padding: 10px 12px;
+  border: 1px solid var(--agent-border);
+  border-left: 3px solid var(--agent-primary);
+}
+
+.agent-activity__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.agent-activity__user {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--agent-primary);
+}
+
+.agent-activity__date {
+  font-size: 10px;
+  color: var(--agent-text-secondary);
+}
+
+.agent-activity__text {
+  font-size: 12px;
+  color: var(--agent-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* --- Dashboard --- */
+.agent-dashboard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  background: var(--agent-bg);
+}
+
+.agent-dashboard__header {
+  margin-bottom: 24px;
+}
+
+.agent-dashboard__title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--agent-primary);
+}
+
+.agent-dashboard__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.agent-kpi {
+  background: var(--agent-bg-white);
+  border: 1px solid var(--agent-border);
+  border-top: 4px solid var(--agent-primary);
+  padding: 20px;
+  text-align: center;
+}
+
+.agent-kpi--danger {
+  border-top-color: var(--agent-danger);
+}
+
+.agent-kpi--warning {
+  border-top-color: var(--agent-warning);
+}
+
+.agent-kpi--success {
+  border-top-color: var(--agent-success);
+}
+
+.agent-kpi__value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--agent-primary);
+  margin-bottom: 4px;
+}
+
+.agent-kpi--danger .agent-kpi__value {
+  color: var(--agent-danger);
+}
+
+.agent-kpi--warning .agent-kpi__value {
+  color: var(--agent-warning);
+}
+
+.agent-kpi--success .agent-kpi__value {
+  color: var(--agent-success);
+}
+
+.agent-kpi__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--agent-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.agent-dashboard__loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--agent-text-secondary);
+}
+
+/* --- Icons (minimal inline) --- */
+.agent-icon {
+  font-style: normal;
+}
+
+.agent-icon--search {
+  font-size: 14px;
+}
+
+.agent-icon--sort {
+  font-size: 12px;
+}
+
+/* --- Scrollbar styling --- */
+.agent-nav::-webkit-scrollbar,
+.agent-list__items::-webkit-scrollbar,
+.agent-detail__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.agent-nav::-webkit-scrollbar-track,
+.agent-list__items::-webkit-scrollbar-track,
+.agent-detail__content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.agent-nav::-webkit-scrollbar-thumb,
+.agent-list__items::-webkit-scrollbar-thumb,
+.agent-detail__content::-webkit-scrollbar-thumb {
+  background: var(--agent-border);
+  border-radius: 3px;
+}
+
+.agent-nav::-webkit-scrollbar-thumb:hover,
+.agent-list__items::-webkit-scrollbar-thumb:hover,
+.agent-detail__content::-webkit-scrollbar-thumb:hover {
+  background: #CCCCCC;
+}
+
+/* --- Responsive adjustments for smaller screens --- */
+@media (max-width: 1200px) {
+  .agent-app {
+    --agent-nav-width: 200px;
+    --agent-list-width: 360px;
+  }
+}
+
+@media (max-width: 900px) {
+  .agent-app {
+    --agent-nav-width: 180px;
+    --agent-list-width: 300px;
+  }
+  
+  .agent-header__search-input {
+    width: 180px;
+  }
+}
+
+/* ========================================================================
+   MOBILE — Optimisations tactiles (&lt; 768px)
+   ======================================================================== */
+@media (max-width: 768px) {
+  .agent-app {
+    --agent-nav-width: 100%;
+    --agent-list-width: 100%;
+    --agent-header-height: 56px;
+    font-size: 14px;
+  }
+
+  /* Header mobile compact */
+  .agent-header {
+    padding: 0 12px;
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 56px;
+    gap: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .agent-header__search {
+    order: 3;
+    width: 100%;
+  }
+
+  .agent-header__search-input {
+    width: 100%;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .agent-header__tools {
+    gap: 8px;
+  }
+
+  .agent-header__profile {
+    display: none;
+  }
+
+  .agent-header__rf {
+    padding: 2px 6px;
+  }
+
+  .agent-header__h1 {
+    font-size: 14px;
+  }
+
+  /* Layout stacked : nav → list → detail en colonne */
+  .agent-body {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  /* Nav horizontale scrollable */
+  .agent-nav {
+    width: 100%;
+    min-width: 100%;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid var(--agent-border);
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .agent-nav__title {
+    display: none;
+  }
+
+  .agent-nav__list {
+    display: flex;
+    flex-direction: row;
+    padding: 0 8px;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .agent-nav__item {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    padding: 12px 14px;
+    font-size: 13px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .agent-nav__item--active {
+    border-left-color: transparent;
+    border-bottom-color: var(--agent-primary);
+  }
+
+  .agent-nav__badge {
+    min-width: 20px;
+    height: 18px;
+    font-size: 10px;
+  }
+
+  .agent-nav__legend {
+    display: none;
+  }
+
+  /* Liste pleine largeur */
+  .agent-list {
+    width: 100%;
+    min-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--agent-border);
+    max-height: 50vh;
+  }
+
+  .agent-list__tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .agent-list__tab {
+    padding: 12px 14px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+
+  .agent-list__item {
+    padding: 14px 16px;
+    min-height: 60px;
+  }
+
+  .agent-list__item-title {
+    font-size: 14px;
+  }
+
+  .agent-list__item-bottom {
+    font-size: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* Détail pleine largeur */
+  .agent-detail {
+    min-height: 60vh;
+  }
+
+  .agent-detail__header {
+    padding: 14px 12px;
+  }
+
+  .agent-detail__number {
+    font-size: 15px;
+  }
+
+  .agent-detail__header-meta {
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .agent-detail__content {
+    padding: 12px;
+  }
+
+  .agent-detail__field {
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 12px;
+  }
+
+  .agent-detail__field-label {
+    width: auto;
+    min-width: auto;
+    font-size: 11px;
+  }
+
+  .agent-detail__field-value {
+    font-size: 14px;
+  }
+
+  /* Boutons d'action tactiles (min 44px hauteur) */
+  .agent-detail__actions {
+    padding: 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .agent-btn {
+    padding: 12px 16px;
+    font-size: 13px;
+    min-height: 44px;
+    flex: 1 1 calc(50% - 4px);
+    text-align: center;
+    justify-content: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Panneau assignation mobile */
+  .agent-assign-panel {
+    padding: 12px;
+  }
+
+  .agent-assign-panel__search input {
+    height: 44px;
+    font-size: 14px;
+  }
+
+  .agent-assign-panel__result {
+    padding: 12px;
+    min-height: 44px;
+  }
+
+  /* Tabs détail */
+  .agent-detail__tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .agent-detail__tab {
+    padding: 12px 14px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+
+  /* KPIs dashboard */
+  .agent-dashboard {
+    padding: 16px 12px;
+  }
+
+  .agent-dashboard__kpis {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .agent-kpi {
+    padding: 14px 12px;
+  }
+
+  .agent-kpi__value {
+    font-size: 28px;
+  }
+
+  /* Notes */
+  .agent-note-form__input {
+    min-height: 80px;
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  /* Étapes */
+  .agent-etape {
+    padding: 10px 0;
+  }
+
+  .agent-etape__label {
+    font-size: 13px;
+  }
+}
+
+/* ========================================================================
+   MOBILE SMALL (&lt; 480px) — Téléphones compacts
+   ======================================================================== */
+@media (max-width: 480px) {
+  .agent-header__marque {
+    gap: 8px;
+  }
+
+  .agent-header__h1 {
+    font-size: 12px;
+  }
+
+  .agent-header__subtitle {
+    display: none;
+  }
+
+  .agent-btn {
+    flex: 1 1 100%;
+    font-size: 14px;
+    padding: 14px 16px;
+  }
+
+  .agent-dashboard__kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-list {
+    max-height: 40vh;
+  }
+
+  .agent-list__item-number {
+    font-size: 13px;
+  }
+
+  .agent-detail__section-title {
+    font-size: 13px;
+  }
+}
+
+/* Assignment panel */
+.agent-assign-panel { background: #f5f5fe; border: 1px solid #e5e5e5; border-radius: 4px; padding: 16px; margin-top: 12px; }
+.agent-assign-panel__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.agent-assign-panel__header h4 { margin: 0; font-size: 14px; font-weight: 600; color: #161616; }
+.agent-assign-panel__tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+.agent-assign-panel__search { display: flex; gap: 8px; margin-bottom: 12px; }
+.agent-assign-panel__search input { flex: 1; }
+.agent-assign-panel__results { max-height: 200px; overflow-y: auto; }
+.agent-assign-panel__result { display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #e5e5e5; transition: background 0.15s; }
+.agent-assign-panel__result:hover { background: #e5e5fe; }
+.agent-assign-panel__name { font-weight: 500; color: #161616; }
+.agent-assign-panel__meta { font-size: 12px; color: #666; margin-left: auto; }
+.agent-detail__actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 0; border-top: 1px solid #e5e5e5; margin-top: 16px; }
+
+/* ═══ Filtres rapides ═══ */
+.agent-list__quickfilters { display: flex; gap: 6px; padding: 8px 16px; border-bottom: 1px solid var(--agent-border); flex-wrap: wrap; }
+.agent-qf { padding: 4px 10px; font-family: var(--agent-font); font-size: 11px; font-weight: 600; border: 1px solid var(--agent-border); background: var(--agent-bg-white); color: var(--agent-text-secondary); cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.agent-qf:hover { border-color: var(--agent-primary); color: var(--agent-primary); }
+.agent-qf--active { background: var(--agent-primary); border-color: var(--agent-primary); color: #FFFFFF; }
+.agent-qf--danger.agent-qf--active { background: var(--agent-danger); border-color: var(--agent-danger); }
+
+/* ═══ Actions en masse ═══ */
+.agent-bulk { padding: 8px 16px; background: #EBEBFF; border-bottom: 1px solid var(--agent-border); }
+.agent-bulk__header { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.agent-bulk__selectall { font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; margin: 0; }
+.agent-bulk__count { font-size: 11px; color: var(--agent-primary); font-weight: 700; }
+.agent-bulk__actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.agent-bulk__checkbox { margin-right: 6px; cursor: pointer; }
+.agent-list__item--selected-bulk { background: #E8E8FE; }
+
+@media (max-width: 768px) {
+  .agent-list__quickfilters { padding: 8px 12px; }
+  .agent-qf { padding: 8px 12px; font-size: 12px; min-height: 36px; }
+  .agent-bulk__actions { gap: 4px; }
+  .agent-bulk__actions .btn { min-height: 36px; }
+}
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>x_snc_habitat_agent</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+}]]></link>
+        <name>Espace de traitement agent (DSFR)</name>
+        <option_schema>[{"name":"flux","label":"Flux métier","type":"string","default_value":"pfmd","section":"Data"},{"name":"file_label","label":"Libellé de la file","type":"string","default_value":"PFMD","section":"Presentation"}]</option_schema>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+    var TABLE_DOSSIER = 'x_snc_habitat_dossier_metier';
+    var TABLE_DEMANDE = 'x_snc_habitat_demande_mobilite';
+    var TABLE_PIECE = 'x_snc_habitat_piece_justificative';
+
+    var STATE_MAP = {
+        '1': 'Nouveau',
+        '2': 'En cours',
+        '3': 'Attente usager',
+        '7': 'Clôturé'
+    };
+
+    var STATE_CLASS = {
+        '1': 'nouveau',
+        '2': 'encours',
+        '3': 'attente',
+        '7': 'cloture'
+    };
+
+    var FLUX_LABELS = {
+        'pfmd': 'PFMD',
+        'logement_atrium': 'DTIE Atrium',
+        'mut_actions': "Mut'Actions",
+        'defense_mobilite': 'Défense Mobilité',
+        'sca': 'SCA',
+        'pcd_om': 'PCD OM',
+        'bcc': 'BCC'
+    };
+
+    var TAB_STATE_MAP = {
+        'nouveau': '1',
+        'encours': '2',
+        'attente': '3',
+        'cloture': '7'
+    };
+
+    function getUserProfile() {
+        var userId = gs.getUserID();
+        var userName = gs.getUserName();
+        var profile = 'pfmd';
+
+        var grMember = new GlideRecord('sys_user_grmember');
+        grMember.addQuery('user', userId);
+        grMember.query();
+        while (grMember.next()) {
+            var groupName = grMember.group.name.toString();
+            if (groupName.indexOf('PFMD') > -1) { profile = 'pfmd'; break; }
+            if (groupName.indexOf('Atrium') > -1) { profile = 'atrium'; break; }
+            if (groupName.indexOf("Mut'Actions") > -1) { profile = 'mutactions'; break; }
+            if (groupName.indexOf('Défense Mobilité') > -1) { profile = 'dm'; break; }
+            if (groupName.indexOf('COMBDD') > -1 || groupName.indexOf('superviseur') > -1) { profile = 'superviseur'; break; }
+        }
+
+        return {
+            user_id: userId,
+            user_name: userName,
+            profile: profile
+        };
+    }
+
+    function getQueues(profile) {
+        var queues = [];
+        var gr = new GlideAggregate(TABLE_DOSSIER);
+        gr.addQuery('state', 'IN', '1,2,3');
+        gr.addAggregate('COUNT');
+        gr.groupBy('type_flux');
+        gr.query();
+
+        var counts = {};
+        while (gr.next()) {
+            var flux = gr.type_flux.toString();
+            var count = parseInt(gr.getAggregate('COUNT'), 10);
+            counts[flux] = count;
+        }
+
+        var fluxKeys = Object.keys(FLUX_LABELS);
+        for (var i = 0; i < fluxKeys.length; i++) {
+            var key = fluxKeys[i];
+            queues.push({
+                key: key,
+                label: FLUX_LABELS[key],
+                count: counts[key] || 0
+            });
+        }
+
+        if (profile === 'superviseur') {
+            queues.unshift({
+                key: '__dash',
+                label: 'Tableau de bord',
+                count: 0
+            });
+        }
+
+        return queues;
+    }
+
+    function getDashboardKPIs() {
+        var kpis = {
+            a_traiter: 0,
+            retard_sla: 0,
+            attente_usager: 0,
+            clotures_30j: 0
+        };
+
+        var grOpen = new GlideAggregate(TABLE_DOSSIER);
+        grOpen.addQuery('state', 'IN', '1,2');
+        grOpen.addAggregate('COUNT');
+        grOpen.query();
+        if (grOpen.next()) {
+            kpis.a_traiter = parseInt(grOpen.getAggregate('COUNT'), 10);
+        }
+
+        var grAttente = new GlideAggregate(TABLE_DOSSIER);
+        grAttente.addQuery('state', '3');
+        grAttente.addAggregate('COUNT');
+        grAttente.query();
+        if (grAttente.next()) {
+            kpis.attente_usager = parseInt(grAttente.getAggregate('COUNT'), 10);
+        }
+
+        var now = new GlideDateTime();
+        var fifteenDaysAgo = new GlideDateTime();
+        fifteenDaysAgo.addDaysLocalTime(-15);
+
+        var grLate = new GlideAggregate(TABLE_DOSSIER);
+        grLate.addQuery('state', 'IN', '1,2,3');
+        grLate.addQuery('sys_created_on', '<', fifteenDaysAgo);
+        grLate.addAggregate('COUNT');
+        grLate.query();
+        if (grLate.next()) {
+            kpis.retard_sla = parseInt(grLate.getAggregate('COUNT'), 10);
+        }
+
+        var thirtyDaysAgo = new GlideDateTime();
+        thirtyDaysAgo.addDaysLocalTime(-30);
+
+        var grClosed = new GlideAggregate(TABLE_DOSSIER);
+        grClosed.addQuery('state', '7');
+        grClosed.addQuery('sys_updated_on', '>=', thirtyDaysAgo);
+        grClosed.addAggregate('COUNT');
+        grClosed.query();
+        if (grClosed.next()) {
+            kpis.clotures_30j = parseInt(grClosed.getAggregate('COUNT'), 10);
+        }
+
+        return kpis;
+    }
+
+    function calculateSLA(dueDate, state) {
+        if (state == '7') return 'ok';
+        if (!dueDate) return 'ok';
+
+        var due = new GlideDateTime(dueDate);
+        var now = new GlideDateTime();
+
+        // Si due_date est dépassée → en retard
+        if (now.compareTo(due) > 0) return 'late';
+
+        // Si due_date est dans moins de 3 jours → vigilance
+        var warnThreshold = new GlideDateTime();
+        warnThreshold.addDaysLocalTime(3);
+        if (due.compareTo(warnThreshold) <= 0) return 'warn';
+
+        return 'ok';
+    }
+
+    function calculateAge(createdOn) {
+        var created = new GlideDateTime(createdOn);
+        var now = new GlideDateTime();
+        var diffSec = GlideDateTime.subtract(created, now).getNumericValue() / 1000;
+        var days = Math.floor(diffSec / 86400);
+
+        if (days === 0) return "Aujourd'hui";
+        if (days === 1) return '1 jour';
+        return days + ' jours';
+    }
+
+    function getList(team, tab, searchQ, sortBy, quickFilter) {
+        var items = [];
+        var gr = new GlideRecord(TABLE_DOSSIER);
+
+        if (team && team !== '__dash') {
+            gr.addQuery('type_flux', team);
+        }
+
+        if (tab && TAB_STATE_MAP[tab]) {
+            gr.addQuery('state', TAB_STATE_MAP[tab]);
+        } else if (tab !== 'tous') {
+            gr.addQuery('state', 'IN', '1,2,3,7');
+        }
+
+        if (searchQ) {
+            var qc = gr.addQuery('number', 'CONTAINS', searchQ);
+            qc.addOrCondition('short_description', 'CONTAINS', searchQ);
+            qc.addOrCondition('demande_parente.number', 'CONTAINS', searchQ);
+        }
+
+        if (quickFilter === 'mine') {
+            gr.addQuery('assigned_to', gs.getUserID());
+        } else if (quickFilter === 'late') {
+            var nowDt = new GlideDateTime();
+            gr.addQuery('due_date', '<', nowDt);
+            gr.addQuery('state', 'IN', '1,2,3');
+        } else if (quickFilter === 'unassigned') {
+            gr.addQuery('assigned_toISEMPTY');
+            gr.addQuery('state', 'IN', '1,2');
+        }
+
+        if (sortBy === 'priority') {
+            gr.orderBy('priority');
+            gr.orderBy('sys_created_on');
+        } else {
+            gr.orderByDesc('sys_created_on');
+        }
+
+        gr.setLimit(100);
+        gr.query();
+
+        while (gr.next()) {
+            var parentNumber = '';
+            var trajet = '';
+            if (!gr.demande_parente.nil()) {
+                var demande = gr.demande_parente.getRefRecord();
+                parentNumber = demande.getValue('number') || '';
+                var siteDepart = demande.getDisplayValue('site_depart') || '';
+                var siteArrivee = demande.getDisplayValue('site_arrivee') || '';
+                if (siteDepart || siteArrivee) {
+                    trajet = siteDepart + ' → ' + siteArrivee;
+                }
+            }
+
+            var stateVal = gr.getValue('state') || '1';
+            items.push({
+                sys_id: gr.getUniqueValue(),
+                number: gr.getValue('number'),
+                parent_number: parentNumber,
+                title: gr.getValue('short_description') || 'Dossier ' + gr.getValue('number'),
+                trajet: trajet,
+                badge_acteur: gr.getDisplayValue('acteur_en_charge') || FLUX_LABELS[gr.getValue('type_flux')] || '',
+                state_label: STATE_MAP[stateVal] || 'Inconnu',
+                state_class: STATE_CLASS[stateVal] || 'nouveau',
+                sla_status: calculateSLA(gr.getValue('due_date'), stateVal),
+                assigned_to_name: gr.getDisplayValue('assigned_to') || 'Non assigné',
+                age_display: calculateAge(gr.getValue('sys_created_on')),
+                priority: gr.getValue('priority')
+            });
+        }
+
+        return items;
+    }
+
+    function getDetail(sysId) {
+        var gr = new GlideRecord(TABLE_DOSSIER);
+        if (!gr.get(sysId)) return null;
+
+        var detail = {
+            sys_id: gr.getUniqueValue(),
+            number: gr.getValue('number'),
+            title: gr.getValue('short_description') || '',
+            state: gr.getValue('state'),
+            state_label: STATE_MAP[gr.getValue('state')] || '',
+            state_class: STATE_CLASS[gr.getValue('state')] || '',
+            type_flux: gr.getValue('type_flux'),
+            type_flux_label: FLUX_LABELS[gr.getValue('type_flux')] || '',
+            assigned_to: gr.getDisplayValue('assigned_to') || 'Non assigné',
+            priority: gr.getValue('priority'),
+            etape_courante_num: parseInt(gr.getValue('etape_courante_num') || '0', 10),
+            nb_etapes_total: parseInt(gr.getValue('nb_etapes_total') || '0', 10),
+            etape_visible_usager: gr.getValue('etape_visible_usager') || '',
+            created: gr.getDisplayValue('sys_created_on'),
+            age: calculateAge(gr.getValue('sys_created_on')),
+            sla_status: calculateSLA(gr.getValue('due_date'), gr.getValue('state'))
+        };
+
+        // Synthese from parent demande
+        detail.synthese = {
+            demandeur: '',
+            agent: '',
+            nigend: '',
+            trajet: '',
+            besoins: ''
+        };
+
+        if (!gr.demande_parente.nil()) {
+            var demande = gr.demande_parente.getRefRecord();
+            detail.synthese.demandeur = demande.getDisplayValue('demandeur') || '';
+            detail.synthese.agent = demande.getDisplayValue('administre') || '';
+            detail.synthese.nigend = demande.getValue('nigend') || '';
+            var sd = demande.getDisplayValue('site_depart') || '';
+            var sa = demande.getDisplayValue('site_arrivee') || '';
+            detail.synthese.trajet = sd + ' → ' + sa;
+            detail.synthese.besoins = demande.getValue('short_description') || '';
+            detail.parent_number = demande.getValue('number') || '';
+        }
+
+        // Etapes
+        detail.etapes = [];
+        var etapesJson = gr.getValue('etapes_json');
+        if (etapesJson) {
+            try {
+                var parsed = JSON.parse(etapesJson);
+                if (Array.isArray(parsed)) {
+                    detail.etapes = parsed;
+                }
+            } catch (e) {
+                // ignore parse errors
+            }
+        }
+
+        // Enrich etapes with status
+        for (var i = 0; i < detail.etapes.length; i++) {
+            var etape = detail.etapes[i];
+            var num = etape.num || (i + 1);
+            if (num < detail.etape_courante_num) {
+                etape.status = 'done';
+            } else if (num == detail.etape_courante_num) {
+                etape.status = 'current';
+            } else {
+                etape.status = 'pending';
+            }
+        }
+
+        // Pieces justificatives
+        detail.pieces = [];
+        var grPiece = new GlideRecord(TABLE_PIECE);
+        grPiece.addQuery('dossier', sysId);
+        grPiece.orderBy('obligatoire');
+        grPiece.query();
+        while (grPiece.next()) {
+            detail.pieces.push({
+                sys_id: grPiece.getUniqueValue(),
+                nom: grPiece.getValue('nom_piece') || '',
+                type: grPiece.getValue('type_piece') || '',
+                statut: grPiece.getValue('statut') || '',
+                statut_display: grPiece.getDisplayValue('statut') || '',
+                obligatoire: grPiece.getValue('obligatoire') == '1' || grPiece.getValue('obligatoire') == 'true'
+            });
+        }
+
+        // Activity (work notes)
+        detail.activity = [];
+        var grJournal = new GlideRecord('sys_journal_field');
+        grJournal.addQuery('element_id', sysId);
+        grJournal.addQuery('element', 'work_notes');
+        grJournal.orderByDesc('sys_created_on');
+        grJournal.setLimit(50);
+        grJournal.query();
+        while (grJournal.next()) {
+            detail.activity.push({
+                sys_id: grJournal.getUniqueValue(),
+                text: grJournal.getValue('value') || '',
+                created: grJournal.getDisplayValue('sys_created_on'),
+                user: grJournal.getDisplayValue('sys_created_by') || ''
+            });
+        }
+
+        return detail;
+    }
+
+    function doAssign(sysId, userId, groupId) {
+        var gr = new GlideRecord(TABLE_DOSSIER);
+        if (!gr.get(sysId)) return false;
+
+        if (userId) {
+            gr.setValue('assigned_to', userId);
+        } else {
+            gr.setValue('assigned_to', gs.getUserID());
+        }
+
+        if (groupId) {
+            gr.setValue('assignment_group', groupId);
+        }
+
+        if (gr.getValue('state') == '1') {
+            gr.setValue('state', '2');
+        }
+        gr.update();
+        return true;
+    }
+
+    function searchUsers(query) {
+        var results = [];
+        if (!query || query.length < 2) return results;
+
+        var gr = new GlideRecord('sys_user');
+        gr.addQuery('active', true);
+        var qc = gr.addQuery('name', 'CONTAINS', query);
+        qc.addOrCondition('user_name', 'CONTAINS', query);
+        qc.addOrCondition('email', 'CONTAINS', query);
+        gr.setLimit(10);
+        gr.orderBy('name');
+        gr.query();
+        while (gr.next()) {
+            results.push({
+                sys_id: gr.getUniqueValue(),
+                name: gr.getDisplayValue('name') + '',
+                email: gr.getValue('email') + '',
+                title: gr.getValue('title') + ''
+            });
+        }
+        return results;
+    }
+
+    function searchGroups(query) {
+        var results = [];
+        if (!query || query.length < 2) return results;
+
+        var gr = new GlideRecord('sys_user_group');
+        gr.addQuery('active', true);
+        gr.addQuery('name', 'CONTAINS', query);
+        gr.setLimit(10);
+        gr.orderBy('name');
+        gr.query();
+        while (gr.next()) {
+            results.push({
+                sys_id: gr.getUniqueValue(),
+                name: gr.getDisplayValue('name') + ''
+            });
+        }
+        return results;
+    }
+
+    function getAssignmentGroups() {
+        var results = [];
+        var gr = new GlideRecord('sys_user_group');
+        gr.addQuery('active', true);
+        var qc = gr.addQuery('name', 'CONTAINS', 'PFMD');
+        qc.addOrCondition('name', 'CONTAINS', 'Atrium');
+        qc.addOrCondition('name', 'CONTAINS', "Mut'Actions");
+        qc.addOrCondition('name', 'CONTAINS', 'Défense Mobilité');
+        qc.addOrCondition('name', 'CONTAINS', 'PCD OM');
+        qc.addOrCondition('name', 'CONTAINS', 'BCC');
+        qc.addOrCondition('name', 'CONTAINS', 'COMBDD');
+        gr.orderBy('name');
+        gr.setLimit(20);
+        gr.query();
+        while (gr.next()) {
+            results.push({
+                sys_id: gr.getUniqueValue(),
+                name: gr.getDisplayValue('name') + ''
+            });
+        }
+        return results;
+    }
+
+    function doAdvance(sysId) {
+        var gr = new GlideRecord(TABLE_DOSSIER);
+        if (!gr.get(sysId)) return false;
+
+        var current = parseInt(gr.getValue('etape_courante_num') || '0', 10);
+        var total = parseInt(gr.getValue('nb_etapes_total') || '0', 10);
+
+        if (current < total) {
+            gr.setValue('etape_courante_num', current + 1);
+            if (current + 1 >= total) {
+                gr.setValue('state', '7');
+            } else if (gr.getValue('state') == '1') {
+                gr.setValue('state', '2');
+            }
+        }
+        gr.update();
+        return true;
+    }
+
+    function doSetState(sysId, newState) {
+        var gr = new GlideRecord(TABLE_DOSSIER);
+        if (!gr.get(sysId)) return false;
+        gr.setValue('state', newState);
+        gr.update();
+        return true;
+    }
+
+    function doAddNote(sysId, text) {
+        var gr = new GlideRecord(TABLE_DOSSIER);
+        if (!gr.get(sysId)) return false;
+        gr.work_notes = text;
+        gr.update();
+        return true;
+    }
+
+    // Main execution
+    if (input && input.action) {
+        switch (input.action) {
+            case 'list':
+                data.items = getList(input.team, input.tab, input.q, input.sortBy, input.quickFilter);
+                break;
+
+            case 'detail':
+                data.detail = getDetail(input.id);
+                break;
+
+            case 'assign':
+                data.success = doAssign(input.id, input.user_id, input.group_id);
+                data.detail = getDetail(input.id);
+                break;
+
+            case 'searchUsers':
+                data.userResults = searchUsers(input.q);
+                break;
+
+            case 'searchGroups':
+                data.groupResults = searchGroups(input.q);
+                break;
+
+            case 'getAssignmentGroups':
+                data.assignmentGroups = getAssignmentGroups();
+                break;
+
+            case 'bulkAssign':
+                var assignIds = (input.ids || '').split(',');
+                for (var ai = 0; ai < assignIds.length; ai++) {
+                    doAssign(assignIds[ai], gs.getUserID(), null);
+                }
+                data.success = true;
+                break;
+
+            case 'bulkPriority':
+                var prioIds = (input.ids || '').split(',');
+                for (var pi = 0; pi < prioIds.length; pi++) {
+                    var grp = new GlideRecord(TABLE_DOSSIER);
+                    if (grp.get(prioIds[pi])) {
+                        grp.setValue('priority', input.priority);
+                        grp.update();
+                    }
+                }
+                data.success = true;
+                break;
+
+            case 'bulkClose':
+                var closeIds = (input.ids || '').split(',');
+                for (var ci = 0; ci < closeIds.length; ci++) {
+                    doSetState(closeIds[ci], '7');
+                }
+                data.success = true;
+                break;
+
+            case 'advance':
+                data.success = doAdvance(input.id);
+                data.detail = getDetail(input.id);
+                break;
+
+            case 'setState':
+                data.success = doSetState(input.id, input.state);
+                data.detail = getDetail(input.id);
+                break;
+
+            case 'addNote':
+                data.success = doAddNote(input.id, input.text);
+                data.detail = getDetail(input.id);
+                break;
+
+            case 'dashboard':
+                data.kpis = getDashboardKPIs();
+                break;
+
+            default:
+                break;
+        }
+    } else {
+        // Initial load
+        var account = getUserProfile();
+        data.account = account;
+        data.queues = getQueues(account.profile);
+    }
+})();
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-06 12:40:11</sys_created_on>
+        <sys_id>2fab58e6c172408d874ef3857d012ea4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Habitat - Espace de traitement (DSFR)</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sp_widget_2fab58e6c172408d874ef3857d012ea4</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-06 12:40:11</sys_updated_on>
+        <template><![CDATA[<div class="agent-app">
+  <!-- Top bar -->
+  <header class="agent-header">
+    <div class="agent-header__marque">
+      <div class="agent-header__rf">
+        <span class="agent-header__rf-text">RÉPUBLIQUE<br/>FRANÇAISE</span>
+      </div>
+      <div class="agent-header__title">
+        <h1 class="agent-header__h1">Espace de traitement</h1>
+        <span class="agent-header__subtitle">Portail Habitat – Gestion des dossiers</span>
+      </div>
+    </div>
+    <div class="agent-header__tools">
+      <div class="agent-header__search">
+        <input type="text"
+               class="agent-header__search-input"
+               placeholder="Rechercher un dossier (n°, nom...)"
+               ng-model="c.searchQ"
+               ng-keypress="c.handleSearchKeypress($event)" />
+        <button class="agent-header__search-btn" ng-click="c.doSearch()" title="Rechercher">
+          <span class="agent-icon agent-icon--search">⌕</span>
+        </button>
+        <button class="agent-header__search-clear" ng-if="c.searchQ" ng-click="c.clearSearch()" title="Effacer">✕</button>
+      </div>
+      <div class="agent-header__profile">
+        <span class="agent-header__profile-role">{{c.role}}</span>
+      </div>
+      <div class="agent-header__user">
+        <span class="agent-header__user-name">{{c.data.account.user_name}}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="agent-body">
+    <!-- Left nav: queues -->
+    <nav class="agent-nav">
+      <div class="agent-nav__title">Files de traitement</div>
+      <ul class="agent-nav__list">
+        <li class="agent-nav__item"
+            ng-repeat="q in c.data.queues"
+            ng-click="c.setQueue(q.key)"
+            ng-class="{'agent-nav__item--active': c.queue === q.key}">
+          <span class="agent-nav__item-label">{{q.label}}</span>
+          <span class="agent-nav__badge" ng-if="q.count > 0">{{q.count}}</span>
+        </li>
+      </ul>
+      <div class="agent-nav__legend">
+        <div class="agent-nav__legend-title">Légende SLA</div>
+        <div class="agent-nav__legend-item">
+          <span class="agent-sla agent-sla--ok"></span> Dans les délais
+        </div>
+        <div class="agent-nav__legend-item">
+          <span class="agent-sla agent-sla--warn"></span> Vigilance (&gt;7j)
+        </div>
+        <div class="agent-nav__legend-item">
+          <span class="agent-sla agent-sla--late"></span> Retard (&gt;15j)
+        </div>
+      </div>
+    </nav>
+
+    <!-- Center: list or dashboard -->
+    <main class="agent-list" ng-if="c.queue !== '__dash'">
+      <div class="agent-list__header">
+        <h2 class="agent-list__title">{{c.queueLabel}}</h2>
+        <span class="agent-list__count">{{c.items.length}} dossier(s)</span>
+        <button type="button" class="btn btn-xs" ng-class="c.bulkMode ? 'btn-primary' : 'btn-default'" ng-click="c.toggleBulkMode()" title="Mode sélection">
+            <span class="glyphicon glyphicon-check"></span>
+        </button>
+      </div>
+      <div class="agent-list__tabs">
+        <button class="agent-list__tab"
+                ng-repeat="t in c.tabs"
+                ng-click="c.setTab(t.key)"
+                ng-class="{'agent-list__tab--active': c.tab === t.key}">
+          {{t.label}}
+        </button>
+      </div>
+      <!-- Filtres rapides -->
+      <div class="agent-list__quickfilters">
+          <button type="button" class="agent-qf" ng-class="{'agent-qf--active': c.quickFilter === 'mine'}" ng-click="c.setQuickFilter('mine')">
+              <span class="glyphicon glyphicon-user"></span> Mes dossiers
+          </button>
+          <button type="button" class="agent-qf agent-qf--danger" ng-class="{'agent-qf--active': c.quickFilter === 'late'}" ng-click="c.setQuickFilter('late')">
+              <span class="glyphicon glyphicon-warning-sign"></span> En retard
+          </button>
+          <button type="button" class="agent-qf" ng-class="{'agent-qf--active': c.quickFilter === 'unassigned'}" ng-click="c.setQuickFilter('unassigned')">
+              <span class="glyphicon glyphicon-inbox"></span> Non assignés
+          </button>
+      </div>
+      <div class="agent-list__sort">
+        <button class="agent-list__sort-btn" ng-click="c.toggleSort()">
+          Tri : {{c.sortBy === 'priority' ? 'Priorité' : 'Récent'}}
+          <span class="agent-icon agent-icon--sort">⇅</span>
+        </button>
+      </div>
+      <!-- Actions en masse -->
+      <div class="agent-bulk" ng-if="c.bulkMode">
+          <div class="agent-bulk__header">
+              <label class="agent-bulk__selectall">
+                  <input type="checkbox" ng-checked="c.selectedCount === c.items.length && c.items.length > 0" ng-click="c.selectAll()"> Tout
+              </label>
+              <span class="agent-bulk__count">{{c.selectedCount}} sélectionné(s)</span>
+          </div>
+          <div class="agent-bulk__actions" ng-if="c.selectedCount > 0">
+              <button type="button" class="btn btn-xs btn-primary" ng-click="c.bulkAssignToMe()">
+                  <span class="glyphicon glyphicon-user"></span> M'assigner
+              </button>
+              <button type="button" class="btn btn-xs btn-warning" ng-click="c.bulkSetPriority('1')">
+                  <span class="glyphicon glyphicon-arrow-up"></span> Priorité 1
+              </button>
+              <button type="button" class="btn btn-xs btn-danger" ng-click="c.bulkClose()">
+                  <span class="glyphicon glyphicon-ok-circle"></span> Clôturer
+              </button>
+          </div>
+      </div>
+      <div class="agent-list__items" ng-if="!c.loading">
+        <div class="agent-list__item"
+             ng-repeat="item in c.items"
+             ng-click="c.bulkMode ? c.toggleSelect(item.sys_id) : c.select(item.sys_id)"
+             ng-class="{'agent-list__item--selected': c.selId === item.sys_id, 'agent-list__item--selected-bulk': c.bulkMode && c.selectedItems[item.sys_id]}">
+          <div class="agent-list__item-top">
+            <input type="checkbox" ng-if="c.bulkMode" ng-checked="c.selectedItems[item.sys_id]" ng-click="$event.stopPropagation(); c.toggleSelect(item.sys_id)" class="agent-bulk__checkbox">
+            <span class="agent-list__item-number">{{item.number}}</span>
+            <span class="agent-badge agent-badge--{{item.state_class}}">{{item.state_label}}</span>
+            <span class="agent-sla" ng-class="c.getSlaClass(item.sla_status)" title="{{c.getSlaLabel(item.sla_status)}}"></span>
+          </div>
+          <div class="agent-list__item-title">{{item.title}}</div>
+          <div class="agent-list__item-meta">
+            <span class="agent-list__item-trajet" ng-if="item.trajet">{{item.trajet}}</span>
+          </div>
+          <div class="agent-list__item-bottom">
+            <span class="agent-badge agent-badge--acteur" ng-if="item.badge_acteur">{{item.badge_acteur}}</span>
+            <span class="agent-list__item-assigned">{{item.assigned_to_name}}</span>
+            <span class="agent-list__item-age">{{item.age_display}}</span>
+          </div>
+        </div>
+        <div class="agent-list__empty" ng-if="c.items.length === 0">
+          Aucun dossier trouvé pour ces critères.
+        </div>
+      </div>
+      <div class="agent-list__loading" ng-if="c.loading">
+        <span>Chargement...</span>
+      </div>
+    </main>
+
+    <!-- Dashboard view for superviseur -->
+    <main class="agent-dashboard" ng-if="c.queue === '__dash'">
+      <div class="agent-dashboard__header">
+        <h2 class="agent-dashboard__title">Tableau de bord superviseur</h2>
+      </div>
+      <div class="agent-dashboard__kpis" ng-if="c.dashKpis">
+        <div class="agent-kpi">
+          <div class="agent-kpi__value">{{c.dashKpis.a_traiter}}</div>
+          <div class="agent-kpi__label">Dossiers à traiter</div>
+        </div>
+        <div class="agent-kpi agent-kpi--danger">
+          <div class="agent-kpi__value">{{c.dashKpis.retard_sla}}</div>
+          <div class="agent-kpi__label">Retard SLA (&gt;15j)</div>
+        </div>
+        <div class="agent-kpi agent-kpi--warning">
+          <div class="agent-kpi__value">{{c.dashKpis.attente_usager}}</div>
+          <div class="agent-kpi__label">Attente usager</div>
+        </div>
+        <div class="agent-kpi agent-kpi--success">
+          <div class="agent-kpi__value">{{c.dashKpis.clotures_30j}}</div>
+          <div class="agent-kpi__label">Clôturés (30j)</div>
+        </div>
+      </div>
+      <div class="agent-dashboard__loading" ng-if="c.loading">
+        Chargement des indicateurs...
+      </div>
+    </main>
+
+    <!-- Right: detail panel -->
+    <aside class="agent-detail" ng-if="c.detail">
+      <div class="agent-detail__header">
+        <div class="agent-detail__header-top">
+          <h3 class="agent-detail__number">{{c.detail.number}}</h3>
+          <span class="agent-badge agent-badge--{{c.detail.state_class}}">{{c.detail.state_label}}</span>
+          <span class="agent-sla" ng-class="c.getSlaClass(c.detail.sla_status)"></span>
+        </div>
+        <div class="agent-detail__header-title">{{c.detail.title}}</div>
+        <div class="agent-detail__header-meta">
+          <span>Flux : {{c.detail.type_flux_label}}</span>
+          <span>Assigné : {{c.detail.assigned_to}}</span>
+          <span>Créé : {{c.detail.created}}</span>
+          <span>Âge : {{c.detail.age}}</span>
+        </div>
+        <div class="agent-detail__progress" ng-if="c.detail.nb_etapes_total > 0">
+          <div class="agent-detail__progress-bar">
+            <div class="agent-detail__progress-fill" ng-style="{'width': c.getProgressPercent() + '%'}"></div>
+          </div>
+          <span class="agent-detail__progress-text">Étape {{c.detail.etape_courante_num}}/{{c.detail.nb_etapes_total}}</span>
+        </div>
+      </div>
+
+      <!-- Actions (hidden when dossier is closed) -->
+      <div class="agent-detail__actions" ng-if="c.detail && c.detail.state !== '7'">
+        <button class="agent-btn agent-btn--primary" ng-click="c.assignToMe()">Prendre en charge</button>
+        <button class="agent-btn agent-btn--secondary" ng-click="c.openAssignPanel()">Assigner à…</button>
+        <button class="agent-btn agent-btn--secondary" ng-click="c.doAction('advance')">Étape suivante</button>
+        <button class="agent-btn agent-btn--warning" ng-click="c.doAction('setState')">Demander des compléments</button>
+        <button class="agent-btn agent-btn--danger" ng-click="c.doAction('close')">Clôturer</button>
+      </div>
+
+      <!-- Assignment panel -->
+      <div class="agent-assign-panel" ng-if="c.showAssignPanel">
+        <div class="agent-assign-panel__header">
+          <h4>Assigner le dossier</h4>
+          <button class="agent-btn agent-btn--secondary" ng-click="c.closeAssignPanel()">✕</button>
+        </div>
+        <div class="agent-assign-panel__tabs">
+          <button class="agent-btn"
+                  ng-class="c.assignMode === 'user' ? 'agent-btn--primary' : 'agent-btn--secondary'"
+                  ng-click="c.setAssignMode('user')">Personne</button>
+          <button class="agent-btn"
+                  ng-class="c.assignMode === 'group' ? 'agent-btn--primary' : 'agent-btn--secondary'"
+                  ng-click="c.setAssignMode('group')">Groupe</button>
+        </div>
+        <div class="agent-assign-panel__search">
+          <input type="text"
+                 class="form-control"
+                 placeholder="Rechercher…"
+                 ng-model="c.assignSearchQ"
+                 ng-keypress="c.handleAssignKeypress($event)" />
+          <button class="agent-btn agent-btn--primary" ng-click="c.searchAssign()">Rechercher</button>
+        </div>
+        <div class="agent-assign-panel__results">
+          <div ng-if="c.assignSearching" class="text-center text-muted">Recherche en cours…</div>
+          <div ng-if="!c.assignSearching && c.assignResults.length === 0 && c.assignSearchQ" class="text-center text-muted">Aucun résultat</div>
+          <div class="agent-assign-panel__result"
+               ng-repeat="item in c.assignResults track by item.sys_id"
+               ng-click="c.assignTo(item)">
+            <span class="agent-assign-panel__name">{{item.name}}</span>
+            <span class="agent-assign-panel__meta">{{item.email || item.description}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-detail__tabs">
+        <button class="agent-detail__tab"
+                ng-click="c.setDtab('synthese')"
+                ng-class="{'agent-detail__tab--active': c.dtab === 'synthese'}">Synthèse</button>
+        <button class="agent-detail__tab"
+                ng-click="c.setDtab('cycle')"
+                ng-class="{'agent-detail__tab--active': c.dtab === 'cycle'}">Cycle de vie</button>
+        <button class="agent-detail__tab"
+                ng-click="c.setDtab('pieces')"
+                ng-class="{'agent-detail__tab--active': c.dtab === 'pieces'}">Pièces</button>
+        <button class="agent-detail__tab"
+                ng-click="c.setDtab('activite')"
+                ng-class="{'agent-detail__tab--active': c.dtab === 'activite'}">Activité</button>
+      </div>
+
+      <!-- Synthese tab -->
+      <div class="agent-detail__content" ng-if="c.dtab === 'synthese'">
+        <div class="agent-detail__section">
+          <h4 class="agent-detail__section-title">Informations demandeur</h4>
+          <div class="agent-detail__field">
+            <span class="agent-detail__field-label">Demandeur</span>
+            <span class="agent-detail__field-value">{{c.detail.synthese.demandeur}}</span>
+          </div>
+          <div class="agent-detail__field">
+            <span class="agent-detail__field-label">Agent concerné</span>
+            <span class="agent-detail__field-value">{{c.detail.synthese.agent}}</span>
+          </div>
+          <div class="agent-detail__field">
+            <span class="agent-detail__field-label">NIGEND</span>
+            <span class="agent-detail__field-value">{{c.detail.synthese.nigend}}</span>
+          </div>
+          <div class="agent-detail__field">
+            <span class="agent-detail__field-label">Trajet</span>
+            <span class="agent-detail__field-value">{{c.detail.synthese.trajet}}</span>
+          </div>
+          <div class="agent-detail__field" ng-if="c.detail.synthese.besoins">
+            <span class="agent-detail__field-label">Besoins exprimés</span>
+            <span class="agent-detail__field-value">{{c.detail.synthese.besoins}}</span>
+          </div>
+        </div>
+        <div class="agent-detail__section" ng-if="c.detail.parent_number">
+          <h4 class="agent-detail__section-title">Demande parente</h4>
+          <div class="agent-detail__field">
+            <span class="agent-detail__field-label">Numéro</span>
+            <span class="agent-detail__field-value">{{c.detail.parent_number}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cycle de vie tab -->
+      <div class="agent-detail__content" ng-if="c.dtab === 'cycle'">
+        <div class="agent-detail__section">
+          <h4 class="agent-detail__section-title">Étapes du dossier</h4>
+          <div class="agent-etapes" ng-if="c.detail.etapes.length > 0">
+            <div class="agent-etape"
+                 ng-repeat="etape in c.detail.etapes"
+                 ng-class="c.getEtapeClass(etape)">
+              <div class="agent-etape__marker">
+                <span class="agent-etape__num">{{$index + 1}}</span>
+              </div>
+              <div class="agent-etape__content">
+                <span class="agent-etape__label">{{etape.label || etape.nom || ('Étape ' + ($index + 1))}}</span>
+                <span class="agent-etape__status" ng-if="etape.status === 'done'">✓ Terminée</span>
+                <span class="agent-etape__status" ng-if="etape.status === 'current'">● En cours</span>
+                <span class="agent-etape__status" ng-if="etape.status === 'pending'">○ À venir</span>
+              </div>
+            </div>
+          </div>
+          <div class="agent-detail__empty" ng-if="c.detail.etapes.length === 0">
+            Aucune étape définie pour ce dossier.
+          </div>
+        </div>
+      </div>
+
+      <!-- Pieces tab -->
+      <div class="agent-detail__content" ng-if="c.dtab === 'pieces'">
+        <div class="agent-detail__section">
+          <h4 class="agent-detail__section-title">Pièces justificatives</h4>
+          <div class="agent-pieces" ng-if="c.detail.pieces.length > 0">
+            <div class="agent-piece"
+                 ng-repeat="piece in c.detail.pieces"
+                 ng-class="c.getPieceStatusClass(piece.statut)">
+              <div class="agent-piece__info">
+                <span class="agent-piece__nom">{{piece.nom}}</span>
+                <span class="agent-piece__type" ng-if="piece.type">({{piece.type}})</span>
+                <span class="agent-piece__obligatoire" ng-if="piece.obligatoire">Obligatoire</span>
+              </div>
+              <div class="agent-piece__statut">
+                <span class="agent-badge agent-badge--piece">{{piece.statut_display}}</span>
+              </div>
+            </div>
+          </div>
+          <div class="agent-detail__empty" ng-if="c.detail.pieces.length === 0">
+            Aucune pièce justificative.
+          </div>
+        </div>
+      </div>
+
+      <!-- Activite tab -->
+      <div class="agent-detail__content" ng-if="c.dtab === 'activite'">
+        <div class="agent-detail__section">
+          <h4 class="agent-detail__section-title">Notes de travail</h4>
+          <div class="agent-note-form">
+            <textarea class="agent-note-form__input"
+                      ng-model="c.noteText"
+                      placeholder="Ajouter une note de travail..."
+                      rows="3"></textarea>
+            <button class="agent-btn agent-btn--primary agent-note-form__btn" ng-click="c.addNote()" ng-disabled="!c.noteText.trim()">
+              Ajouter
+            </button>
+          </div>
+          <div class="agent-activity" ng-if="c.detail.activity.length > 0">
+            <div class="agent-activity__item" ng-repeat="entry in c.detail.activity">
+              <div class="agent-activity__header">
+                <span class="agent-activity__user">{{entry.user}}</span>
+                <span class="agent-activity__date">{{entry.created}}</span>
+              </div>
+              <div class="agent-activity__text">{{entry.text}}</div>
+            </div>
+          </div>
+          <div class="agent-detail__empty" ng-if="c.detail.activity.length === 0">
+            Aucune activité enregistrée.
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Empty state -->
+    <aside class="agent-detail agent-detail--empty" ng-if="!c.detail && c.queue !== '__dash'">
+      <div class="agent-detail__empty-state">
+        <div class="agent-detail__empty-icon">]]>📋<![CDATA[</div>
+        <div class="agent-detail__empty-text">Sélectionnez un dossier pour afficher les détails</div>
+      </div>
+    </aside>
+  </div>
+</div>
+]]></template>
+    </sp_widget>
+</record_update>

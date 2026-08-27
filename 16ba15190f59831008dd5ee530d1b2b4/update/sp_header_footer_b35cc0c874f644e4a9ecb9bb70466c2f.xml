@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_header_footer">
+    <sp_header_footer action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope) {
+    var c = this;
+
+    c.mobileMenuOpen = false;
+
+    c.toggleMobileMenu = function() {
+        c.mobileMenuOpen = !c.mobileMenuOpen;
+    };
+
+    c.closeMobileMenu = function() {
+        c.mobileMenuOpen = false;
+    };
+};
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* DSFR Header - Design System de l'État français */&#13;
+/* Font: Marianne */&#13;
+$dsfr-blue: #000091;&#13;
+$dsfr-red: #E1000F;&#13;
+$dsfr-text: #161616;&#13;
+$dsfr-border: #E5E5E5;&#13;
+$dsfr-white: #FFFFFF;&#13;
+$dsfr-bg-light: #F6F6F6;&#13;
+$dsfr-blue-light: #F5F5FE;&#13;
+&#13;
+.dsfr-header {&#13;
+  font-family: 'Marianne', Arial, sans-serif;&#13;
+  background-color: $dsfr-white;&#13;
+  position: relative;&#13;
+  z-index: 1000;&#13;
+}&#13;
+&#13;
+/* Tricolore border top */&#13;
+.dsfr-header__tricolore {&#13;
+  height: 4px;&#13;
+  background: linear-gradient(to right, $dsfr-blue 33.33%, $dsfr-white 33.33%, $dsfr-white 66.66%, $dsfr-red 66.66%);&#13;
+}&#13;
+&#13;
+/* Header body (top bar) */&#13;
+.dsfr-header__body {&#13;
+  min-height: 80px;&#13;
+  border-bottom: 1px solid $dsfr-border;&#13;
+}&#13;
+&#13;
+.dsfr-header__body-inner {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  min-height: 80px;&#13;
+  width: 100%;&#13;
+}&#13;
+&#13;
+/* Brand / Logo */&#13;
+.dsfr-header__brand {&#13;
+  flex-shrink: 0;&#13;
+  margin-right: 24px;&#13;
+}&#13;
+&#13;
+.dsfr-header__brand-link {&#13;
+  text-decoration: none;&#13;
+  color: $dsfr-text;&#13;
+  display: block;&#13;
+&#13;
+  &amp;:hover,&#13;
+  &amp;:focus {&#13;
+    text-decoration: none;&#13;
+    color: $dsfr-text;&#13;
+  }&#13;
+}&#13;
+&#13;
+.dsfr-header__logo {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+}&#13;
+&#13;
+.dsfr-header__logo-img {&#13;
+  height: 64px;&#13;
+  width: auto;&#13;
+  display: block;&#13;
+}&#13;
+&#13;
+/* Service / Portal title */&#13;
+.dsfr-header__service {&#13;
+  flex: 1;&#13;
+  min-width: 0;&#13;
+  padding-right: 16px;&#13;
+}&#13;
+&#13;
+.dsfr-header__service-title {&#13;
+  font-size: 18px;&#13;
+  font-weight: 700;&#13;
+  color: $dsfr-text;&#13;
+  text-decoration: none;&#13;
+  display: block;&#13;
+  line-height: 1.3;&#13;
+&#13;
+  &amp;:hover,&#13;
+  &amp;:focus {&#13;
+    text-decoration: none;&#13;
+    color: $dsfr-blue;&#13;
+  }&#13;
+}&#13;
+&#13;
+.dsfr-header__service-tagline {&#13;
+  font-size: 12px;&#13;
+  color: #666666;&#13;
+  margin: 2px 0 0 0;&#13;
+  line-height: 1.3;&#13;
+}&#13;
+&#13;
+/* Tools (right section) */&#13;
+.dsfr-header__tools {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  flex-shrink: 0;&#13;
+  gap: 16px;&#13;
+}&#13;
+&#13;
+.dsfr-header__tools-links {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 8px;&#13;
+}&#13;
+&#13;
+/* Buttons */&#13;
+.dsfr-btn {&#13;
+  display: inline-block;&#13;
+  font-family: 'Marianne', Arial, sans-serif;&#13;
+  font-size: 13px;&#13;
+  font-weight: 500;&#13;
+  padding: 6px 14px;&#13;
+  border-radius: 3px;&#13;
+  text-decoration: none;&#13;
+  cursor: pointer;&#13;
+  border: 1px solid transparent;&#13;
+  line-height: 1.4;&#13;
+  text-align: center;&#13;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;&#13;
+&#13;
+  &amp;:hover,&#13;
+  &amp;:focus {&#13;
+    text-decoration: none;&#13;
+  }&#13;
+}&#13;
+&#13;
+.dsfr-btn--primary {&#13;
+  background-color: $dsfr-blue;&#13;
+  color: $dsfr-white;&#13;
+  border-color: $dsfr-blue;&#13;
+&#13;
+  &amp;:hover,&#13;
+  &amp;:focus {&#13;
+    background-color: darken($dsfr-blue, 10%);&#13;
+    color: $dsfr-white;&#13;
+  }&#13;
+}&#13;
+&#13;
+.dsfr-btn--outlined {&#13;
+  background-color: transparent;&#13;
+  color: $dsfr-blue;&#13;
+  border-color: $dsfr-blue;&#13;
+&#13;
+  &amp;:hover,&#13;
+  &amp;:focus {&#13;
+    background-color: $dsfr-blue;&#13;
+    color: $dsfr-white;&#13;
+  }&#13;
+}&#13;
+&#13;
+.dsfr-btn--menu {&#13;
+  background: none;&#13;
+  border: none;&#13;
+  font-size: 20px;&#13;
+  color: $dsfr-text;&#13;
+  padding: 8px 12px;&#13;
+&#13;
+  &amp;:hover,&#13;
+  &amp;:focus {&#13;
+    color: $dsfr-blue;&#13;
+  }&#13;
+}&#13;
+&#13;
+.dsfr-btn--block {&#13;
+  display: block;&#13;
+  width: 100%;&#13;
+  margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+/* User info */&#13;
+.dsfr-header__user {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 6px;&#13;
+  font-size: 13px;&#13;
+  color: $dsfr-text;&#13;
+}&#13;
+&#13;
+.dsfr-header__user-icon {&#13;
+  font-size: 14px;&#13;
+  color: $dsfr-blue;&#13;
+}&#13;
+&#13;
+.dsfr-header__user-name {&#13;
+  white-space: nowrap;&#13;
+}&#13;
+&#13;
+/* ===== Navigation principale (icônes + soulignement bleu) ===== */&#13;
+.main-nav {&#13;
+  background-color: $dsfr-white;&#13;
+  border-bottom: 1px solid $dsfr-border;&#13;
+}&#13;
+&#13;
+.main-nav .nav-list {&#13;
+  display: flex;&#13;
+  flex-wrap: wrap;&#13;
+  list-style: none;&#13;
+  padding: 0;&#13;
+  margin: 0;&#13;
+}&#13;
+&#13;
+.main-nav .nav-item {&#13;
+  margin: 0;&#13;
+}&#13;
+&#13;
+.main-nav .nav-link {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 8px;&#13;
+  padding: 14px 14px;&#13;
+  font-size: 14px;&#13;
+  font-weight: 600;&#13;
+  color: $dsfr-blue;&#13;
+  text-decoration: none;&#13;
+  border-bottom: 3px solid transparent;&#13;
+  white-space: nowrap;&#13;
+  transition: background-color 0.2s ease, border-color 0.2s ease;&#13;
+&#13;
+  &amp;:hover,&#13;
+  &amp;:focus {&#13;
+    background-color: $dsfr-blue-light;&#13;
+    text-decoration: none;&#13;
+  }&#13;
+}&#13;
+&#13;
+.main-nav .nav-link.active {&#13;
+  border-bottom-color: $dsfr-blue;&#13;
+}&#13;
+&#13;
+.main-nav .nav-icon {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  width: 18px;&#13;
+  height: 18px;&#13;
+  flex-shrink: 0;&#13;
+}&#13;
+&#13;
+/* Sécurité : borne TOUS les svg de la nav pour éviter tout débordement */&#13;
+.main-nav svg {&#13;
+  width: 18px;&#13;
+  height: 18px;&#13;
+  max-width: 18px;&#13;
+  max-height: 18px;&#13;
+  flex-shrink: 0;&#13;
+}&#13;
+&#13;
+/* Mobile menu */&#13;
+.dsfr-header__burger {&#13;
+  margin-left: auto;&#13;
+}&#13;
+&#13;
+.dsfr-header__mobile-panel {&#13;
+  background-color: $dsfr-bg-light;&#13;
+  padding: 16px 0;&#13;
+  border-bottom: 1px solid $dsfr-border;&#13;
+}&#13;
+&#13;
+.dsfr-header__mobile-links {&#13;
+  margin-bottom: 12px;&#13;
+}&#13;
+&#13;
+.dsfr-header__mobile-user {&#13;
+  font-size: 13px;&#13;
+  color: $dsfr-text;&#13;
+  padding: 8px 0;&#13;
+&#13;
+  .fa {&#13;
+    margin-right: 6px;&#13;
+    color: $dsfr-blue;&#13;
+  }&#13;
+}&#13;
+&#13;
+/* Responsive */&#13;
+@media (max-width: 767px) {&#13;
+  .dsfr-header__body-inner {&#13;
+    padding: 0 8px;&#13;
+  }&#13;
+&#13;
+  .dsfr-header__service {&#13;
+    display: none;&#13;
+  }&#13;
+&#13;
+  .main-nav {&#13;
+    display: none;&#13;
+&#13;
+    &amp;.main-nav--open {&#13;
+      display: block;&#13;
+    }&#13;
+&#13;
+    .nav-list {&#13;
+      flex-direction: column;&#13;
+    }&#13;
+&#13;
+    .nav-link {&#13;
+      border-bottom: none;&#13;
+      border-left: 3px solid transparent;&#13;
+      white-space: normal;&#13;
+&#13;
+      &amp;:hover,&#13;
+      &amp;:focus {&#13;
+        border-left-color: $dsfr-blue;&#13;
+        border-bottom-color: transparent;&#13;
+      }&#13;
+    }&#13;
+&#13;
+    .nav-link.active {&#13;
+      border-left-color: $dsfr-blue;&#13;
+      border-bottom-color: transparent;&#13;
+    }&#13;
+  }&#13;
+}&#13;
+&#13;
+@media (min-width: 768px) {&#13;
+  .dsfr-header__mobile-panel {&#13;
+    display: none;&#13;
+  }&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>x_snc_habitat_dsfr_header</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+}]]></link>
+        <name>Habitat - DSFR Header</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+    // Menu integration
+    var menu = $sp.getValue("sp_rectangle_menu");
+    data.menu = $sp.getWidgetFromInstance(menu);
+
+    // Current user info
+    data.userDisplayName = gs.getUserDisplayName();
+    data.userID = gs.getUserID();
+    data.userRoles = gs.getUser().getRoles().toString();
+    data.isLoggedIn = gs.isLoggedIn();
+
+    // Portal identification - this is the Internet portal
+    data.isInternet = true;
+
+    // Portal URLs
+    data.portalInternetUrl = '/familles';
+    data.portalIntradefUrl = '/habitat';
+})();
+]]></script>
+        <servicenow>false</servicenow>
+        <static>true</static>
+        <sys_class_name>sp_header_footer</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-05 16:36:25</sys_created_on>
+        <sys_id>b35cc0c874f644e4a9ecb9bb70466c2f</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_name>Habitat - DSFR Header</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sp_header_footer_b35cc0c874f644e4a9ecb9bb70466c2f</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-07-23 07:17:10</sys_updated_on>
+        <template><![CDATA[<header class="dsfr-header" role="banner">
+  <!-- Top border tricolore -->
+  <div class="dsfr-header__tricolore"></div>
+
+  <!-- Header top bar -->
+  <div class="dsfr-header__body">
+    <div class="container">
+      <div class="row">
+        <div class="dsfr-header__body-inner">
+
+          <!-- Logo Ministère des Armées et des Anciens Combattants -->
+          <div class="dsfr-header__brand">
+            <a class="dsfr-header__brand-link" href="{{::c.data.portalInternetUrl}}" title="Accueil - Portail Habitat">
+              <div class="dsfr-header__logo">
+                <img class="dsfr-header__logo-img"
+                     src="/logo_minarm.png"
+                     alt="Ministère des Armées et des Anciens Combattants — Liberté Égalité Fraternité">
+              </div>
+            </a>
+          </div>
+
+          <!-- Portal title -->
+          <div class="dsfr-header__service">
+            <a class="dsfr-header__service-title" href="{{::c.data.portalInternetUrl}}" title="Accueil - Portail Habitat">
+              Portail Habitat
+            </a>
+            <p class="dsfr-header__service-tagline">
+              Mobilité, logement &amp; accompagnement
+            </p>
+          </div>
+
+          <!-- Mobile menu toggle -->
+          <div class="dsfr-header__burger visible-xs visible-sm">
+            <button class="dsfr-btn dsfr-btn--menu" type="button"
+                    ng-click="c.toggleMobileMenu()"
+                    aria-expanded="{{c.mobileMenuOpen}}"
+                    aria-label="Menu">
+              <span class="fa fa-bars" ng-hide="c.mobileMenuOpen"></span>
+              <span class="fa fa-times" ng-show="c.mobileMenuOpen"></span>
+            </button>
+          </div>
+
+          <!-- Right section: portal switch + user info -->
+          <div class="dsfr-header__tools hidden-xs hidden-sm">
+            <div class="dsfr-header__tools-links">
+              <a class="dsfr-btn dsfr-btn--primary" href="{{::c.data.portalInternetUrl}}"
+                 ng-class="{'dsfr-btn--active': c.data.isInternet}">
+                Portail Internet
+              </a>
+              <a class="dsfr-btn dsfr-btn--outlined" href="{{::c.data.portalIntradefUrl}}"
+                 ng-class="{'dsfr-btn--active': !c.data.isInternet}">
+                Portail Intradef
+              </a>
+            </div>
+            <div class="dsfr-header__user" ng-if="c.data.isLoggedIn">
+              <span class="fa fa-user dsfr-header__user-icon"></span>
+              <span class="dsfr-header__user-name">{{::c.data.userDisplayName}}  connectée</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation principale (icônes + soulignement bleu) -->
+  <nav class="main-nav" role="navigation" aria-label="Navigation principale"
+       ng-class="{'main-nav--open': c.mobileMenuOpen}">
+    <div class="container">
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="?id=x_snc_habitat_familles_home" class="nav-link active" aria-current="page">
+            <span class="nav-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+            </span>
+            Accueil
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="?id=x_snc_habitat_familles_actualites" class="nav-link">
+            <span class="nav-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14"/><path d="M3 9h18"/><path d="M7 13h6"/></svg>
+            </span>
+            Actualités
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="?id=x_snc_habitat_familles_mobilite" class="nav-link">
+            <span class="nav-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v4a1 1 0 001 1h4"/><path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
+            </span>
+            Demande de démarche
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="?id=x_snc_habitat_familles_suivi" class="nav-link">
+            <span class="nav-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+            </span>
+            Suivi de dossier
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="?id=x_snc_habitat_familles_informations" class="nav-link">
+            <span class="nav-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="7.5" r="0.5" fill="currentColor"/></svg>
+            </span>
+            Informations
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="?id=x_snc_habitat_familles_bureau_logement" class="nav-link">
+            <span class="nav-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            </span>
+            Trouver mon bureau logement
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Mobile panel (collapsed content) -->
+  <div class="dsfr-header__mobile-panel" ng-show="c.mobileMenuOpen">
+    <div class="container">
+      <div class="dsfr-header__mobile-links">
+        <a class="dsfr-btn dsfr-btn--primary dsfr-btn--block" href="{{::c.data.portalInternetUrl}}">
+          Portail Internet
+        </a>
+        <a class="dsfr-btn dsfr-btn--outlined dsfr-btn--block" href="{{::c.data.portalIntradefUrl}}">
+          Portail Intradef
+        </a>
+      </div>
+      <div class="dsfr-header__mobile-user" ng-if="c.data.isLoggedIn">
+        <span class="fa fa-user"></span>
+        <span>{{::c.data.userDisplayName}} — connectée</span>
+      </div>
+    </div>
+  </div>
+</header>]]></template>
+    </sp_header_footer>
+</record_update>

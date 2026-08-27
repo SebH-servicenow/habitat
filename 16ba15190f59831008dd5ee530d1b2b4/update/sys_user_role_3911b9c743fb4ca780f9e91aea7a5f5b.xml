@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_user_role">
+    <sys_user_role action="INSERT_OR_UPDATE">
+        <assignable_by/>
+        <can_delegate>true</can_delegate>
+        <description>Traitant</description>
+        <elevated_privilege>false</elevated_privilege>
+        <federated_id>7dN/JCd5FINbf4jaiqGgR25aWQ+qxlTNy1YKHF4htAk=</federated_id>
+        <grantable>true</grantable>
+        <includes_roles/>
+        <name>x_snc_habitat.habitat_agent</name>
+        <scoped_admin>false</scoped_admin>
+        <suffix>habitat_agent</suffix>
+        <sys_class_name>sys_user_role</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:41</sys_created_on>
+        <sys_id>3911b9c743fb4ca780f9e91aea7a5f5b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_snc_habitat.habitat_agent</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sys_user_role_3911b9c743fb4ca780f9e91aea7a5f5b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:41</sys_updated_on>
+    </sys_user_role>
+</record_update>

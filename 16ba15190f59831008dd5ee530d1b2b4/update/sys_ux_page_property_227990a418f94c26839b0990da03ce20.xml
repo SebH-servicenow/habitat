@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_ux_page_property">
+    <sys_ux_page_property action="INSERT_OR_UPDATE">
+        <choices/>
+        <description/>
+        <name>wbApplicabilityConfigId</name>
+        <page display_value="Habitat - Défense Mobilité">39a37acf76fb49cc8f81e832a6623271</page>
+        <required_translations/>
+        <route/>
+        <suffix>wbApplicabilityConfigId</suffix>
+        <sys_class_name>sys_ux_page_property</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-06 18:57:55</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>227990a418f94c26839b0990da03ce20</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>wbApplicabilityConfigId</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sys_ux_page_property_227990a418f94c26839b0990da03ce20</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-06 18:57:55</sys_updated_on>
+        <type>string</type>
+        <unique_name/>
+        <value>27119d30cf43470fa30c50ee79719c6a</value>
+    </sys_ux_page_property>
+    <sys_translated_text action="delete_multiple" query="documentkey=227990a418f94c26839b0990da03ce20"/>
+</record_update>

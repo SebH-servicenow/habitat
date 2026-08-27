@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>HMAC key for returning user cookie signing. Auto-generated. Do not modify.</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>glide.session.admission.returning_auth_user_cookie.hmac_key</name>
+        <read_roles/>
+        <suffix/>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-08-27 07:15:00</sys_created_on>
+        <sys_id>b0bc87c80f07831008dd5ee530d1b2a5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>glide.session.admission.returning_auth_user_cookie.hmac_key</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sys_properties_b0bc87c80f07831008dd5ee530d1b2a5</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-08-27 07:15:00</sys_updated_on>
+        <type>password</type>
+        <value>y1HUSUbyu+PAD5+983Lpr59eTpWafC+staaCqot7+9U=</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=b0bc87c80f07831008dd5ee530d1b2a5"/>
+</record_update>

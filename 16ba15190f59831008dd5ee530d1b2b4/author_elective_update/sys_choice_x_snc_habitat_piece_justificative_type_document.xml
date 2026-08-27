@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_choice action="INSERT_OR_UPDATE" field="type_document" table="x_snc_habitat_piece_justificative" version="3">
+        <sys_choice_set action="INSERT_OR_UPDATE">
+            <element>type_document</element>
+            <name>x_snc_habitat_piece_justificative</name>
+            <sys_class_name>sys_choice_set</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-04 21:06:25</sys_created_on>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>type_document</sys_name>
+            <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+            <sys_update_name>sys_choice_x_snc_habitat_piece_justificative_type_document</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-04 21:06:25</sys_updated_on>
+        </sys_choice_set>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>type_document</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Ordre de mutation</label>
+            <language>en</language>
+            <name>x_snc_habitat_piece_justificative</name>
+            <sequence>0</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:27</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:27</sys_updated_on>
+            <value>ordre_mutation</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>type_document</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Certificat de radiation</label>
+            <language>en</language>
+            <name>x_snc_habitat_piece_justificative</name>
+            <sequence>1</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:27</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:27</sys_updated_on>
+            <value>certificat_radiation</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>type_document</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Attestation de domicile</label>
+            <language>en</language>
+            <name>x_snc_habitat_piece_justificative</name>
+            <sequence>2</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:27</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:27</sys_updated_on>
+            <value>attestation_domicile</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>type_document</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Justificatif d'identité</label>
+            <language>en</language>
+            <name>x_snc_habitat_piece_justificative</name>
+            <sequence>3</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:27</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:27</sys_updated_on>
+            <value>justificatif_identite</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>type_document</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Autre</label>
+            <language>en</language>
+            <name>x_snc_habitat_piece_justificative</name>
+            <sequence>4</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-09 12:26:28</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-09 12:26:28</sys_updated_on>
+            <value>autre</value>
+        </sys_choice>
+    </sys_choice>
+</record_update>

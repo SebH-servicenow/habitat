@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_documentation element="site_arrivee" label="Site d'arrivée" language="en" table="x_snc_habitat_demande_mobilite">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>site_arrivee</element>
+            <help/>
+            <hint/>
+            <label>Site d'arrivée</label>
+            <language>en</language>
+            <name>x_snc_habitat_demande_mobilite</name>
+            <plural>Site d'arrivées</plural>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-06-04 21:06:27</sys_created_on>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>Site d'arrivée</sys_name>
+            <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+            <sys_update_name>sys_documentation_x_snc_habitat_demande_mobilite_site_arrivee_en</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-06-04 21:06:27</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>

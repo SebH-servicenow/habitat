@@ -1,0 +1,1678 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope) {
+    var c = this;
+
+    // Stepper labels for visual progress bar
+    c.stepperLabels = ['Identité', 'Mobilité', 'Famille & besoins', 'Documents', 'Récapitulatif'];
+
+    // Step definitions
+    c.steps = [
+        { number: 1, title: 'Le demandeur', nextTitle: 'Mobilité' },
+        { number: 2, title: 'Mobilité', nextTitle: 'Vos besoins' },
+        { number: 3, title: 'Vos besoins', nextTitle: 'Pièces justificatives' },
+        { number: 4, title: 'Pièces justificatives', nextTitle: 'Récapitulatif' },
+        { number: 5, title: 'Récapitulatif', nextTitle: '' }
+    ];
+
+    // State
+    c.currentStep = 1;
+    c.stepError = '';
+    c.saving = false;
+    c.submitted = false;
+    c.recordSysId = null;
+
+    // Form data model
+    c.formData = {
+        demande_pour_autrui: undefined,
+        nom_famille: '',
+        grade: '',
+        nigend: '',
+        armee_direction: '',
+        site_depart: '',
+        site_arrivee: '',
+        date_prise_fonction: '',
+        famille_suit: false,
+        famille_reste_metropole: false,
+        besoin_demenagement: false,
+        besoin_logement: false,
+        besoin_accompagnement: false,
+        type_demenagement: '',
+        type_logement: '',
+        document_file: null
+    };
+
+    // Pre-fill user data if available
+    if (c.data.userData) {
+        c.formData.nom_famille = c.data.userData.last_name || '';
+    }
+
+    // Documents list (loaded from server - "Dites-le-nous une fois")
+    c.documents = c.data.documents || [];
+    c.showUploadZone = false;
+
+    // Toggle upload zone
+    c.addDocument = function() {
+        c.showUploadZone = !c.showUploadZone;
+    };
+
+    // Handle radio change for demande type
+    c.onDemandeTypeChange = function() {
+        if (c.formData.demande_pour_autrui === false && c.data.userData) {
+            c.formData.nom_famille = c.data.userData.last_name || '';
+        } else if (c.formData.demande_pour_autrui === true) {
+            c.formData.nom_famille = '';
+            c.formData.grade = '';
+            c.formData.nigend = '';
+            c.formData.armee_direction = '';
+        }
+    };
+
+    // Get label from choices array
+    c.getChoiceLabel = function(choices, value) {
+        if (!choices || !value) return '—';
+        for (var i = 0; i < choices.length; i++) {
+            if (choices[i].value === value) {
+                return choices[i].label;
+            }
+        }
+        return value;
+    };
+
+    // Step validation
+    c.validateStep = function(step) {
+        c.stepError = '';
+        switch (step) {
+            case 1:
+                if (c.formData.demande_pour_autrui === undefined) {
+                    c.stepError = 'Veuillez indiquer pour qui vous déposez cette demande.';
+                    return false;
+                }
+                if (!c.formData.nom_famille) {
+                    c.stepError = 'Le nom de famille est obligatoire.';
+                    return false;
+                }
+                if (!c.formData.grade) {
+                    c.stepError = 'Le grade est obligatoire.';
+                    return false;
+                }
+                if (!c.formData.armee_direction) {
+                    c.stepError = "L'armée ou direction est obligatoire.";
+                    return false;
+                }
+                return true;
+            case 2:
+                if (!c.formData.site_depart) {
+                    c.stepError = 'Le site de départ est obligatoire.';
+                    return false;
+                }
+                if (!c.formData.site_arrivee) {
+                    c.stepError = "Le site d'arrivée est obligatoire.";
+                    return false;
+                }
+                if (!c.formData.date_prise_fonction) {
+                    c.stepError = 'La date prévisionnelle est obligatoire.';
+                    return false;
+                }
+                return true;
+            case 3:
+                if (!c.formData.besoin_demenagement && !c.formData.besoin_logement && !c.formData.besoin_accompagnement) {
+                    c.stepError = 'Veuillez sélectionner au moins une prestation.';
+                    return false;
+                }
+                if (c.formData.besoin_demenagement && !c.formData.type_demenagement) {
+                    c.stepError = 'Veuillez sélectionner un type de déménagement.';
+                    return false;
+                }
+                if (c.formData.besoin_logement && !c.formData.type_logement) {
+                    c.stepError = 'Veuillez sélectionner un type de logement.';
+                    return false;
+                }
+                return true;
+            case 4:
+                return true;
+            case 5:
+                return true;
+            default:
+                return true;
+        }
+    };
+
+    // Navigation
+    c.nextStep = function() {
+        if (c.validateStep(c.currentStep)) {
+            if (c.currentStep < 5) {
+                c.currentStep++;
+                c.stepError = '';
+                scrollToTop();
+            }
+        }
+    };
+
+    c.prevStep = function() {
+        if (c.currentStep > 1) {
+            c.currentStep--;
+            c.stepError = '';
+            scrollToTop();
+        }
+    };
+
+    // Save draft
+    c.saveDraft = function() {
+        c.saving = true;
+        c.stepError = '';
+        var payload = {
+            action: 'saveDraft',
+            sys_id: c.recordSysId,
+            formData: buildServerPayload()
+        };
+        c.server.get(payload).then(function(response) {
+            c.saving = false;
+            if (response.data.sys_id) {
+                c.recordSysId = response.data.sys_id;
+            }
+        }, function() {
+            c.saving = false;
+            c.stepError = "Erreur lors de l'enregistrement du brouillon.";
+        });
+    };
+
+    // Submit form
+    c.submitForm = function() {
+        if (!c.validateStep(5)) return;
+        c.saving = true;
+        c.stepError = '';
+        var payload = {
+            action: 'submit',
+            sys_id: c.recordSysId,
+            formData: buildServerPayload()
+        };
+        c.server.get(payload).then(function(response) {
+            c.saving = false;
+            if (response.data.submitted) {
+                c.submitted = true;
+                if (response.data.sys_id) {
+                    c.recordSysId = response.data.sys_id;
+                }
+            }
+        }, function() {
+            c.saving = false;
+            c.stepError = 'Erreur lors de la soumission de la demande.';
+        });
+    };
+
+    // Build payload for server
+    function buildServerPayload() {
+        return {
+            demande_pour_autrui: c.formData.demande_pour_autrui || false,
+            nom_famille: c.formData.nom_famille || '',
+            grade: c.formData.grade || '',
+            nigend: c.formData.nigend || '',
+            armee_direction: c.formData.armee_direction || '',
+            site_depart: c.formData.site_depart || '',
+            site_arrivee: c.formData.site_arrivee || '',
+            date_prise_fonction: c.formData.date_prise_fonction || '',
+            famille_suit: c.formData.famille_suit || false,
+            famille_reste_metropole: c.formData.famille_reste_metropole || false,
+            besoin_demenagement: c.formData.besoin_demenagement || false,
+            besoin_logement: c.formData.besoin_logement || false,
+            besoin_accompagnement: c.formData.besoin_accompagnement || false,
+            type_demenagement: c.formData.type_demenagement || '',
+            type_logement: c.formData.type_logement || '',
+            etape_courante: c.currentStep + ''
+        };
+    }
+
+    // Scroll to top on step change
+    function scrollToTop() {
+        var el = document.querySelector('.dsfr-wizard');
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+};
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ===== DSFR Wizard — Formulaire unique de mobilité ===== */
+/* Font: Marianne (DSFR standard) */
+
+.dsfr-wizard {
+    font-family: 'Marianne', Arial, sans-serif;
+    color: #161616;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+    line-height: 1.5;
+}
+
+/* ===== Breadcrumb ===== */
+.dsfr-breadcrumb {
+    margin-bottom: 24px;
+}
+
+.dsfr-breadcrumb ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 14px;
+}
+
+.dsfr-breadcrumb li {
+    display: inline-flex;
+    align-items: center;
+}
+
+.dsfr-breadcrumb li + li::before {
+    content: '›';
+    margin-right: 8px;
+    margin-left: 4px;
+    color: #666666;
+}
+
+.dsfr-breadcrumb a {
+    color: #000091;
+    text-decoration: underline;
+}
+
+.dsfr-breadcrumb a:hover {
+    text-decoration: none;
+}
+
+.dsfr-breadcrumb [aria-current] {
+    color: #161616;
+    font-weight: 500;
+}
+
+/* ===== Stepper ===== */
+.dsfr-stepper {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #E5E5E5;
+}
+
+.dsfr-stepper__state {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #666666;
+    margin-bottom: 8px;
+}
+
+.dsfr-stepper__title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #161616;
+    margin: 0 0 4px;
+    line-height: 1.2;
+}
+
+.dsfr-stepper__subtitle {
+    font-size: 14px;
+    color: #666666;
+    margin: 0 0 16px;
+    font-style: italic;
+}
+
+/* Progress bar */
+.dsfr-stepper__progress {
+    display: flex;
+    gap: 4px;
+    height: 8px;
+}
+
+.dsfr-stepper__segment {
+    flex: 1;
+    background-color: #E5E5E5;
+    display: block;
+}
+
+.dsfr-stepper__segment--filled {
+    background-color: #000091;
+}
+
+/* ===== Step content ===== */
+.dsfr-step-content {
+    animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Callout / Info box ===== */
+.dsfr-callout {
+    background-color: #F5F5FE;
+    border-left: 4px solid #000091;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+}
+
+.dsfr-callout__title {
+    font-weight: 700;
+    font-size: 14px;
+    color: #000091;
+    margin: 0 0 8px;
+}
+
+.dsfr-callout__text {
+    font-size: 14px;
+    color: #161616;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.dsfr-callout--success {
+    background-color: #B8FEC9;
+    border-left-color: #18753C;
+}
+
+.dsfr-callout--success .dsfr-callout__title {
+    color: #18753C;
+}
+
+/* ===== Fieldset ===== */
+.dsfr-fieldset {
+    border: none;
+    padding: 0;
+    margin: 0 0 24px;
+}
+
+.dsfr-fieldset__legend {
+    font-size: 16px;
+    font-weight: 700;
+    color: #161616;
+    margin-bottom: 16px;
+    padding: 0;
+}
+
+/* ===== Radio cards ===== */
+.dsfr-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dsfr-radio-card {
+    border: 1px solid #E5E5E5;
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.dsfr-radio-card:hover {
+    border-color: #000091;
+    background-color: #F5F5FE;
+}
+
+.dsfr-radio-card--selected {
+    border-color: #000091;
+    border-left: 4px solid #000091;
+    background-color: #F5F5FE;
+}
+
+.dsfr-radio-card input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    accent-color: #000091;
+    flex-shrink: 0;
+}
+
+.dsfr-radio-card label {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dsfr-radio-card__title {
+    font-weight: 700;
+    font-size: 15px;
+    color: #161616;
+}
+
+.dsfr-radio-card__desc {
+    font-size: 13px;
+    color: #666666;
+}
+
+/* ===== Form section ===== */
+.dsfr-form-section {
+    margin-bottom: 24px;
+}
+
+.dsfr-section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #161616;
+    margin: 0 0 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #E5E5E5;
+}
+
+.dsfr-helper-text {
+    font-size: 14px;
+    color: #666666;
+    margin: 0 0 16px;
+    line-height: 1.5;
+}
+
+/* ===== Form groups ===== */
+.dsfr-form-group {
+    margin-bottom: 20px;
+}
+
+.dsfr-form-group--conditional {
+    margin-top: 16px;
+    padding-left: 24px;
+    border-left: 3px solid #000091;
+}
+
+.dsfr-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #161616;
+    margin-bottom: 6px;
+}
+
+.dsfr-required {
+    color: #CE0500;
+}
+
+.dsfr-hint {
+    display: block;
+    font-size: 12px;
+    color: #666666;
+    margin-bottom: 6px;
+}
+
+/* ===== Inputs and selects ===== */
+.dsfr-input,
+.dsfr-select {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: 'Marianne', Arial, sans-serif;
+    color: #161616;
+    background-color: #FFFFFF;
+    border: 1px solid #929292;
+    border-radius: 0;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.dsfr-input:focus,
+.dsfr-select:focus {
+    border-color: #000091;
+    box-shadow: 0 0 0 2px rgba(0, 0, 145, 0.2);
+}
+
+.dsfr-input::placeholder {
+    color: #929292;
+}
+
+.dsfr-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%23161616' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+/* ===== Checkboxes ===== */
+.dsfr-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.dsfr-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.dsfr-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+    accent-color: #000091;
+    flex-shrink: 0;
+}
+
+.dsfr-checkbox label {
+    font-size: 14px;
+    color: #161616;
+    cursor: pointer;
+    line-height: 1.5;
+}
+
+/* ===== Upload zone ===== */
+.dsfr-upload-zone {
+    margin-top: 16px;
+}
+
+.dsfr-upload-zone__inner {
+    border: 2px dashed #929292;
+    padding: 32px 24px;
+    text-align: center;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.dsfr-upload-zone__inner:hover {
+    border-color: #000091;
+    background-color: #F5F5FE;
+}
+
+.dsfr-upload-zone__icon {
+    display: block;
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.dsfr-upload-zone__label {
+    font-size: 14px;
+    color: #161616;
+    cursor: pointer;
+}
+
+.dsfr-upload-zone__link {
+    color: #000091;
+    text-decoration: underline;
+    font-weight: 700;
+}
+
+.dsfr-upload-zone__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.dsfr-upload-zone__hint {
+    font-size: 12px;
+    color: #666666;
+    margin-top: 8px;
+}
+
+/* ===== Summary (Récapitulatif) ===== */
+.dsfr-summary {
+    margin-bottom: 24px;
+}
+
+.dsfr-summary__section {
+    margin-bottom: 24px;
+}
+
+.dsfr-summary__heading {
+    font-size: 16px;
+    font-weight: 700;
+    color: #000091;
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #000091;
+}
+
+.dsfr-summary__list {
+    margin: 0;
+}
+
+.dsfr-summary__row {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px solid #E5E5E5;
+}
+
+.dsfr-summary__row dt {
+    font-size: 14px;
+    font-weight: 500;
+    color: #666666;
+    flex: 0 0 200px;
+}
+
+.dsfr-summary__row dd {
+    font-size: 14px;
+    color: #161616;
+    font-weight: 600;
+    margin: 0;
+    flex: 1;
+}
+
+/* ===== Notice (warning) ===== */
+.dsfr-notice {
+    background-color: #FEF4F4;
+    border-left: 4px solid #CE0500;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+}
+
+.dsfr-notice p {
+    margin: 0;
+    font-size: 14px;
+    color: #161616;
+    line-height: 1.6;
+}
+
+/* ===== Buttons group ===== */
+.dsfr-buttons-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #E5E5E5;
+    flex-wrap: wrap;
+}
+
+.dsfr-link-back {
+    font-size: 14px;
+    color: #000091;
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 500;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.dsfr-link-back:hover {
+    text-decoration: none;
+}
+
+.dsfr-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Marianne', Arial, sans-serif;
+    border-radius: 0;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.15s, color 0.15s;
+    border: none;
+    line-height: 1.5;
+}
+
+.dsfr-btn--primary {
+    background-color: #000091;
+    color: #FFFFFF;
+}
+
+.dsfr-btn--primary:hover {
+    background-color: #1212FF;
+    color: #FFFFFF;
+}
+
+.dsfr-btn--secondary {
+    background-color: transparent;
+    color: #000091;
+    border: 1px solid #000091;
+}
+
+.dsfr-btn--secondary:hover {
+    background-color: #F5F5FE;
+}
+
+.dsfr-btn--submit {
+    background-color: #000091;
+    color: #FFFFFF;
+}
+
+.dsfr-btn--submit:hover {
+    background-color: #1212FF;
+    color: #FFFFFF;
+}
+
+/* ===== Error message ===== */
+.dsfr-error-message {
+    background-color: #FEF4F4;
+    border-left: 4px solid #CE0500;
+    padding: 12px 16px;
+    margin-top: 16px;
+}
+
+.dsfr-error-message p {
+    margin: 0;
+    font-size: 14px;
+    color: #CE0500;
+    font-weight: 500;
+}
+
+/* ===== Success message ===== */
+.dsfr-success-message {
+    margin-top: 24px;
+}
+
+/* ===== Saving indicator ===== */
+.dsfr-saving-indicator {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background-color: #000091;
+    color: #FFFFFF;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dsfr-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #FFFFFF;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== Logement block (step 3 conditional) ===== */
+.dsfr-logement-section {
+    margin-top: 24px;
+    padding-left: 24px;
+    border-left: 3px solid #000091;
+}
+
+.dsfr-logement-block__title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #161616;
+    margin: 0 0 8px;
+}
+
+.dsfr-logement-block__question {
+    font-size: 14px;
+    font-weight: 700;
+    color: #161616;
+    margin: 0 0 16px;
+}
+
+/* ===== DLNUF Callout (green) ===== */
+.dsfr-callout--dlnuf {
+    background-color: #E6F7E6;
+    border-left-color: #18753C;
+}
+
+.dsfr-callout--dlnuf .dsfr-callout__title {
+    color: #18753C;
+}
+
+/* ===== Documents list ===== */
+.dsfr-documents-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 20px;
+}
+
+.dsfr-document-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border: 1px solid #E5E5E5;
+    border-bottom: none;
+    background-color: #FFFFFF;
+}
+
+.dsfr-document-item:last-child {
+    border-bottom: 1px solid #E5E5E5;
+}
+
+.dsfr-document-item__icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666666;
+    font-size: 20px;
+}
+
+.dsfr-document-item__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dsfr-document-item__name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #161616;
+}
+
+.dsfr-document-item__meta {
+    font-size: 13px;
+    color: #666666;
+}
+
+.dsfr-document-item__badge {
+    flex-shrink: 0;
+}
+
+/* Badges */
+.dsfr-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid;
+}
+
+.dsfr-badge--reuse {
+    color: #18753C;
+    border-color: #18753C;
+    background-color: transparent;
+}
+
+.dsfr-badge--required {
+    color: #CE0500;
+    border-color: #CE0500;
+    background-color: transparent;
+}
+
+/* Add document button */
+.dsfr-btn-add-document {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Marianne', Arial, sans-serif;
+    color: #000091;
+    background-color: transparent;
+    border: 1px solid #000091;
+    border-radius: 0;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    margin-bottom: 16px;
+}
+
+.dsfr-btn-add-document:hover {
+    background-color: #F5F5FE;
+}
+
+.dsfr-btn-add-document__arrow {
+    font-size: 16px;
+}
+
+/* ===== Responsive adjustments ===== */
+@media (max-width: 767px) {
+    .dsfr-wizard {
+        padding: 16px 12px 32px;
+    }
+
+    .dsfr-stepper__title {
+        font-size: 22px;
+    }
+
+    .dsfr-summary__row {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .dsfr-summary__row dt {
+        flex: none;
+    }
+
+    .dsfr-buttons-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dsfr-buttons-group .dsfr-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .dsfr-buttons-group .dsfr-link-back {
+        order: -1;
+        text-align: center;
+    }
+}
+
+/* ═══ Stepper ═══ */
+.hab-stepper { padding: 24px 16px; margin-bottom: 24px; background: #FFFFFF; border-bottom: 1px solid #E5E5E5; }
+.hab-stepper__steps { display: flex; align-items: flex-start; justify-content: center; gap: 0; max-width: 700px; margin: 0 auto; }
+.hab-stepper__step { display: flex; flex-direction: column; align-items: center; position: relative; flex: 1; text-align: center; }
+.hab-stepper__marker { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border: 2px solid #E5E5E5; background: #FFFFFF; color: #666666; position: relative; z-index: 2; transition: all 0.3s; }
+.hab-stepper__step--active .hab-stepper__marker { border-color: #000091; background: #000091; color: #FFFFFF; box-shadow: 0 0 0 4px rgba(0,0,145,0.15); }
+.hab-stepper__step--done .hab-stepper__marker { border-color: #18753C; background: #18753C; color: #FFFFFF; }
+.hab-stepper__step--pending .hab-stepper__marker { border-color: #E5E5E5; background: #F5F5FE; color: #666666; }
+.hab-stepper__label { margin-top: 8px; font-size: 11px; font-weight: 500; color: #666666; white-space: nowrap; font-family: 'Marianne', Arial, sans-serif; }
+.hab-stepper__step--active .hab-stepper__label { color: #000091; font-weight: 700; }
+.hab-stepper__step--done .hab-stepper__label { color: #18753C; }
+.hab-stepper__connector { position: absolute; top: 18px; left: calc(50% + 18px); width: calc(100% - 36px); height: 2px; background: #E5E5E5; z-index: 1; }
+.hab-stepper__step--done .hab-stepper__connector { background: #18753C; }
+.hab-stepper__step--active .hab-stepper__connector { background: #E5E5E5; }
+@media (max-width: 768px) {
+  .hab-stepper__steps { gap: 0; }
+  .hab-stepper__label { font-size: 9px; }
+  .hab-stepper__marker { width: 28px; height: 28px; font-size: 12px; }
+  .hab-stepper__connector { top: 14px; left: calc(50% + 14px); width: calc(100% - 28px); }
+}
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id/>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+}]]></link>
+        <name>Habitat - Formulaire Mobilité</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+    // Handle actions from client
+    if (input && input.action) {
+        if (input.action === 'loadUserData') {
+            var userGR = new GlideRecord('sys_user');
+            userGR.addQuery('sys_id', gs.getUserID());
+            userGR.setLimit(1);
+            userGR.query();
+            if (userGR.next()) {
+                data.userData = {
+                    sys_id: userGR.getUniqueValue() + '',
+                    name: userGR.getDisplayValue('name') + '',
+                    last_name: userGR.getDisplayValue('last_name') + '',
+                    first_name: userGR.getDisplayValue('first_name') + ''
+                };
+            }
+        }
+
+        if (input.action === 'saveDraft') {
+            var gr = new GlideRecord('x_snc_habitat_demande_mobilite');
+            if (input.sys_id) {
+                gr.addQuery('sys_id', input.sys_id);
+                gr.setLimit(1);
+                gr.query();
+                if (!gr.next()) {
+                    gr.initialize();
+                }
+            } else {
+                gr.initialize();
+            }
+
+            var fd = input.formData || {};
+            gr.setValue('administre', fd.administre || gs.getUserID());
+            gr.setValue('demandeur', gs.getUserID());
+            gr.setValue('demande_pour_autrui', fd.demande_pour_autrui || false);
+            gr.setValue('grade', fd.grade || '');
+            gr.setValue('nigend', fd.nigend || '');
+            gr.setValue('armee_direction', fd.armee_direction || '');
+            gr.setValue('site_depart', fd.site_depart || '');
+            gr.setValue('site_arrivee', fd.site_arrivee || '');
+            gr.setValue('date_prise_fonction', fd.date_prise_fonction || '');
+            gr.setValue('famille_suit', fd.famille_suit || false);
+            gr.setValue('famille_reste_metropole', fd.famille_reste_metropole || false);
+            gr.setValue('besoin_demenagement', fd.besoin_demenagement || false);
+            gr.setValue('besoin_logement', fd.besoin_logement || false);
+            gr.setValue('besoin_accompagnement', fd.besoin_accompagnement || false);
+            gr.setValue('type_demenagement', fd.type_demenagement || '');
+            gr.setValue('type_logement', fd.type_logement || '');
+            gr.setValue('etape_courante', fd.etape_courante || '1');
+            gr.setValue('est_brouillon', true);
+
+            if (input.sys_id && gr.getUniqueValue()) {
+                gr.update();
+            } else {
+                gr.setValue('short_description', 'Demande de mobilité - Brouillon');
+                data.sys_id = gr.insert() + '';
+            }
+            data.saved = true;
+        }
+
+        if (input.action === 'submit') {
+            var grSubmit = new GlideRecord('x_snc_habitat_demande_mobilite');
+            if (input.sys_id) {
+                grSubmit.addQuery('sys_id', input.sys_id);
+                grSubmit.setLimit(1);
+                grSubmit.query();
+                if (!grSubmit.next()) {
+                    grSubmit.initialize();
+                }
+            } else {
+                grSubmit.initialize();
+            }
+
+            var fdSubmit = input.formData || {};
+            grSubmit.setValue('administre', fdSubmit.administre || gs.getUserID());
+            grSubmit.setValue('demandeur', gs.getUserID());
+            grSubmit.setValue('demande_pour_autrui', fdSubmit.demande_pour_autrui || false);
+            grSubmit.setValue('grade', fdSubmit.grade || '');
+            grSubmit.setValue('nigend', fdSubmit.nigend || '');
+            grSubmit.setValue('armee_direction', fdSubmit.armee_direction || '');
+            grSubmit.setValue('site_depart', fdSubmit.site_depart || '');
+            grSubmit.setValue('site_arrivee', fdSubmit.site_arrivee || '');
+            grSubmit.setValue('date_prise_fonction', fdSubmit.date_prise_fonction || '');
+            grSubmit.setValue('famille_suit', fdSubmit.famille_suit || false);
+            grSubmit.setValue('famille_reste_metropole', fdSubmit.famille_reste_metropole || false);
+            grSubmit.setValue('besoin_demenagement', fdSubmit.besoin_demenagement || false);
+            grSubmit.setValue('besoin_logement', fdSubmit.besoin_logement || false);
+            grSubmit.setValue('besoin_accompagnement', fdSubmit.besoin_accompagnement || false);
+            grSubmit.setValue('type_demenagement', fdSubmit.type_demenagement || '');
+            grSubmit.setValue('type_logement', fdSubmit.type_logement || '');
+            grSubmit.setValue('est_brouillon', false);
+            grSubmit.setValue('etape_courante', '5');
+            grSubmit.setValue('short_description', 'Demande de mobilité');
+            grSubmit.setValue('etape_visible_usager', 'Demande soumise');
+
+            if (input.sys_id && grSubmit.getUniqueValue()) {
+                grSubmit.update();
+            } else {
+                data.sys_id = grSubmit.insert() + '';
+            }
+            data.submitted = true;
+        }
+        return;
+    }
+
+    // Initial load
+    data.isExternal = gs.hasRole('habitat_external');
+    data.currentUserID = gs.getUserID() + '';
+
+    // Pre-load user data
+    var userGR = new GlideRecord('sys_user');
+    userGR.addQuery('sys_id', gs.getUserID());
+    userGR.setLimit(1);
+    userGR.query();
+    if (userGR.next()) {
+        data.userData = {
+            sys_id: userGR.getUniqueValue() + '',
+            name: userGR.getDisplayValue('name') + '',
+            last_name: userGR.getDisplayValue('last_name') + '',
+            first_name: userGR.getDisplayValue('first_name') + ''
+        };
+    }
+
+    // Choice options for dropdowns
+    data.armeesChoices = [
+        {value: 'armee_de_terre', label: 'Armée de Terre'},
+        {value: 'marine_nationale', label: 'Marine Nationale'},
+        {value: 'armee_de_lair', label: "Armée de l'Air et de l'Espace"},
+        {value: 'gendarmerie', label: 'Gendarmerie Nationale'},
+        {value: 'ssa', label: 'Service de Santé des Armées'},
+        {value: 'sca', label: "Service du Commissariat des Armées"},
+        {value: 'dga', label: 'DGA'},
+        {value: 'sga', label: 'SGA'},
+        {value: 'autre', label: 'Autre direction'}
+    ];
+
+    data.sitesChoices = [
+        {value: 'metropole_idf', label: 'Métropole et IDF'},
+        {value: 'europe', label: 'Europe'},
+        {value: 'pf_reu_may', label: 'PF, REU et MAY'},
+        {value: 'dji', label: 'DJI'},
+        {value: 'autre_om', label: 'Autre OM'},
+        {value: 'autres_etranger', label: 'Autres étranger'}
+    ];
+
+    data.logementsChoices = [
+        {value: 'hebergement_bcc', label: 'Hébergement BCC-Week Away'},
+        {value: 'logement_patrimonial', label: 'Logement patrimonial'},
+        {value: 'logement_prive', label: 'Logement privé'}
+    ];
+
+    // "Dites-le-nous une fois" — Load existing documents from user's piece justificative table
+    var TYPE_DOC_LABELS = {
+        'ordre_mutation': 'Ordre de mutation',
+        'justificatif_identite': "Justificatif d'identité (CNI / Passeport)",
+        'attestation_domicile': 'Attestation de domicile',
+        'certificat_radiation': 'Certificat de radiation logement',
+        'livret_famille': 'Livret de famille',
+        'rib': 'RIB',
+        'certificat_medical': 'Certificat médical'
+    };
+
+    data.documents = [];
+    var pjGR = new GlideRecord('x_snc_habitat_piece_justificative');
+    pjGR.addQuery('administre', gs.getUserID());
+    pjGR.orderByDesc('sys_created_on');
+    pjGR.setLimit(10);
+    pjGR.query();
+    while (pjGR.next()) {
+        var typeDoc = pjGR.getValue('type_document') + '';
+        var metaStr = pjGR.getValue('metadonnees') + '';
+        var docName = TYPE_DOC_LABELS[typeDoc] || typeDoc;
+
+        // Try to get a more specific name from metadonnees JSON
+        try {
+            var metaObj = JSON.parse(metaStr);
+            if (metaObj && metaObj.nom) {
+                docName = metaObj.nom;
+            }
+        } catch(e) {
+            // metadonnees is not valid JSON, use type label
+        }
+
+        var createdOn = pjGR.getDisplayValue('sys_created_on') + '';
+        var meta = 'Transmis le ' + createdOn;
+        var source = pjGR.getValue('source_extraction') + '';
+        if (source === 'ocr') {
+            meta += ' · Extrait par OCR';
+        }
+
+        data.documents.push({
+            sys_id: pjGR.getUniqueValue() + '',
+            name: docName,
+            meta: meta,
+            status: 'reuse'
+        });
+    }
+
+    // If no documents found, show required documents placeholder
+    if (data.documents.length === 0) {
+        data.documents = [
+            {sys_id: '', name: 'Ordre de mutation', meta: 'À fournir pour cette démarche', status: 'required'},
+            {sys_id: '', name: 'Livret de famille', meta: 'À fournir pour cette démarche', status: 'required'},
+            {sys_id: '', name: 'Justificatif de domicile actuel', meta: 'À fournir pour cette démarche', status: 'required'}
+        ];
+    }
+})();
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:37</sys_created_on>
+        <sys_id>f3c6cfb22e294bc2b14f3aad499051c5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Habitat - Formulaire Mobilité</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sp_widget_f3c6cfb22e294bc2b14f3aad499051c5</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:37</sys_updated_on>
+        <template><![CDATA[<div class="dsfr-wizard">
+  <!-- Stepper -->
+  <div class="hab-stepper">
+    <div class="hab-stepper__steps">
+      <div class="hab-stepper__step" ng-repeat="s in c.stepperLabels track by $index" ng-class="{'hab-stepper__step--done': $index < c.currentStep - 1, 'hab-stepper__step--active': $index === c.currentStep - 1, 'hab-stepper__step--pending': $index > c.currentStep - 1}">
+        <div class="hab-stepper__marker">
+          <span ng-if="$index < c.currentStep - 1" class="glyphicon glyphicon-ok"></span>
+          <span ng-if="$index >= c.currentStep - 1">{{$index + 1}}</span>
+        </div>
+        <div class="hab-stepper__label">{{s}}</div>
+        <div class="hab-stepper__connector" ng-if="$index < c.stepperLabels.length - 1"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Breadcrumb -->
+  <nav class="dsfr-breadcrumb" aria-label="Fil d'Ariane">
+    <ol>
+      <li><a href="?id=familles_home">Accueil</a></li>
+      <li aria-current="step">Formulaire unique de mobilité</li>
+    </ol>
+  </nav>
+
+  <!-- Step indicator -->
+  <div class="dsfr-stepper">
+    <div class="dsfr-stepper__header">
+      <span class="dsfr-stepper__state">Étape {{c.currentStep}} sur 5</span>
+      <h2 class="dsfr-stepper__title">{{c.steps[c.currentStep - 1].title}}</h2>
+      <p class="dsfr-stepper__subtitle" ng-if="c.currentStep < 5">
+        prochaine étape : {{c.steps[c.currentStep - 1].nextTitle}}
+      </p>
+      <p class="dsfr-stepper__subtitle" ng-if="c.currentStep === 5">
+        dernière étape
+      </p>
+    </div>
+    <!-- Progress bar -->
+    <div class="dsfr-stepper__progress" role="progressbar" aria-valuenow="{{c.currentStep}}" aria-valuemin="1" aria-valuemax="5">
+      <span class="dsfr-stepper__segment" ng-repeat="step in [1,2,3,4,5]" ng-class="{'dsfr-stepper__segment--filled': step <= c.currentStep}"></span>
+    </div>
+  </div>
+
+  <!-- ====== STEP 1: Le demandeur ====== -->
+  <div class="dsfr-step-content" ng-if="c.currentStep === 1">
+    <!-- Info box -->
+    <div class="dsfr-callout">
+      <p class="dsfr-callout__title">Portail Internet</p>
+      <p class="dsfr-callout__text">Vous pouvez déposer une demande en votre nom ou pour le compte d'un usager (délégation famille). Toute demande pour autrui déclenchera un courriel de validation d'identité et de consentement auprès de l'usager concerné.</p>
+    </div>
+
+    <!-- Radio choice: Pour qui -->
+    <fieldset class="dsfr-fieldset">
+      <legend class="dsfr-fieldset__legend">Pour qui déposez-vous cette demande ?</legend>
+      <div class="dsfr-radio-group">
+        <div class="dsfr-radio-card" ng-class="{'dsfr-radio-card--selected': c.formData.demande_pour_autrui === false}">
+          <input type="radio" id="radio-moi" name="demande_pour" ng-model="c.formData.demande_pour_autrui" ng-value="false" ng-change="c.onDemandeTypeChange()">
+          <label for="radio-moi">
+            <span class="dsfr-radio-card__title">En mon nom propre</span>
+            <span class="dsfr-radio-card__desc">Je suis l'usager concerné par la mobilité.</span>
+          </label>
+        </div>
+        <div class="dsfr-radio-card" ng-class="{'dsfr-radio-card--selected': c.formData.demande_pour_autrui === true}">
+          <input type="radio" id="radio-autrui" name="demande_pour" ng-model="c.formData.demande_pour_autrui" ng-value="true" ng-change="c.onDemandeTypeChange()">
+          <label for="radio-autrui">
+            <span class="dsfr-radio-card__title">Pour le compte d'un usager (délégation)</span>
+            <span class="dsfr-radio-card__desc">Membre de la famille ou représentant légal.</span>
+          </label>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Identity fields -->
+    <div class="dsfr-form-section" ng-if="c.formData.demande_pour_autrui !== undefined">
+      <div class="row">
+        <div class="col-xs-12 col-md-6">
+          <div class="dsfr-form-group">
+            <label class="dsfr-label" for="nom_famille">Nom de famille <span class="dsfr-required">*</span></label>
+            <input class="dsfr-input" type="text" id="nom_famille" ng-model="c.formData.nom_famille" placeholder="Nom de famille" required>
+          </div>
+        </div>
+        <div class="col-xs-12 col-md-6">
+          <div class="dsfr-form-group">
+            <label class="dsfr-label" for="grade">Grade <span class="dsfr-required">*</span></label>
+            <input class="dsfr-input" type="text" id="grade" ng-model="c.formData.grade" placeholder="Grade" required>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12 col-md-6">
+          <div class="dsfr-form-group">
+            <label class="dsfr-label" for="nigend">NIGEND</label>
+            <span class="dsfr-hint">Identifiant unique défense</span>
+            <input class="dsfr-input" type="text" id="nigend" ng-model="c.formData.nigend" placeholder="Identifiant unique défense">
+          </div>
+        </div>
+        <div class="col-xs-12 col-md-6">
+          <div class="dsfr-form-group">
+            <label class="dsfr-label" for="armee_direction">Armée / direction <span class="dsfr-required">*</span></label>
+            <select class="dsfr-select" id="armee_direction" ng-model="c.formData.armee_direction" required>
+              <option value="">Sélectionner une option</option>
+              <option ng-repeat="choice in c.data.armeesChoices" value="{{choice.value}}">{{choice.label}}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Validation error -->
+    <div class="dsfr-error-message" ng-if="c.stepError">
+      <p>{{c.stepError}}</p>
+    </div>
+
+    <!-- Step 1 buttons -->
+    <div class="dsfr-buttons-group">
+      <button class="dsfr-btn dsfr-btn--secondary" ng-click="c.saveDraft()">Enregistrer le brouillon</button>
+      <button class="dsfr-btn dsfr-btn--primary" ng-click="c.nextStep()">Continuer ›</button>
+    </div>
+  </div>
+
+  <!-- ====== STEP 2: Mobilité ====== -->
+  <div class="dsfr-step-content" ng-if="c.currentStep === 2">
+    <!-- Trajet de mutation -->
+    <div class="dsfr-form-section">
+      <h3 class="dsfr-section-title">Trajet de mutation</h3>
+      <p class="dsfr-helper-text">La combinaison site de départ / site d'arrivée détermine les offres auxquelles vous êtes éligible (matrice d'éligibilité).</p>
+
+      <div class="row">
+        <div class="col-xs-12 col-md-6">
+          <div class="dsfr-form-group">
+            <label class="dsfr-label" for="site_depart">Site de départ <span class="dsfr-required">*</span></label>
+            <select class="dsfr-select" id="site_depart" ng-model="c.formData.site_depart" required>
+              <option value="">Sélectionner un site</option>
+              <option ng-repeat="choice in c.data.sitesChoices" value="{{choice.value}}">{{choice.label}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-xs-12 col-md-6">
+          <div class="dsfr-form-group">
+            <label class="dsfr-label" for="site_arrivee">Site d'arrivée <span class="dsfr-required">*</span></label>
+            <select class="dsfr-select" id="site_arrivee" ng-model="c.formData.site_arrivee" required>
+              <option value="">Sélectionner un site</option>
+              <option ng-repeat="choice in c.data.sitesChoices" value="{{choice.value}}">{{choice.label}}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12 col-md-6">
+          <div class="dsfr-form-group">
+            <label class="dsfr-label" for="date_prise_fonction">Date prévisionnelle de prise de fonction <span class="dsfr-required">*</span></label>
+            <input class="dsfr-input" type="date" id="date_prise_fonction" ng-model="c.formData.date_prise_fonction" required>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Composition de la mobilité -->
+    <div class="dsfr-form-section">
+      <h3 class="dsfr-section-title">Composition de la mobilité</h3>
+      <div class="dsfr-checkbox-group">
+        <div class="dsfr-checkbox">
+          <input type="checkbox" id="famille_suit" ng-model="c.formData.famille_suit">
+          <label for="famille_suit">Ma famille me suit sur le nouveau lieu d'affectation</label>
+        </div>
+        <div class="dsfr-checkbox">
+          <input type="checkbox" id="famille_reste" ng-model="c.formData.famille_reste_metropole">
+          <label for="famille_reste">Ma famille reste en métropole</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Validation error -->
+    <div class="dsfr-error-message" ng-if="c.stepError">
+      <p>{{c.stepError}}</p>
+    </div>
+
+    <!-- Step 2 buttons -->
+    <div class="dsfr-buttons-group">
+      <a class="dsfr-link-back" ng-click="c.prevStep()">‹ Précédent</a>
+      <button class="dsfr-btn dsfr-btn--secondary" ng-click="c.saveDraft()">Enregistrer le brouillon</button>
+      <button class="dsfr-btn dsfr-btn--primary" ng-click="c.nextStep()">Continuer ›</button>
+    </div>
+  </div>
+
+  <!-- ====== STEP 3: Vos besoins ====== -->
+  <div class="dsfr-step-content" ng-if="c.currentStep === 3">
+    <div class="dsfr-form-section">
+      <h3 class="dsfr-section-title">Quels accompagnements souhaitez-vous activer ?</h3>
+      <div class="dsfr-checkbox-group">
+        <div class="dsfr-checkbox">
+          <input type="checkbox" id="besoin_demenagement" ng-model="c.formData.besoin_demenagement">
+          <label for="besoin_demenagement">Accompagnement au déménagement</label>
+        </div>
+        <div class="dsfr-checkbox">
+          <input type="checkbox" id="besoin_logement" ng-model="c.formData.besoin_logement">
+          <label for="besoin_logement">Accompagnement au logement</label>
+        </div>
+        <div class="dsfr-checkbox">
+          <input type="checkbox" id="besoin_accompagnement" ng-model="c.formData.besoin_accompagnement">
+          <label for="besoin_accompagnement">Accompagnement de la famille &amp; prestations diverses</label>
+        </div>
+      </div>
+
+      <!-- Conditional: Déménagement radio cards -->
+      <div class="dsfr-logement-section" ng-if="c.formData.besoin_demenagement">
+        <div class="dsfr-logement-block">
+          <h4 class="dsfr-logement-block__title">Déménagement</h4>
+          <p class="dsfr-logement-block__question">Comment souhaitez-vous déménager ?</p>
+          <div class="dsfr-radio-group">
+            <div class="dsfr-radio-card" ng-class="{'dsfr-radio-card--selected': c.formData.type_demenagement === 'prise_en_charge_admin'}">
+              <input type="radio" id="dem_admin" name="type_demenagement" ng-model="c.formData.type_demenagement" value="prise_en_charge_admin">
+              <label for="dem_admin">
+                <span class="dsfr-radio-card__title">L'administration prend en charge mon déménagement</span>
+                <span class="dsfr-radio-card__desc">Sans avance de frais — PFMD (métropole) ou PCD OME et garde-meubles (hors métropole).</span>
+              </label>
+            </div>
+            <div class="dsfr-radio-card" ng-class="{'dsfr-radio-card--selected': c.formData.type_demenagement === 'propres_moyens'}">
+              <input type="radio" id="dem_propres" name="type_demenagement" ng-model="c.formData.type_demenagement" value="propres_moyens">
+              <label for="dem_propres">
+                <span class="dsfr-radio-card__title">Je déménage par mes propres moyens</span>
+                <span class="dsfr-radio-card__desc">Dossier de prise en charge des frais.</span>
+              </label>
+            </div>
+            <div class="dsfr-radio-card" ng-class="{'dsfr-radio-card--selected': c.formData.type_demenagement === 'recherche_demenageur'}">
+              <input type="radio" id="dem_recherche" name="type_demenagement" ng-model="c.formData.type_demenagement" value="recherche_demenageur">
+              <label for="dem_recherche">
+                <span class="dsfr-radio-card__title">Je recherche mon déménageur</span>
+                <span class="dsfr-radio-card__desc">Mandat au prestataire et dossier de prise en charge des frais.</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conditional: Logement radio cards -->
+      <div class="dsfr-logement-section" ng-if="c.formData.besoin_logement">
+        <div class="dsfr-logement-block">
+          <h4 class="dsfr-logement-block__title">Logement</h4>
+          <p class="dsfr-logement-block__question">Quel type de logement recherchez-vous ?</p>
+          <div class="dsfr-radio-group">
+            <div class="dsfr-radio-card" ng-class="{'dsfr-radio-card--selected': c.formData.type_logement === 'hebergement_bcc'}">
+              <input type="radio" id="logement_bcc" name="type_logement" ng-model="c.formData.type_logement" value="hebergement_bcc">
+              <label for="logement_bcc">
+                <span class="dsfr-radio-card__title">Hébergement BCC / Week Away</span>
+                <span class="dsfr-radio-card__desc">Demande au COMBDD / Igesa.</span>
+              </label>
+            </div>
+            <div class="dsfr-radio-card" ng-class="{'dsfr-radio-card--selected': c.formData.type_logement === 'logement_patrimonial'}">
+              <input type="radio" id="logement_patrimonial" name="type_logement" ng-model="c.formData.type_logement" value="logement_patrimonial">
+              <label for="logement_patrimonial">
+                <span class="dsfr-radio-card__title">Logement patrimonial</span>
+                <span class="dsfr-radio-card__desc">Demande à la DTIE (SI Atrium).</span>
+              </label>
+            </div>
+            <div class="dsfr-radio-card" ng-class="{'dsfr-radio-card--selected': c.formData.type_logement === 'logement_prive'}">
+              <input type="radio" id="logement_prive" name="type_logement" ng-model="c.formData.type_logement" value="logement_prive">
+              <label for="logement_prive">
+                <span class="dsfr-radio-card__title">Logement privé</span>
+                <span class="dsfr-radio-card__desc">Mandat au prestataire Mut'actions et bourse aux logements.</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Validation error -->
+    <div class="dsfr-error-message" ng-if="c.stepError">
+      <p>{{c.stepError}}</p>
+    </div>
+
+    <!-- Step 3 buttons -->
+    <div class="dsfr-buttons-group">
+      <a class="dsfr-link-back" ng-click="c.prevStep()">‹ Précédent</a>
+      <button class="dsfr-btn dsfr-btn--secondary" ng-click="c.saveDraft()">Enregistrer le brouillon</button>
+      <button class="dsfr-btn dsfr-btn--primary" ng-click="c.nextStep()">Continuer ›</button>
+    </div>
+  </div>
+
+  <!-- ====== STEP 4: Pièces justificatives ====== -->
+  <div class="dsfr-step-content" ng-if="c.currentStep === 4">
+    <div class="dsfr-form-section">
+      <h3 class="dsfr-section-title">Pièces justificatives</h3>
+
+      <!-- Dites-le-nous une fois -->
+      <div class="dsfr-callout dsfr-callout--dlnuf">
+        <p class="dsfr-callout__title">Dites-le-nous une fois</p>
+        <p class="dsfr-callout__text">Les documents ci-dessous sont déjà présents dans votre espace et seront rattachés automatiquement. Vous pouvez en ajouter de nouveaux.</p>
+      </div>
+
+      <!-- Documents list -->
+      <div class="dsfr-documents-list">
+        <div class="dsfr-document-item" ng-repeat="doc in c.documents">
+          <div class="dsfr-document-item__icon" aria-hidden="true">
+            <span class="fa fa-file-text-o"></span>
+          </div>
+          <div class="dsfr-document-item__content">
+            <span class="dsfr-document-item__name">{{doc.name}}</span>
+            <span class="dsfr-document-item__meta">{{doc.meta}}</span>
+          </div>
+          <div class="dsfr-document-item__badge">
+            <span class="dsfr-badge" ng-class="{'dsfr-badge--reuse': doc.status === 'reuse', 'dsfr-badge--required': doc.status === 'required'}">
+              {{doc.status === 'reuse' ? 'RÉUTILISÉ' : 'REQUIS'}}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add document button -->
+      <button class="dsfr-btn-add-document" ng-click="c.addDocument()">
+        <span class="dsfr-btn-add-document__arrow" aria-hidden="true">→</span>
+        Ajouter un document
+      </button>
+
+      <!-- Upload area (shown when adding) -->
+      <div class="dsfr-upload-zone" ng-if="c.showUploadZone">
+        <div class="dsfr-upload-zone__inner">
+          <span class="dsfr-upload-zone__icon" aria-hidden="true">]]>📄<![CDATA[</span>
+          <label class="dsfr-upload-zone__label" for="file_upload">
+            Glissez-déposez votre fichier ici ou
+            <span class="dsfr-upload-zone__link">parcourir</span>
+          </label>
+          <input type="file" id="file_upload" class="dsfr-upload-zone__input" accept=".pdf,.jpg,.jpeg,.png">
+          <p class="dsfr-upload-zone__hint">Formats acceptés : PDF, JPG, PNG — Taille max : 10 Mo</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Validation error -->
+    <div class="dsfr-error-message" ng-if="c.stepError">
+      <p>{{c.stepError}}</p>
+    </div>
+
+    <!-- Step 4 buttons -->
+    <div class="dsfr-buttons-group">
+      <a class="dsfr-link-back" ng-click="c.prevStep()">‹ Précédent</a>
+      <button class="dsfr-btn dsfr-btn--secondary" ng-click="c.saveDraft()">Enregistrer le brouillon</button>
+      <button class="dsfr-btn dsfr-btn--primary" ng-click="c.nextStep()">Continuer ›</button>
+    </div>
+  </div>
+
+  <!-- ====== STEP 5: Récapitulatif ====== -->
+  <div class="dsfr-step-content" ng-if="c.currentStep === 5">
+    <!-- Summary table -->
+    <div class="dsfr-summary">
+      <h3 class="dsfr-section-title">Récapitulatif de votre demande</h3>
+
+      <!-- Section: Le demandeur -->
+      <div class="dsfr-summary__section">
+        <h4 class="dsfr-summary__heading">Le demandeur</h4>
+        <dl class="dsfr-summary__list">
+          <div class="dsfr-summary__row">
+            <dt>Type de demande</dt>
+            <dd>{{c.formData.demande_pour_autrui ? 'Pour le compte d\'un usager' : 'En mon nom propre'}}</dd>
+          </div>
+          <div class="dsfr-summary__row">
+            <dt>Nom de famille</dt>
+            <dd>{{c.formData.nom_famille}}</dd>
+          </div>
+          <div class="dsfr-summary__row">
+            <dt>Grade</dt>
+            <dd>{{c.formData.grade}}</dd>
+          </div>
+          <div class="dsfr-summary__row">
+            <dt>NIGEND</dt>
+            <dd>{{c.formData.nigend || '—'}}</dd>
+          </div>
+          <div class="dsfr-summary__row">
+            <dt>Armée / direction</dt>
+            <dd>{{c.getChoiceLabel(c.data.armeesChoices, c.formData.armee_direction)}}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Section: Mobilité -->
+      <div class="dsfr-summary__section">
+        <h4 class="dsfr-summary__heading">Mobilité</h4>
+        <dl class="dsfr-summary__list">
+          <div class="dsfr-summary__row">
+            <dt>Site de départ</dt>
+            <dd>{{c.getChoiceLabel(c.data.sitesChoices, c.formData.site_depart)}}</dd>
+          </div>
+          <div class="dsfr-summary__row">
+            <dt>Site d'arrivée</dt>
+            <dd>{{c.getChoiceLabel(c.data.sitesChoices, c.formData.site_arrivee)}}</dd>
+          </div>
+          <div class="dsfr-summary__row">
+            <dt>Date prévisionnelle</dt>
+            <dd>{{c.formData.date_prise_fonction}}</dd>
+          </div>
+          <div class="dsfr-summary__row">
+            <dt>Famille suit</dt>
+            <dd>{{c.formData.famille_suit ? 'Oui' : 'Non'}}</dd>
+          </div>
+          <div class="dsfr-summary__row">
+            <dt>Famille reste en métropole</dt>
+            <dd>{{c.formData.famille_reste_metropole ? 'Oui' : 'Non'}}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Section: Vos besoins -->
+      <div class="dsfr-summary__section">
+        <h4 class="dsfr-summary__heading">Vos besoins</h4>
+        <dl class="dsfr-summary__list">
+          <div class="dsfr-summary__row">
+            <dt>Déménagement</dt>
+            <dd>{{c.formData.besoin_demenagement ? 'Oui' : 'Non'}}</dd>
+          </div>
+          <div class="dsfr-summary__row">
+            <dt>Logement</dt>
+            <dd>{{c.formData.besoin_logement ? 'Oui' : 'Non'}}</dd>
+          </div>
+          <div class="dsfr-summary__row" ng-if="c.formData.besoin_logement">
+            <dt>Type de logement</dt>
+            <dd>{{c.getChoiceLabel(c.data.logementsChoices, c.formData.type_logement)}}</dd>
+          </div>
+          <div class="dsfr-summary__row">
+            <dt>Accompagnement famille</dt>
+            <dd>{{c.formData.besoin_accompagnement ? 'Oui' : 'Non'}}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+
+    <!-- Warning -->
+    <div class="dsfr-notice">
+      <p>En soumettant cette demande, les services compétents seront automatiquement saisis. Vous pourrez suivre l'avancement depuis la page « Suivi de mes dossiers ».</p>
+    </div>
+
+    <!-- Validation error -->
+    <div class="dsfr-error-message" ng-if="c.stepError">
+      <p>{{c.stepError}}</p>
+    </div>
+
+    <!-- Step 5 buttons -->
+    <div class="dsfr-buttons-group">
+      <a class="dsfr-link-back" ng-click="c.prevStep()">‹ Précédent</a>
+      <button class="dsfr-btn dsfr-btn--secondary" ng-click="c.saveDraft()">Enregistrer le brouillon</button>
+      <button class="dsfr-btn dsfr-btn--submit" ng-click="c.submitForm()">Soumettre ma demande</button>
+    </div>
+  </div>
+
+  <!-- Success message -->
+  <div class="dsfr-success-message" ng-if="c.submitted">
+    <div class="dsfr-callout dsfr-callout--success">
+      <p class="dsfr-callout__title">Demande soumise avec succès</p>
+      <p class="dsfr-callout__text">Votre demande de mobilité a bien été enregistrée. Vous pouvez suivre son avancement depuis la page « Suivi de mes dossiers ».</p>
+      <a class="dsfr-btn dsfr-btn--primary" href="?id=familles_suivi">Accéder au suivi</a>
+    </div>
+  </div>
+
+  <!-- Saving indicator -->
+  <div class="dsfr-saving-indicator" ng-if="c.saving">
+    <span class="dsfr-spinner"></span> Enregistrement en cours...
+  </div>
+</div>
+]]></template>
+    </sp_widget>
+</record_update>
