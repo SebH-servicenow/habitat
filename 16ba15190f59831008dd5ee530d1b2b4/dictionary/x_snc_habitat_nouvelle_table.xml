@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="f626b8e52b834b10eedef9ffbe91bf6a" label="nouvelle table" max_length="40" name="x_snc_habitat_nouvelle_table" type="collection"/>
+</database>
