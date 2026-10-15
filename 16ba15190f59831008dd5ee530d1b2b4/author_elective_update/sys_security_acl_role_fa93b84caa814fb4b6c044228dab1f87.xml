@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl_role">
+  <sys_security_acl_role action="DELETE">
+    <sys_id>fa93b84caa814fb4b6c044228dab1f87</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_security_acl_role_fa93b84caa814fb4b6c044228dab1f87</sys_update_name>
+    <sys_security_acl>9ecfdee2ef4546ecbdd699e75cb29b4f</sys_security_acl>
+    <sys_user_role name="admin">993fae00e8924eb3b72fe6020b449b0c</sys_user_role>
+  </sys_security_acl_role>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_security_acl_role_fa93b84caa814fb4b6c044228dab1f87</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl_role">
+  <sys_security_acl_role action="INSERT_OR_UPDATE">
+    <sys_id>fa93b84caa814fb4b6c044228dab1f87</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_security_acl_role_fa93b84caa814fb4b6c044228dab1f87</sys_update_name>
+    <sys_security_acl>9ecfdee2ef4546ecbdd699e75cb29b4f</sys_security_acl>
+    <sys_user_role name="admin">993fae00e8924eb3b72fe6020b449b0c</sys_user_role>
+  </sys_security_acl_role>
+</record_update>]]></payload>
+        <payload_hash>32658653</payload_hash>
+        <record_name/>
+        <reverted_from/>
+        <source>95a9b3962b870350d2bef8c76e91bf77</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-03 10:18:20</sys_created_on>
+        <sys_id>a6c97fd62b870350d2bef8c76e91bf87</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a066c6d1a90000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-03 10:18:20</sys_updated_on>
+        <type>Access Roles</type>
+        <update_guid>eec97fd619870350f44844c081d89b86</update_guid>
+        <update_guid_history>eec97fd619870350f44844c081d89b86:0,e1d7f352f0870350543a2c7cfd6a05ed:0,0045375abc470350164f98629b0675f6:0,87307b1e450703508d99e04c2fd8c6b2:0,efafa35a74070350acf9d6080b0f1df3:0,2afea75618070350f1e8d623d0eefbc5:0,ee6ed13a0c158350d1891ca0a272c34e:0,ff5a9072891d435005071bb6f65855df:0,0e8974ee2f118b108dceafb15460e4f2:0,4d98b4ea1e118b10aaa0c3a470180f96:0,4ac778e637118b109dcb7bb8530f108d:0,eee3b8eee5dd4b10742aa2bdf5020fe9:0,9e8230eab0dd4b107dc3be256ab01d16:0,66cc335a8e994b10d05aff02cbfe8221:0,2f63eb9699d54b108b6544bdf70816f4:0,7c0443161f154b1007111b1d2282b0b5:0,40b1439e37d14b1097c90ac25edc75b4:0,e88b3ade8e914b10444b981ba51a3506:0,a129365a29914b10aae0894122460858:0,0467761659914b10fcf36009c56d5735:0,5506fedec6514b1067f8d097e7c388ef:0,fd23b65a7a514b1016af007c6429d6b1:0,c6f1765687514b102bc408a1b3178bc7:0,5a407a12d3514b10e2fe88daa33faf50:0,1df7285a37150b1031ef7969cd44a3f4:0,739dd28efed5c710d4daf5a818fdc826:0,d6aab731185987108d5fe54fd8380ac0:0,c557f7395b198710cfb67bed589cedf0:0,d665b3f18d19871035c44c3868d79cb6:0,2c4ba371e0d58710654cce3640703eb3:0,085f9bb9e15587102cbc39e22f480dac:0,df5e13f5c755871009c657136a467405:0,a38ddbb1f45587102671a0be0a9690f4:0,f03bdff9eb1587107e6d925026bd9a3c:1671577289</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="now.habitat-defense-mobilite.*.admin">91ede1222b230b10eedef9ffbe91bf09</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-28 15:17:00</sys_created_on>
+        <sys_db_object display_value="" name="sys_security_acl_role">sys_security_acl_role</sys_db_object>
+        <sys_id>03159ba1e74048008216a94355900000</sys_id>
+        <sys_metadata>fa93b84caa814fb4b6c044228dab1f87</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>now.habitat-defense-mobilite.*.admin</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_security_acl_role_fa93b84caa814fb4b6c044228dab1f87</sys_update_name>
+        <sys_update_version display_value="sys_security_acl_role_fa93b84caa814fb4b6c044228dab1f87">a6c97fd62b870350d2bef8c76e91bf87</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-28 15:17:00</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

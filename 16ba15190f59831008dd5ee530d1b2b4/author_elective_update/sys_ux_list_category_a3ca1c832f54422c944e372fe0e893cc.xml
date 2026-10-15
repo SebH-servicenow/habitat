@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_list_category">
+  <sys_ux_list_category action="DELETE">
+    <sys_id>a3ca1c832f54422c944e372fe0e893cc</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_list_category_a3ca1c832f54422c944e372fe0e893cc</sys_update_name>
+    <active>true</active>
+    <configuration>e2a21ca0b2b64724a79674a19e56bf41</configuration>
+    <description/>
+    <order>10</order>
+    <title>Dossiers PFMD</title>
+  </sys_ux_list_category>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_ux_list_category_a3ca1c832f54422c944e372fe0e893cc</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_list_category">
+  <sys_ux_list_category action="INSERT_OR_UPDATE">
+    <sys_id>a3ca1c832f54422c944e372fe0e893cc</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_list_category_a3ca1c832f54422c944e372fe0e893cc</sys_update_name>
+    <active>true</active>
+    <configuration>e2a21ca0b2b64724a79674a19e56bf41</configuration>
+    <description/>
+    <order>10</order>
+    <title>Dossiers PFMD</title>
+  </sys_ux_list_category>
+</record_update>]]></payload>
+        <payload_hash>-1888810483</payload_hash>
+        <record_name>Dossiers PFMD</record_name>
+        <reverted_from/>
+        <source>0675e9190f99831008dd5ee530d1b221</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:42</sys_created_on>
+        <sys_id>7085e5590f99831008dd5ee530d1b237</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19e9475b4b50000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:42</sys_updated_on>
+        <type>UX List Category</type>
+        <update_guid>3085e559fa99831001e3ad9ab6df5d37</update_guid>
+        <update_guid_history>3085e559fa99831001e3ad9ab6df5d37:-1888810483</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 05:36:12</sys_created_on>
+        <sys_db_object display_value="" name="sys_ux_list_category">sys_ux_list_category</sys_db_object>
+        <sys_id>300137770ef9442799545bfec76cc931</sys_id>
+        <sys_metadata>a3ca1c832f54422c944e372fe0e893cc</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Dossiers PFMD</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_ux_list_category_a3ca1c832f54422c944e372fe0e893cc</sys_update_name>
+        <sys_update_version display_value="sys_ux_list_category_a3ca1c832f54422c944e372fe0e893cc">7085e5590f99831008dd5ee530d1b237</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 05:36:12</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_page_property">
+  <sys_ux_page_property action="DELETE">
+    <sys_id>c3067dd54dfc43de8fb39c555e06365a</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_page_property_c3067dd54dfc43de8fb39c555e06365a</sys_update_name>
+    <description/>
+    <name>chrome_footer</name>
+    <page>595b014037f74518a5251cc1a011eee8</page>
+    <route/>
+    <suffix>chrome_footer</suffix>
+    <type>json</type>
+    <value>{"public_page":{"enable_footer_topbar":false,"footer_topbar_options":{},"enable_footer_bar":false,"footer_bar_options":{}}}</value>
+  </sys_ux_page_property>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_ux_page_property_c3067dd54dfc43de8fb39c555e06365a</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_page_property">
+  <sys_ux_page_property action="INSERT_OR_UPDATE">
+    <sys_id>c3067dd54dfc43de8fb39c555e06365a</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_page_property_c3067dd54dfc43de8fb39c555e06365a</sys_update_name>
+    <description/>
+    <name>chrome_footer</name>
+    <page>595b014037f74518a5251cc1a011eee8</page>
+    <route/>
+    <suffix>chrome_footer</suffix>
+    <type>json</type>
+    <value>{"public_page":{"enable_footer_topbar":false,"footer_topbar_options":{},"enable_footer_bar":false,"footer_bar_options":{}}}</value>
+  </sys_ux_page_property>
+</record_update>]]></payload>
+        <payload_hash>-1993389585</payload_hash>
+        <record_name>chrome_footer</record_name>
+        <reverted_from/>
+        <source>0675e9190f99831008dd5ee530d1b221</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:43</sys_created_on>
+        <sys_id>c18529590f99831008dd5ee530d1b267</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19e9475b8ae0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:43</sys_updated_on>
+        <type>UX Page Property</type>
+        <update_guid>81852959fb9983105d7051c5b06b1b67</update_guid>
+        <update_guid_history>81852959fb9983105d7051c5b06b1b67:-1993389585</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 05:36:13</sys_created_on>
+        <sys_db_object display_value="" name="sys_ux_page_property">sys_ux_page_property</sys_db_object>
+        <sys_id>18537d3e51df47ec8407ace954abfa31</sys_id>
+        <sys_metadata>c3067dd54dfc43de8fb39c555e06365a</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>chrome_footer</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_ux_page_property_c3067dd54dfc43de8fb39c555e06365a</sys_update_name>
+        <sys_update_version display_value="sys_ux_page_property_c3067dd54dfc43de8fb39c555e06365a">c18529590f99831008dd5ee530d1b267</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 05:36:13</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

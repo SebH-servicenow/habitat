@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_app_route">
+  <sys_ux_app_route action="DELETE">
+    <sys_id>10448ecbdd024adaadbba98bd414d9da</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_app_route_10448ecbdd024adaadbba98bd414d9da</sys_update_name>
+    <app_config>16efb201ce3d4b95829d28130ca30b26</app_config>
+    <description/>
+    <extension_point/>
+    <fields/>
+    <icon/>
+    <interoperable>false</interoperable>
+    <name>List Page</name>
+    <optional_parameters>listId</optional_parameters>
+    <order>0</order>
+    <parent_macroponent>c276387cc331101080d6d3658940ddd2</parent_macroponent>
+    <parent_macroponent_composition_element_id/>
+    <route_type>list</route_type>
+    <screen_type>7848cd4fb5ec4e2cb69253e058001ab8</screen_type>
+  </sys_ux_app_route>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_ux_app_route_10448ecbdd024adaadbba98bd414d9da</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_app_route">
+  <sys_ux_app_route action="INSERT_OR_UPDATE">
+    <sys_id>10448ecbdd024adaadbba98bd414d9da</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_app_route_10448ecbdd024adaadbba98bd414d9da</sys_update_name>
+    <app_config>16efb201ce3d4b95829d28130ca30b26</app_config>
+    <description/>
+    <extension_point/>
+    <fields/>
+    <icon/>
+    <interoperable>false</interoperable>
+    <name>List Page</name>
+    <optional_parameters>listId</optional_parameters>
+    <order>0</order>
+    <parent_macroponent>c276387cc331101080d6d3658940ddd2</parent_macroponent>
+    <parent_macroponent_composition_element_id/>
+    <route_type>list</route_type>
+    <screen_type>7848cd4fb5ec4e2cb69253e058001ab8</screen_type>
+  </sys_ux_app_route>
+</record_update>]]></payload>
+        <payload_hash>-838144309</payload_hash>
+        <record_name>List Page</record_name>
+        <reverted_from/>
+        <source>0675e9190f99831008dd5ee530d1b221</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:41</sys_created_on>
+        <sys_id>2085a5590f99831008dd5ee530d1b27b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19e9475b1900000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:41</sys_updated_on>
+        <type>UX App Route</type>
+        <update_guid>ec85a559039983104874ba171e64947a</update_guid>
+        <update_guid_history>ec85a559039983104874ba171e64947a:-838144309</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 05:36:10</sys_created_on>
+        <sys_db_object display_value="" name="sys_ux_app_route">sys_ux_app_route</sys_db_object>
+        <sys_id>5ab47fdad604463e99a31638c9adcbb1</sys_id>
+        <sys_metadata>10448ecbdd024adaadbba98bd414d9da</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>List Page</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_ux_app_route_10448ecbdd024adaadbba98bd414d9da</sys_update_name>
+        <sys_update_version display_value="sys_ux_app_route_10448ecbdd024adaadbba98bd414d9da">2085a5590f99831008dd5ee530d1b27b</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 05:36:10</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

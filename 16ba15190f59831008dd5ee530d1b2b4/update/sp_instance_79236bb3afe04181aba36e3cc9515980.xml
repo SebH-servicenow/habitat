@@ -3,7 +3,7 @@
         <active>true</active>
         <advanced_placeholder_dimensions>false</advanced_placeholder_dimensions>
         <async_load>false</async_load>
-        <async_load_device_type>desktop,tablet,mobile</async_load_device_type>
+        <async_load_device_type>desktop</async_load_device_type>
         <async_load_trigger>viewport</async_load_trigger>
         <class_name/>
         <color>default</color>
@@ -59,19 +59,19 @@
         <short_description/>
         <size>md</size>
         <sp_column display_value="1">69afafcd9b6649bba084a7c660f7011d</sp_column>
-        <sp_widget display_value="Habitat - Formulaire Mobilité">f3c6cfb22e294bc2b14f3aad499051c5</sp_widget>
+        <sp_widget display_value="Habitat - Formulaire Mobilité">a6e2642d080d428fa07f0bbb3c88b2d2</sp_widget>
         <sys_class_name>sp_instance</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2026-06-05 16:36:25</sys_created_on>
         <sys_id>79236bb3afe04181aba36e3cc9515980</sys_id>
-        <sys_mod_count>0</sys_mod_count>
+        <sys_mod_count>1</sys_mod_count>
         <sys_name/>
         <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
         <sys_policy/>
         <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
         <sys_update_name>sp_instance_79236bb3afe04181aba36e3cc9515980</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2026-06-05 16:36:25</sys_updated_on>
+        <sys_updated_on>2026-09-23 07:46:35</sys_updated_on>
         <title/>
         <url/>
         <widget_parameters/>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="catalog_ui_policy_action">
+  <catalog_ui_policy_action action="DELETE">
+    <sys_id>85a623cddab24d878b4b70b86ae9d91e</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>catalog_ui_policy_action_85a623cddab24d878b4b70b86ae9d91e</sys_update_name>
+    <catalog_item>6f896a9848444d8bb277d2d4aaa9a3b5</catalog_item>
+    <catalog_variable>IO:85965064fe09496b94a2d6997d03b101</catalog_variable>
+    <cleared>false</cleared>
+    <disabled>ignore</disabled>
+    <field_message/>
+    <field_message_type>none</field_message_type>
+    <mandatory>ignore</mandatory>
+    <order>100</order>
+    <ui_policy>6af9ac40f18a438ca75dac8188cda00d</ui_policy>
+    <value/>
+    <value_action>ignore</value_action>
+    <variable>section_demenagement_start</variable>
+    <variable_set/>
+    <visible>false</visible>
+  </catalog_ui_policy_action>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>catalog_ui_policy_action_85a623cddab24d878b4b70b86ae9d91e</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="catalog_ui_policy_action">
+  <catalog_ui_policy_action action="INSERT_OR_UPDATE">
+    <sys_id>85a623cddab24d878b4b70b86ae9d91e</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>catalog_ui_policy_action_85a623cddab24d878b4b70b86ae9d91e</sys_update_name>
+    <catalog_item>6f896a9848444d8bb277d2d4aaa9a3b5</catalog_item>
+    <catalog_variable>IO:85965064fe09496b94a2d6997d03b101</catalog_variable>
+    <cleared>false</cleared>
+    <disabled>ignore</disabled>
+    <field_message/>
+    <field_message_type>none</field_message_type>
+    <mandatory>ignore</mandatory>
+    <order>100</order>
+    <ui_policy>6af9ac40f18a438ca75dac8188cda00d</ui_policy>
+    <value/>
+    <value_action>ignore</value_action>
+    <variable>section_demenagement_start</variable>
+    <variable_set/>
+    <visible>false</visible>
+  </catalog_ui_policy_action>
+</record_update>]]></payload>
+        <payload_hash>-1031162089</payload_hash>
+        <record_name>section_demenagement_start</record_name>
+        <reverted_from/>
+        <source>0675e9190f99831008dd5ee530d1b221</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:34</sys_created_on>
+        <sys_id>4b75ed190f99831008dd5ee530d1b242</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19e9475968e0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:34</sys_updated_on>
+        <type>Catalog UI Policy Action</type>
+        <update_guid>0b75ed193f9983107ac9864ebaf0f742</update_guid>
+        <update_guid_history>0b75ed193f9983107ac9864ebaf0f742:-1031162089</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="section_demenagement_start">78ae9c412b9f0310eedef9ffbe91bff5</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 07:24:08</sys_created_on>
+        <sys_db_object display_value="" name="catalog_ui_policy_action">catalog_ui_policy_action</sys_db_object>
+        <sys_id>01c5df58b3d74ba6802d076a7fd294e4</sys_id>
+        <sys_metadata>85a623cddab24d878b4b70b86ae9d91e</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>section_demenagement_start</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>catalog_ui_policy_action_85a623cddab24d878b4b70b86ae9d91e</sys_update_name>
+        <sys_update_version display_value="catalog_ui_policy_action_85a623cddab24d878b4b70b86ae9d91e">4b75ed190f99831008dd5ee530d1b242</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 07:24:08</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

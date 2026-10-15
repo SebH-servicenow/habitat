@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="par_dashboard">
+  <par_dashboard action="DELETE">
+    <sys_id>2a138e258dca45ecbaeab9af30e47f47</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>par_dashboard_2a138e258dca45ecbaeab9af30e47f47</sys_update_name>
+    <active>true</active>
+    <name>Habitat Défense Mobilité Dashboard</name>
+  </par_dashboard>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>par_dashboard_2a138e258dca45ecbaeab9af30e47f47</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="par_dashboard">
+  <par_dashboard action="INSERT_OR_UPDATE">
+    <sys_id>2a138e258dca45ecbaeab9af30e47f47</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>par_dashboard_2a138e258dca45ecbaeab9af30e47f47</sys_update_name>
+    <active>true</active>
+    <name>Habitat Défense Mobilité Dashboard</name>
+  </par_dashboard>
+</record_update>]]></payload>
+        <payload_hash>-434663761</payload_hash>
+        <record_name>Habitat Défense Mobilité Dashboard</record_name>
+        <reverted_from/>
+        <source>3b7d9f710f55871008dd5ee530d1b2a7</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-06 19:07:58</sys_created_on>
+        <sys_id>0d8d93b10f55871008dd5ee530d1b2d3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19e9e55b8be0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-06 19:07:58</sys_updated_on>
+        <type>PAR Dashboard</type>
+        <update_guid>858d93b1b85587102ff2102a87a7d9d3</update_guid>
+        <update_guid_history>858d93b1b85587102ff2102a87a7d9d3:0,402ddf3177558710dd2723255b133474:273150105,d62bd3f9fd158710b4b72cf6fc50dfef:-434663761</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Habitat Défense Mobilité Dashboard">53e5880d2b9b0310eedef9ffbe91bfae</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 05:36:10</sys_created_on>
+        <sys_db_object display_value="" name="par_dashboard">par_dashboard</sys_db_object>
+        <sys_id>26c5b424b1a34a3f8532fe4879354a21</sys_id>
+        <sys_metadata>2a138e258dca45ecbaeab9af30e47f47</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Habitat Défense Mobilité Dashboard</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>par_dashboard_2a138e258dca45ecbaeab9af30e47f47</sys_update_name>
+        <sys_update_version display_value="par_dashboard_2a138e258dca45ecbaeab9af30e47f47">0d8d93b10f55871008dd5ee530d1b2d3</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 05:36:10</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller=function() {
+  /* widget controller */
+  var c = this;
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>html {
+  color-scheme: light only;
+}
+
+body {
+  background-color: #ffffff;
+  font-family: Marianne;
+}
+
+.ph-content {
+  padding-top: 32px;
+  padding-bottom: 64px;
+  max-width: 960px;
+  font-family: Marianne;
+  font-size: 16px !important;
+}
+
+.ph-content h2.ph-title {
+  color: #000091 !important;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  margin-bottom: 24px;
+  font-family: Marianne;
+  font-size: 32px !important;
+}
+
+.ph-content p {
+  color: var(--text-default-grey);
+  font-family: Marianne;
+  font-size: 16px !important;
+  line-height: 1.5;
+}
+
+.ph-block {
+  margin: 40px 0 24px 0;
+}
+
+.ph-block svg {
+  width: 45px;
+  height: 45px;
+} 
+
+.ph-block-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px !important;
+  font-weight: 700;
+  color: var(--text-title-grey);
+  margin-bottom: 16px;
+  font-family: Marianne;
+}
+
+.ph-icon-info {
+  color: var(--text-default-error);
+  flex-shrink: 0;
+}
+
+.ph-block--alert {
+  border-left: 3px solid var(--border-default-error);
+  padding-left: 24px;
+}
+
+.ph-check-list,
+.ph-plain-list {
+  list-style: none;
+  margin: 0 0 8px 0;
+  padding: 0;
+}
+
+.ph-check-list li {
+  display: flex;    
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 15px !important;
+  color: var(--text-default-grey);
+  margin-bottom: 12px;
+  font-family: Marianne;
+}
+
+.ph-check-list li svg {
+  width: 25px;
+  height: 25px;
+}
+
+.ph-icon-check {
+  color: var(--text-active-blue-france);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ph-plain-list {
+  padding-left: 20px;
+}
+
+.ph-plain-list li {
+  list-style: disc;
+  font-size: 15px !important;
+  color: var(--text-default-grey);
+  margin-bottom: 10px;
+  font-family: Marianne;
+}
+.ph-timeline {
+  margin: 24px 0;
+}
+
+.ph-timeline-step {
+  display: flex;
+  gap: 20px;
+  position: relative;
+}
+
+.ph-step-number-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 40px;
+}
+
+.ph-step-number {
+  width: 40px;
+  height: 40px;
+  background: #000091;
+  color: #ffffff;
+  font-size: 18px !important;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  z-index: 2;
+  font-family: Marianne;
+}
+
+.ph-step-line {
+  width: 2px;
+  flex-grow: 1;
+  background: #dddddd;
+  margin-top: -4px;
+  margin-bottom: -4px;
+  z-index: 1;
+}
+
+.ph-step-content {
+  flex: 1;
+  padding-bottom: 32px;
+}
+
+.ph-step-content h4 {
+  font-size: 16px !important;
+  font-weight: 700;
+  color: var(--text-title-grey);
+  margin: 8px 0 14px 0;
+  font-family: Marianne;
+}
+
+@media (max-width: 768px) {
+  .ph-content {
+    padding-top: 24px;
+  }
+
+  .ph-timeline-step {
+    gap: 14px;
+  }
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>x_snc_habitat_familles_informations</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Information general</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  /* populate the 'data' object */
+  /* e.g., data.table = $sp.getValue('table'); */
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-15 12:42:49</sys_created_on>
+        <sys_id>8dad4e562b5bc710eedef9ffbe91bf6d</sys_id>
+        <sys_mod_count>16</sys_mod_count>
+        <sys_name>Information general</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sp_widget_8dad4e562b5bc710eedef9ffbe91bf6d</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-17 09:24:04</sys_updated_on>
+        <template><![CDATA[<!DOCTYPE html>
+<html lang="fr" data-fr-theme="light" data-fr-scheme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portail Habitat - Informations</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr/dist/dsfr.min.css">
+<link rel="stylesheet" href="info.css">
+</head>
+<body>
+
+<main class="fr-container ph-content" id="contenu">
+
+  <h2 class="fr-h2 ph-title">Informations</h2>
+
+  <p class="fr-text--lg">Le <strong>Portail Habitat</strong> Un accompagnement simple, transparent et sécurisé pour votre installation, que ce soit en logement permanent ou en hébergement.</p>
+
+  <p class="fr-text--lg">Votre <strong>Portail Habitat</strong> est conçu pour faciliter vos démarches de mutation et d'installation.</p>
+
+  <section class="ph-block">
+    <h3 class="ph-block-title">
+      <svg class="fr-icon-custom-info" viewBox="0 0 500 500" width="45" height="45" aria-hidden="true">
+        <path d="M410 40H90C62.4 40 40 62.4 40 90v270c0 27.6 22.4 50 50 50h140l70 70 20-70h90c27.6 0 50-22.4 50-50V90c0-27.6-22.4-50-50-50z" fill="none" stroke="#161685" stroke-width="35" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="250" cy="140" r="22" fill="#e1000f"/>
+        <rect x="228" y="195" width="44" height="145" rx="22" fill="#e1000f"/>
+      </svg>
+      DIGITALISATION DU PARCOURS : TOUT EN UN CLIC
+    </h3>
+
+    <p>Grâce au portail, vous pouvez accéder à vos démarches quand vous le souhaitez.</p>
+
+    <p>Vous pouvez :</p>
+
+    <ul class="ph-check-list">
+      <li>
+        <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+          <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+          <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <strong>Déposer une demande</strong> : Logement ou Hébergement.
+      </li>
+      <li>
+        <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+          <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+          <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <strong>Suivre son avancement</strong> : Statut de votre dossier en temps réel.
+      </li>
+      <li>
+        <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+          <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+          <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <strong>Accéder aux informations utiles</strong> : Fiches réflexe, téléprocédures et guides pratiques.
+      </li>
+      <li>
+        <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+          <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+          <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <strong>Échanger avec les acteurs du soutien</strong> : Contact direct avec les cellules instructrices ou gestionnaires.
+      </li>
+      <li>
+        <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+          <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+          <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <strong>Gérer les formalités</strong> : État des lieux, remise des clés, justificatifs.
+      </li>
+    </ul>
+  </section>
+
+  <section class="ph-block">
+    <h3 class="ph-block-title">
+      <svg class="fr-icon-custom-info" viewBox="0 0 500 500" width="45" height="45" aria-hidden="true">
+        <path d="M410 40H90C62.4 40 40 62.4 40 90v270c0 27.6 22.4 50 50 50h140l70 70 20-70h90c27.6 0 50-22.4 50-50V90c0-27.6-22.4-50-50-50z" fill="none" stroke="#161685" stroke-width="35" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="250" cy="140" r="22" fill="#e1000f"/>
+        <rect x="228" y="195" width="44" height="145" rx="22" fill="#e1000f"/>
+      </svg>
+      LE PARCOURS CLIENT : DE LA DEMANDE A L'INSTALLATION
+    </h3>
+  </section>
+
+  <div class="ph-timeline">
+
+    <div class="ph-timeline-step">
+      <div class="ph-step-number-container">
+        <div class="ph-step-number">1</div>
+        <div class="ph-step-line"></div>
+      </div>
+      <div class="ph-step-content">
+        <h4>Avant votre arrivée / La Demande</h4>
+        <ul class="ph-check-list">
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Je m'informe facilement sur les solutions disponibles.
+          </li>
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Je réalise ma demande en quelques clics.
+          </li>
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Je suis accompagné dans mes démarches.
+          </li>
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Je suis le traitement de mon dossier.
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ph-timeline-step">
+      <div class="ph-step-number-container">
+        <div class="ph-step-number">2</div>
+        <div class="ph-step-line"></div>
+      </div>
+      <div class="ph-step-content">
+        <h4>À votre arrivée / L'Installation</h4>
+        <ul class="ph-check-list">
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Mon accueil est préparé.
+          </li>
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Je découvre mon logement ou ma chambre.
+          </li>
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Pour un logement : Je réalise l'état des lieux d'entrée et récupère mes clés.
+          </li>
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Pour un hébergement (BCC) : Je signe le règlement intérieur et m'engage à le respecter.
+          </li>
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Je dispose de toutes les informations utiles sur mes droits et devoirs.
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ph-timeline-step">
+      <div class="ph-step-number-container">
+        <div class="ph-step-number">3</div>
+        <div class="ph-step-line"></div>
+      </div>
+      <div class="ph-step-content">
+        <h4>Pendant le séjour / La Vie Quotidienne</h4>
+        <ul class="ph-check-list">
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Je peux signaler une difficulté (technique ou administrative) et obtenir une réponse rapidement.
+          </li>
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Je respecte les règles de vie de la résidence ou de la communauté.
+          </li>
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Mon avis contribue à améliorer le service (enquêtes de satisfaction).
+          </li>
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Pour les hébergements BCC : Je ne modifie pas l'aménagement de ma chambre.
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ph-timeline-step">  
+      <div class="ph-step-number-container">
+        <div class="ph-step-number">4</div>
+      </div>
+      <div class="ph-step-content">
+        <h4>Fin du séjour / La Restitution</h4>
+        <ul class="ph-check-list">
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Je signale ma libération (mutation ou fin d'affectation).
+          </li>
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Je prends rendez-vous pour effectuer mon état des lieux de sortie au plus vite.
+          </li>
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Je m'assure du règlement de la totalité des quotes-parts ou charges locatives.
+          </li>
+          <li>
+            <svg class="fr-icon-custom-check" viewBox="0 0 500 500" width="25" height="25" aria-hidden="true">
+              <circle cx="250" cy="250" r="200" fill="none" stroke="#161685" stroke-width="40" stroke-linecap="round"/>
+              <path d="M160 250l60 60 140-140" fill="none" stroke="#e1000f" stroke-width="45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Je restitue les clés de mon logement ou de ma chambre.
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <section class="ph-block">
+    <h3 class="ph-block-title">
+      <svg class="fr-icon-custom-info" viewBox="0 0 500 500" width="45" height="45" aria-hidden="true">
+        <path d="M410 40H90C62.4 40 40 62.4 40 90v270c0 27.6 22.4 50 50 50h140l70 70 20-70h90c27.6 0 50-22.4 50-50V90c0-27.6-22.4-50-50-50z" fill="none" stroke="#161685" stroke-width="35" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="250" cy="140" r="22" fill="#e1000f"/>
+        <rect x="228" y="195" width="44" height="145" rx="22" fill="#e1000f"/>
+      </svg>
+      CE QUE VOUS POUVEZ ATTENDRE : NOS ENGAGEMENTS
+    </h3>
+
+    <p>Chaque établissement s'engage à proposer :</p>
+
+    <ul class="ph-plain-list">
+      <li>Un accueil attentif</li>
+      <li>Un service réactif</li>
+      <li>Une démarche responsable</li>
+    </ul>
+
+    <p>Notre objectif : Vous offrir un hébergement ou un logement fiable, confortable et adapté à vos attentes.</p>
+
+    <p>L'expérience utilisateur en 5 <strong>engagements</strong> clés :</p>
+
+    <ul class="ph-plain-list">
+      <li><strong>Tout savoir, au bon moment</strong> : des informations pratiques disponibles et un accompagnement personnalisé.</li>
+      <li><strong>Une arrivée simple, un accueil humain</strong> : vous êtes attendu, orienté, et découvrez un environnement organisé.</li>
+      <li><strong>Confortable, adapté à votre quotidien</strong> : un environnement propre, fonctionnel, sécurisé et équipé.</li>
+      <li><strong>Un service qui évolue grâce à vos retours</strong> : écoute des occupants et amélioration continue.</li>
+      <li><strong>Un hébergement performant et responsable</strong> : engagement éco-responsable (limitation des consommations, réduction des déchets).</li>
+    </ul>
+  </section>
+
+  <section class="ph-block ph-block--alert">
+    <h3 class="ph-block-title">
+      <svg class="fr-icon-custom-info" viewBox="0 0 500 500" width="45" height="45" aria-hidden="true">
+        <path d="M410 40H90C62.4 40 40 62.4 40 90v270c0 27.6 22.4 50 50 50h140l70 70 20-70h90c27.6 0 50-22.4 50-50V90c0-27.6-22.4-50-50-50z" fill="none" stroke="#161685" stroke-width="35" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="250" cy="140" r="22" fill="#e1000f"/>
+        <rect x="228" y="195" width="44" height="145" rx="22" fill="#e1000f"/>
+      </svg>
+      BON A SAVOIR ET ALERTES
+    </h3>
+
+    <p><strong>Renouvellement (BCC)</strong> : L'attribution d'une chambre en BCC étant annuelle et révocable, une demande de renouvellement d'hébergement est à réaliser chaque année.</p>
+
+    <p><strong>Règlement intérieur</strong> : Le respect des règles de vie en communauté et du règlement intérieur est impératif.</p>
+
+    <p><strong>Sanctions</strong> : Toute incivilité ou non-respect du règlement intérieur peut donner lieu à des sanctions disciplinaires voire le retrait de la chambre d'hébergement.</p>
+  </section>
+</main>
+</body>
+</html>]]></template>
+    </sp_widget>
+</record_update>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="1c8f49122bd30b10d2bef8c76e91bfac" label="Offre mutation" max_length="40" name="x_snc_habitat_offre_mutation" type="collection">
+        <element label="Contact Courriel" max_length="100" name="contact_courriel" type="string"/>
+        <element label="Contact Telephone" max_length="40" name="contact_telephone" type="string"/>
+        <element choice="3" label="Theme" max_length="40" name="theme" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Demenagement" sequence="1" value="demenagement"/>
+                <element inactive_on_update="false" label="Logement" sequence="0" value="logement"/>
+                <element inactive_on_update="false" label="Accompagnement" sequence="2" value="accompagnement"/>
+            </choice>
+        </element>
+        <element display="true" label="Titre" max_length="100" name="ttire" type="string"/>
+        <element label="Conditions" max_length="4000" name="conditions" type="string_full_utf8"/>
+        <element default="True" label="Actif" max_length="255" name="actif" type="boolean"/>
+        <element label="Presentation" max_length="4000" name="presentation" type="string_full_utf8"/>
+        <element label="Lien" max_length="255" name="lien" type="string"/>
+        <element label="Cle" max_length="100" name="cle" type="string"/>
+        <element label="Demarches" max_length="4000" name="demarches" type="string_full_utf8"/>
+        <element label="Contact Service" max_length="100" name="contact_service" type="string"/>
+        <element label="Alias" max_length="4000" name="alias" type="string_full_utf8"/>
+    </element>
+</database>

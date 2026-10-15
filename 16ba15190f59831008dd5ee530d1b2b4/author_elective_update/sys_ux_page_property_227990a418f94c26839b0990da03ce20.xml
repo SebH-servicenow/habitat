@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_page_property">
+  <sys_ux_page_property action="DELETE">
+    <sys_id>227990a418f94c26839b0990da03ce20</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_page_property_227990a418f94c26839b0990da03ce20</sys_update_name>
+    <description/>
+    <name>wbApplicabilityConfigId</name>
+    <page>39a37acf76fb49cc8f81e832a6623271</page>
+    <route/>
+    <suffix>wbApplicabilityConfigId</suffix>
+    <type>string</type>
+    <value>27119d30cf43470fa30c50ee79719c6a</value>
+  </sys_ux_page_property>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_ux_page_property_227990a418f94c26839b0990da03ce20</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_page_property">
+  <sys_ux_page_property action="INSERT_OR_UPDATE">
+    <sys_id>227990a418f94c26839b0990da03ce20</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_page_property_227990a418f94c26839b0990da03ce20</sys_update_name>
+    <description/>
+    <name>wbApplicabilityConfigId</name>
+    <page>39a37acf76fb49cc8f81e832a6623271</page>
+    <route/>
+    <suffix>wbApplicabilityConfigId</suffix>
+    <type>string</type>
+    <value>27119d30cf43470fa30c50ee79719c6a</value>
+  </sys_ux_page_property>
+</record_update>]]></payload>
+        <payload_hash>-2087036162</payload_hash>
+        <record_name>wbApplicabilityConfigId</record_name>
+        <reverted_from/>
+        <source>f82bdfb90f15871008dd5ee530d1b26b</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-06 18:57:55</sys_created_on>
+        <sys_id>793b533d0f15871008dd5ee530d1b2c3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19e9e4c84ef0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-06 18:57:55</sys_updated_on>
+        <type>UX Page Property</type>
+        <update_guid>393b533d9f1587101a88157e3a6040c3</update_guid>
+        <update_guid_history>393b533d9f1587101a88157e3a6040c3:-2087036162</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 05:36:20</sys_created_on>
+        <sys_db_object display_value="" name="sys_ux_page_property">sys_ux_page_property</sys_db_object>
+        <sys_id>06bea5a38e9446f88fe409e49d794424</sys_id>
+        <sys_metadata>227990a418f94c26839b0990da03ce20</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>wbApplicabilityConfigId</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_ux_page_property_227990a418f94c26839b0990da03ce20</sys_update_name>
+        <sys_update_version display_value="sys_ux_page_property_227990a418f94c26839b0990da03ce20">793b533d0f15871008dd5ee530d1b2c3</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 05:36:20</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

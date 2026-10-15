@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl">
+  <sys_security_acl action="DELETE">
+    <sys_id>20b8d845d6884d85accecf59494c7af9</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_security_acl_20b8d845d6884d85accecf59494c7af9</sys_update_name>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <advanced>false</advanced>
+    <applies_to/>
+    <condition/>
+    <decision_type>allow</decision_type>
+    <description/>
+    <local_or_existing>Existing</local_or_existing>
+    <name>now.habitat-mut-actions.*</name>
+    <operation>read</operation>
+    <script/>
+    <security_attribute/>
+    <type>b9eb8a1b873303002941b53046cb1234</type>
+  </sys_security_acl>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_security_acl_20b8d845d6884d85accecf59494c7af9</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl">
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>20b8d845d6884d85accecf59494c7af9</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_security_acl_20b8d845d6884d85accecf59494c7af9</sys_update_name>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <advanced>false</advanced>
+    <applies_to/>
+    <condition/>
+    <decision_type>allow</decision_type>
+    <description/>
+    <local_or_existing>Existing</local_or_existing>
+    <name>now.habitat-mut-actions.*</name>
+    <operation>read</operation>
+    <script/>
+    <security_attribute/>
+    <type>b9eb8a1b873303002941b53046cb1234</type>
+  </sys_security_acl>
+</record_update>]]></payload>
+        <payload_hash>-667424764</payload_hash>
+        <record_name>now.habitat-mut-actions.*</record_name>
+        <reverted_from/>
+        <source>f82bdfb90f15871008dd5ee530d1b26b</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-06 18:57:50</sys_created_on>
+        <sys_id>7c3b9ff90f15871008dd5ee530d1b2a6</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19e9e4c736d0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-06 18:57:50</sys_updated_on>
+        <type>Access Control</type>
+        <update_guid>3c3b9ff9f51587108dea28ba43c79fa6</update_guid>
+        <update_guid_history>3c3b9ff9f51587108dea28ba43c79fa6:-667424764</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-28 15:17:01</sys_created_on>
+        <sys_db_object display_value="" name="sys_security_acl">sys_security_acl</sys_db_object>
+        <sys_id>0bf79e52ddcd4615a6c99987fca52769</sys_id>
+        <sys_metadata>20b8d845d6884d85accecf59494c7af9</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>now.habitat-mut-actions.*</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_security_acl_20b8d845d6884d85accecf59494c7af9</sys_update_name>
+        <sys_update_version display_value="sys_security_acl_20b8d845d6884d85accecf59494c7af9">7c3b9ff90f15871008dd5ee530d1b2a6</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-28 15:17:01</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

@@ -2,951 +2,694 @@
     <sp_widget action="INSERT_OR_UPDATE">
         <category>custom</category>
         <client_script><![CDATA[api.controller = function($scope, $timeout, $element) {
-
-  /* ============================================================
-     CLIENT CONTROLLER — Widget "Simulateur CIMob"
-
-     Le champ doit commencer par un identifiant : on utilise donc
-     la forme "api.controller = function(...) { ... };" et non une
-     fonction anonyme seule, qui déclenche l'erreur
-     "SyntaxError: Expected ident at line 1, column 1".
-
-     Les dépendances ($scope, $timeout, $element) sont injectées
-     automatiquement par le Service Portal.
-
-     $element : limite les recherches DOM au widget, pour ne pas
-                entrer en conflit avec le reste de la page.
-     $timeout : laisse Angular finir son rendu avant de mesurer
-                les positions (indispensable pour l'avion).
-     ➜ À coller dans le champ "Client controller" du widget.
-     ============================================================ */
-
   var c = this;
 
-  /* ----------------------------------------------------------
-     1. ICÔNES SVG
-     Tracés embarqués : aucun appel réseau, fonctionne sur
-     Intradef. Usage : ICONS.plane
-     ---------------------------------------------------------- */
-  var ICONS = {
-    plane:      '<svg class="icn icn--solid" viewBox="0 0 24 24"><path d="M12 2 L14 9 L21 11.5 L21 13 L14 12 L13.5 18 L16 20 L16 21.5 L12 20.5 L8 21.5 L8 20 L10.5 18 L10 12 L3 13 L3 11.5 L10 9 Z"/></svg>',
-    building:   '<svg class="icn" viewBox="0 0 24 24"><path d="M4 21h16M5 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16M15 9h3a1 1 0 0 1 1 1v11M8 7h2M8 11h2M8 15h2"/></svg>',
-    earth:      '<svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3.5 9.5h17M3.5 14.5h17M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>',
-    anchor:     '<svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><path d="M12 7.5V21M12 21c-4.5 0-8-3-8.5-7M12 21c4.5 0 8-3 8.5-7M9 10h6"/></svg>',
-    sun:        '<svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12h2.5M19 12h2.5M5 5l1.8 1.8M17.2 17.2 19 19M19 5l-1.8 1.8M6.8 17.2 5 19"/></svg>',
-    pin:        '<svg class="icn" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
-    flag:       '<svg class="icn" viewBox="0 0 24 24"><path d="M5 21V4M5 4h13l-2.5 4L18 12H5"/></svg>',
-    check:      '<svg class="icn" viewBox="0 0 24 24"><path d="M4.5 12.5 10 18 19.5 7"/></svg>',
-    home:       '<svg class="icn" viewBox="0 0 24 24"><path d="M3.5 11 12 3.5 20.5 11M6 9.5V20a.8.8 0 0 0 .8.8h10.4a.8.8 0 0 0 .8-.8V9.5M10 20.5v-6h4v6"/></svg>',
-    truck:      '<svg class="icn" viewBox="0 0 24 24"><path d="M2.5 6h11v10h-11zM13.5 9.5H18l3.5 3.5v3h-8"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>',
-    team:       '<svg class="icn" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="17" cy="9.5" r="2.3"/><path d="M16.5 14.7c2.3.3 4 2 4 4.3"/></svg>',
-    arrowLeft:  '<svg class="icn" viewBox="0 0 24 24"><path d="M20 12H4M10 6l-6 6 6 6"/></svg>',
-    refresh:    '<svg class="icn" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 3.5V8h-4.5"/></svg>'
+  // ===================== DONNÉES DU SERVER SCRIPT =====================
+  c.sites  = c.data.sites;
+  c.themes = c.data.themes;
+  c.etapes = c.data.etapes;
+  c.fiches = c.data.fiches || {};   // libellé (clé ou alias) -> clé de la fiche
+
+  // ===================== ÉTAT DU SIMULATEUR =====================
+  c.etape   = 1;      // 1 départ, 2 arrivée, 3 offres
+  c.depart  = null;   // site choisi à l'étape 1
+  c.arrivee = null;   // site choisi à l'étape 2
+  c.offres  = null;   // { logement: [...], demenagement: [...], accompagnement: [...] }
+
+  // ===================== ÉTAT DE LA FICHE (MODALE) =====================
+  var cache = {};             // fiches déjà chargées, par clé
+  var boutonOrigine = null;   // bouton "Voir l'offre" cliqué, pour y rendre le focus
+
+  c.fiche      = null;        // fiche ouverte, null = modale fermée
+  c.onglet     = "presentation";
+  c.chargement = false;
+
+  c.onglets = [
+    { key: "presentation", label: "Présentation" },
+    { key: "conditions",   label: "Conditions" },
+    { key: "demarches",    label: "Démarches" },
+    { key: "contact",      label: "Contact" }
+  ];
+
+  // ===================== ACTIONS DU SIMULATEUR =====================
+  c.choisirDepart = function(site) {
+    c.depart = site;
+    c.etape = 2;
   };
 
-  /* ----------------------------------------------------------
-     2. DONNÉES VENUES DU SERVER SCRIPT
-     ---------------------------------------------------------- */
-  var SITES  = c.data.sites;
-  var THEMES = c.data.themes;
-  var STEPS  = c.data.steps;
-  var MATRIX = c.data.matrix;
-
-  /* ----------------------------------------------------------
-     3. ÉTAT ET UTILITAIRES
-     ---------------------------------------------------------- */
-  var state = {
-    depart: null,
-    arrivee: null
+  c.choisirArrivee = function(site) {
+    c.arrivee = site;
+    c.offres = preparer(lireMatrice(c.depart.id, site.id));
+    c.etape = 3;
   };
 
-  var currentStep = 1;
-
-  /* Recherche limitée au widget grâce à $element */
-  function $(selecteur) {
-    return $element[0].querySelector(selecteur);
-  }
-
-  function $$(selecteur) {
-    return $element[0].querySelectorAll(selecteur);
-  }
-
-  /* ----------------------------------------------------------
-     4. ICÔNES STATIQUES DU TEMPLATE
-     Remplit tous les <span data-icn="..."> du HTML.
-     ---------------------------------------------------------- */
-  function fillStaticIcons() {
-    var spans = $$("[data-icn]");
-    for (var i = 0; i < spans.length; i++) {
-      spans[i].innerHTML = ICONS[spans[i].getAttribute("data-icn")] || "";
-    }
-  }
-
-  /* ----------------------------------------------------------
-     5. STEPPER-TRAJET
-     ---------------------------------------------------------- */
-
-  /**
-   * Construit les 3 escales et place l'avion sur la ligne.
-   * @param {number} etape - 1, 2 ou 3
-   */
-  function renderRoute(etape) {
-    var track = $(".cimob-route__track");
-
-    /* On retire les anciennes escales (ligne et avion restent) */
-    var anciennes = track.querySelectorAll(".cimob-route__stop");
-    for (var j = 0; j < anciennes.length; j++) {
-      anciennes[j].remove();
-    }
-
-    STEPS.forEach(function(step, index) {
-      var numero = index + 1;
-
-      var el = document.createElement("div");
-      el.className = "cimob-route__stop"
-                   + (numero === etape ? " is-current" : "")
-                   + (numero < etape   ? " is-done"    : "");
-      el.innerHTML =
-        '<span class="cimob-route__circle" aria-hidden="true">'
-        + (numero < etape ? ICONS.check : numero)
-        + '</span>'
-        + '<span class="cimob-route__label">' + step.label + '</span>';
-
-      track.appendChild(el);
-    });
-
-    /* Position de l'avion : toujours SUR la ligne, jamais derrière
-       une pastille.
-       - étape 1 : juste à droite de la pastille "Départ"
-       - étapes 2 et 3 : juste à gauche de la pastille courante
-
-       $timeout laisse Angular terminer son rendu : sans lui, les
-       largeurs valent 0 et l'avion se placerait mal. */
-    $timeout(function() {
-      var pastilles = track.querySelectorAll(".cimob-route__circle");
-      var cible = pastilles[etape - 1];
-      if (!cible) { return; }
-
-      var rectTrack = track.getBoundingClientRect();
-      var rectCible = cible.getBoundingClientRect();
-
-      var ECART = 24; /* distance entre la pastille et l'avion */
-      var positionX;
-
-      if (etape === 1) {
-        positionX = rectCible.right - rectTrack.left + ECART;
-      } else {
-        positionX = rectCible.left - rectTrack.left - ECART;
-      }
-
-      $(".cimob-plane").style.left = positionX + "px";
-
-      /* La ligne bleue s'arrête juste derrière l'avion */
-      $(".cimob-route__done").style.width =
-        Math.max(0, positionX - 26 - 14) + "px";
-    }, 0);
-
-    /* Titre et sous-titre de l'étape */
-    $(".cimob-route__num").textContent = etape;
-    $(".cimob-route__title").innerHTML = STEPS[etape - 1].titleHtml;
-
-    var next = $(".cimob-route__next");
-    if (etape < STEPS.length) {
-      next.style.display = "block";
-      next.textContent = "prochaine étape : " + STEPS[etape].titlePlain;
-    } else {
-      next.style.display = "none";
-    }
-  }
-
-  /* ----------------------------------------------------------
-     6. CARTES DE DESTINATION
-     ---------------------------------------------------------- */
-
-  /**
-   * Affiche les 6 sites dans une grille.
-   * @param {HTMLElement} grid - conteneur .cimob-grid
-   * @param {Function} onSelect - appelée avec le site choisi
-   */
-  function renderSiteCards(grid, onSelect) {
-    grid.innerHTML = "";
-
-    SITES.forEach(function(site, index) {
-      /* <button> plutôt que <div> pour l'accessibilité clavier */
-      var card = document.createElement("button");
-      card.type = "button";
-      card.className = "cimob-card";
-      card.setAttribute("role", "listitem");
-
-      /* La couleur de la zone alimente pastille, anneau et coche */
-      card.style.setProperty("--zone", site.color);
-      card.style.setProperty("--zone-tint", site.tint);
-
-      /* Apparition en cascade */
-      card.style.animationDelay = (index * 60) + "ms";
-
-      card.innerHTML =
-        '<span class="cimob-card__check">' + ICONS.check + '</span>'
-        + '<span class="cimob-card__icon">' + ICONS[site.icon] + '</span>'
-        + '<p class="cimob-card__title">' + site.label + '</p>'
-        + '<p class="cimob-card__desc">' + site.desc + '</p>';
-
-      card.addEventListener("click", function() {
-        var cartes = grid.querySelectorAll(".cimob-card");
-        for (var k = 0; k < cartes.length; k++) {
-          cartes[k].classList.remove("is-selected");
-        }
-        card.classList.add("is-selected");
-
-        /* 320 ms : le temps de voir la coche rebondir */
-        $timeout(function() { onSelect(site); }, 320);
-      });
-
-      grid.appendChild(card);
-    });
-  }
-
-  /* ----------------------------------------------------------
-     7. NAVIGATION ENTRE ÉTAPES
-     ---------------------------------------------------------- */
-
-  /**
-   * Affiche l'étape demandée et masque les autres.
-   * @param {number} etape - 1, 2 ou 3
-   */
-  function goToStep(etape) {
-    currentStep = etape;
-
-    [1, 2, 3].forEach(function(numero) {
-      var section = $("#cimob-step-" + numero);
-      section.style.display = (numero === etape) ? "block" : "none";
-
-      /* Rejouer l'animation d'apparition */
-      if (numero === etape) {
-        section.classList.remove("cimob-step--in");
-        void section.offsetWidth;
-        section.classList.add("cimob-step--in");
-      }
-    });
-
-    /* Regénérer les cartes pour rejouer la cascade */
-    if (etape === 1) { renderSiteCards($("#cimob-grid-depart"), onSelectDepart); }
-    if (etape === 2) { renderSiteCards($("#cimob-grid-arrivee"), onSelectArrivee); }
-
-    renderRoute(etape);
-  }
-
-  /* ----------------------------------------------------------
-     8. AFFICHAGE DES OFFRES (étape 3)
-     ---------------------------------------------------------- */
-  function renderResults() {
-    var zone = $("#cimob-results");
-    var vide = $("#cimob-results-empty");
-
-    zone.innerHTML = "";
-
-    /* Rappel du trajet */
-    $(".cimob-result-depart").textContent  = state.depart.label;
-    $(".cimob-result-arrivee").textContent = state.arrivee.label;
-
-    /* Lecture de la matrice */
-    var parDepart = MATRIX[state.depart.id];
-    var offres = parDepart ? parDepart[state.arrivee.id] : null;
-
-    /* Combinaison absente : message d'information */
-    if (!offres) {
-      vide.style.display = "block";
-      return;
-    }
-    vide.style.display = "none";
-
-    /* Un bloc par thème, en cascade */
-    THEMES.forEach(function(theme, index) {
-      var items = offres[theme.key] || [];
-      if (items.length === 0) { return; }
-
-      var bloc = document.createElement("div");
-      bloc.className = "cimob-result-card";
-      bloc.style.setProperty("--theme", theme.color);
-      bloc.style.setProperty("--theme-tint", theme.tint);
-      bloc.style.animationDelay = (index * 150) + "ms";
-
-      var lignes = items.map(function(offre) {
-        return '<li>' + ICONS.check + '<span>' + offre + '</span></li>';
-      }).join("");
-
-      bloc.innerHTML =
-        '<div class="cimob-result-card__header">'
-        +   '<span class="cimob-result-card__icon">' + ICONS[theme.icon] + '</span>'
-        +   '<p class="cimob-result-card__title">' + theme.titre + '</p>'
-        +   '<span class="cimob-result-card__count">'
-        +     items.length + ' offre' + (items.length > 1 ? 's' : '')
-        +   '</span>'
-        + '</div>'
-        + '<ul class="cimob-result-card__list">' + lignes + '</ul>';
-
-      zone.appendChild(bloc);
-    });
-  }
-
-  /* ----------------------------------------------------------
-     9. SÉLECTIONS
-     ---------------------------------------------------------- */
-  function onSelectDepart(site) {
-    state.depart = site;
-    $(".cimob-summary-depart").textContent = site.label;
-    goToStep(2);
-  }
-
-  function onSelectArrivee(site) {
-    state.arrivee = site;
-    renderResults();
-    goToStep(3);
-  }
-
-  /* ----------------------------------------------------------
-     10. MÉTHODES EXPOSÉES AU TEMPLATE
-     Appelées depuis le HTML avec ng-click="c.retourDepart()"
-     ---------------------------------------------------------- */
-  c.retourDepart = function() {
-    goToStep(1);
-  };
-
-  c.retourArrivee = function() {
-    goToStep(2);
+  c.retour = function(etape) {
+    c.etape = etape;
   };
 
   c.recommencer = function() {
-    state.depart = null;
-    state.arrivee = null;
-    goToStep(1);
+    c.depart  = null;
+    c.arrivee = null;
+    c.offres  = null;
+    c.etape   = 1;
   };
 
-  /* ----------------------------------------------------------
-     11. DÉMARRAGE
-     $timeout(0) : on attend que le template soit dans le DOM
-     avant de manipuler les éléments.
-     ---------------------------------------------------------- */
-  $timeout(function() {
-    fillStaticIcons();
-    goToStep(1);
-  }, 0);
+  // ===================== ACTIONS DE LA FICHE =====================
+  // Charge la fiche à la demande, puis l'ouvre (avec cache)
+  c.voirOffre = function(offre, $event) {
+    boutonOrigine = $event.currentTarget;
+    var k = offre.cle;
+    if (!k) return;
 
-  /* L'avion se replace si la fenêtre change de taille */
-  window.addEventListener("resize", function() {
-    renderRoute(currentStep);
-  });
+    if (cache[k]) {
+      ouvrir(cache[k]);
+      return;
+    }
 
+    c.chargement = true;
+    c.server.get({ action: "fiche", cle: k }).then(function(r) {
+      c.chargement = false;
+      if (!r.data.fiche) return;
+      cache[k] = r.data.fiche;
+      ouvrir(cache[k]);
+    });
+  };
+
+  c.choisirOnglet = function(key) {
+    c.onglet = key;
+  };
+
+  c.fermer = function() {
+    c.fiche = null;
+    if (boutonOrigine) {
+      $timeout(function() { boutonOrigine.focus(); }, 0);
+    }
+  };
+
+  // Échap ferme la modale
+  c.touche = function($event) {
+    if ($event.key === "Escape") c.fermer();
+  };
+
+  // Clic sur le fond gris (et pas sur la fenêtre) ferme la modale
+  c.clicFond = function($event) {
+    if ($event.target === $event.currentTarget) c.fermer();
+  };
+
+  // ===================== FONCTIONS INTERNES =====================
+  function ouvrir(fiche) {
+    c.fiche  = fiche;
+    c.onglet = "presentation";
+    $timeout(function() {
+      var corps = $element[0].querySelector(".fr-modal__body");
+      if (corps) corps.focus();
+    }, 0);
+  }
+
+  // Transforme chaque libellé en objet { nom, cle }, une seule fois par trajet
+  function preparer(offres) {
+    if (!offres) return null;
+    var prepare = {};
+    Object.keys(offres).forEach(function(theme) {
+      prepare[theme] = offres[theme].map(function(nom) {
+        return { nom: nom, cle: c.fiches[nom] || null };
+      });
+    });
+    return prepare;
+  }
+
+  // Renvoie les offres du trajet, ou null si la combinaison n'existe pas
+  function lireMatrice(departId, arriveeId) {
+    var ligne = c.data.matrix[departId];
+    return (ligne && ligne[arriveeId]) ? ligne[arriveeId] : null;
+  }
 };]]></client_script>
         <controller_as>c</controller_as>
-        <css>/* ============================================================&#13;
-   CSS — Widget "Simulateur CIMob"&#13;
-   Cartes blanches arrondies sur fond gris-bleu, pastilles&#13;
-   d'icônes colorées, marqueur bleu sur les mots-clés.&#13;
-   Préfixe "cimob-" partout (portage ServiceNow sans collision).&#13;
-   ➜ À coller dans le champ "CSS" du widget.&#13;
-   Les variables sont portées par .cimob-container (et non :root)&#13;
-   pour rester isolées du reste du portail.&#13;
-   ============================================================ */&#13;
-&#13;
-&#13;
-/* ------------------------------------------------------------&#13;
-   VARIABLES&#13;
-   ------------------------------------------------------------ */&#13;
-.cimob-container {&#13;
-  --blue: #000091;          /* bleu France */&#13;
-  --blue-hover: #1212FF;&#13;
-  --blue-tint: #F5F5FE;     /* fond bleu très clair */&#13;
-  --blue-line: #CACAFB;     /* marqueur et bordures claires */&#13;
-  --blue-soft: #E3E3FD;     /* bordure au survol */&#13;
-&#13;
-  --text: #161616;&#13;
-  --text-soft: #666666;&#13;
-&#13;
-  --page: #F1F2F7;          /* fond de page */&#13;
-  --card: #FFFFFF;          /* cartes principales */&#13;
-  --tile: #FAFAFA;          /* cartes internes (sites, offres) */&#13;
-  --border: #EEEEEE;&#13;
-  --line: #E0E0EA;&#13;
-&#13;
-  --radius-card: 20px;&#13;
-  --radius-tile: 14px;&#13;
-  --shadow-card: 0 2px 18px rgba(10, 10, 60, 0.06);&#13;
-  --shadow-soft: 0 4px 16px rgba(10, 10, 60, 0.05);&#13;
-}&#13;
-&#13;
-&#13;
-/* ------------------------------------------------------------&#13;
-   BASE&#13;
-   ------------------------------------------------------------ */&#13;
-.cimob-container * {&#13;
-  box-sizing: border-box;&#13;
-}&#13;
-&#13;
-/* Le conteneur porte les variables (voir plus haut) et les styles&#13;
-   de base. On ne touche pas à &lt;body&gt; : c'est le portail qui gère. */&#13;
-.cimob-container {&#13;
-  max-width: 860px;&#13;
-  margin: 0 auto;&#13;
-  padding: 24px 16px 40px;&#13;
-  background: var(--page);&#13;
-  color: var(--text);&#13;
-  font-family: "Marianne", "Segoe UI", Roboto, Arial, sans-serif;&#13;
-  line-height: 1.5;&#13;
-}&#13;
-&#13;
-/* Icônes SVG : elles prennent la couleur du texte parent */&#13;
-.icn {&#13;
-  width: 1em;&#13;
-  height: 1em;&#13;
-  fill: none;&#13;
-  stroke: currentColor;&#13;
-  stroke-width: 1.7;&#13;
-  stroke-linecap: round;&#13;
-  stroke-linejoin: round;&#13;
-  flex-shrink: 0;&#13;
-}&#13;
-&#13;
-/* L'avion est un tracé plein, pas un contour */&#13;
-.icn--solid {&#13;
-  fill: currentColor;&#13;
-  stroke: none;&#13;
-}&#13;
-&#13;
-/* Petit intitulé bleu en majuscules, utilisé partout */&#13;
-.cimob-kicker {&#13;
-  font-size: 12px;&#13;
-  font-weight: 700;&#13;
-  letter-spacing: 2px;&#13;
-  text-transform: uppercase;&#13;
-  color: var(--blue);&#13;
-  margin: 0 0 10px;&#13;
-}&#13;
-&#13;
-/* Le mot surligné au marqueur bleu clair */&#13;
-.cimob-route__title span {&#13;
-  color: var(--blue);&#13;
-  background: linear-gradient(transparent 62%, var(--blue-line) 62%);&#13;
-  padding: 0 4px;&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   A. STEPPER-TRAJET&#13;
-   ============================================================ */&#13;
-.cimob-route {&#13;
-  background: var(--card);&#13;
-  border-radius: var(--radius-card);&#13;
-  box-shadow: var(--shadow-card);&#13;
-  padding: 32px 32px 24px;&#13;
-  margin-bottom: 20px;&#13;
-}&#13;
-&#13;
-.cimob-route__track {&#13;
-  position: relative;&#13;
-  display: flex;&#13;
-  justify-content: space-between;&#13;
-  max-width: 480px;&#13;
-  margin: 0 auto;&#13;
-}&#13;
-&#13;
-/* Ligne pointillée grise : le trajet restant */&#13;
-.cimob-route__track::before {&#13;
-  content: "";&#13;
-  position: absolute;&#13;
-  left: 26px;&#13;
-  right: 26px;&#13;
-  top: 25px;&#13;
-  border-top: 2px dashed var(--line);&#13;
-}&#13;
-&#13;
-/* Ligne pointillée bleue : le trajet parcouru (largeur en JS) */&#13;
-.cimob-route__done {&#13;
-  position: absolute;&#13;
-  left: 26px;&#13;
-  top: 25px;&#13;
-  width: 0;&#13;
-  border-top: 2px dashed var(--blue);&#13;
-  transition: width 0.8s cubic-bezier(0.45, 0, 0.25, 1);&#13;
-}&#13;
-&#13;
-/* L'avion vole vers l'escale courante (position en JS) */&#13;
-.cimob-plane {&#13;
-  position: absolute;&#13;
-  top: 11px;&#13;
-  left: 26px;&#13;
-  width: 26px;&#13;
-  height: 26px;&#13;
-  color: var(--blue);&#13;
-  transform: translateX(-50%) rotate(90deg);&#13;
-  transition: left 0.8s cubic-bezier(0.45, 0, 0.25, 1);&#13;
-  z-index: 2;&#13;
-  animation: cimob-hover 2.4s ease-in-out infinite;&#13;
-}&#13;
-&#13;
-.cimob-plane .icn {&#13;
-  width: 100%;&#13;
-  height: 100%;&#13;
-}&#13;
-&#13;
-/* Léger flottement, comme en vol */&#13;
-@keyframes cimob-hover {&#13;
-  0%, 100% { margin-top: 0; }&#13;
-  50%      { margin-top: -4px; }&#13;
-}&#13;
-&#13;
-/* ---------- Une escale ---------- */&#13;
-.cimob-route__stop {&#13;
-  position: relative;&#13;
-  z-index: 1;&#13;
-  display: flex;&#13;
-  flex-direction: column;&#13;
-  align-items: center;&#13;
-  gap: 9px;&#13;
-  width: 100px;&#13;
-}&#13;
-&#13;
-.cimob-route__circle {&#13;
-  width: 52px;&#13;
-  height: 52px;&#13;
-  border-radius: 16px;&#13;
-  background: var(--tile);&#13;
-  border: 1px solid var(--border);&#13;
-  color: #999999;&#13;
-  display: flex;&#13;
-  align-items: center;&#13;
-  justify-content: center;&#13;
-  font-weight: 700;&#13;
-  font-size: 15px;&#13;
-  transition: all 0.4s ease;&#13;
-}&#13;
-&#13;
-.cimob-route__circle .icn {&#13;
-  width: 20px;&#13;
-  height: 20px;&#13;
-}&#13;
-&#13;
-/* Escale en cours : pastille bleue pleine */&#13;
-.is-current .cimob-route__circle {&#13;
-  background: var(--blue);&#13;
-  border-color: var(--blue);&#13;
-  color: #FFFFFF;&#13;
-  box-shadow: 0 8px 20px rgba(0, 0, 145, 0.28);&#13;
-}&#13;
-&#13;
-/* Escale franchie : pastille bleu clair avec coche */&#13;
-.is-done .cimob-route__circle {&#13;
-  background: var(--blue-tint);&#13;
-  border-color: var(--blue-line);&#13;
-  color: var(--blue);&#13;
-}&#13;
-&#13;
-.cimob-route__label {&#13;
-  font-size: 13px;&#13;
-  font-weight: 600;&#13;
-  color: #999999;&#13;
-  text-align: center;&#13;
-  transition: color 0.3s ease;&#13;
-}&#13;
-&#13;
-.is-current .cimob-route__label {&#13;
-  color: var(--blue);&#13;
-  font-weight: 700;&#13;
-}&#13;
-&#13;
-.is-done .cimob-route__label {&#13;
-  color: var(--text);&#13;
-}&#13;
-&#13;
-/* ---------- Titre de l'étape ---------- */&#13;
-.cimob-route__meta {&#13;
-  text-align: center;&#13;
-  margin-top: 22px;&#13;
-  padding-top: 18px;&#13;
-  border-top: 1px solid #F0F0F4;&#13;
-}&#13;
-&#13;
-.cimob-route__title {&#13;
-  font-size: 24px;&#13;
-  font-weight: 700;&#13;
-  margin: 0;&#13;
-  color: var(--text);&#13;
-}&#13;
-&#13;
-.cimob-route__next {&#13;
-  font-size: 13px;&#13;
-  color: var(--text-soft);&#13;
-  margin: 6px 0 0;&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   B. ÉTAPES (chaque étape est une carte blanche)&#13;
-   ============================================================ */&#13;
-.cimob-step {&#13;
-  background: var(--card);&#13;
-  border-radius: var(--radius-card);&#13;
-  box-shadow: var(--shadow-card);&#13;
-  padding: 28px 26px;&#13;
-}&#13;
-&#13;
-/* Classe posée par le contrôleur pour rejouer l'apparition */&#13;
-.cimob-step--in {&#13;
-  animation: cimob-rise 0.4s ease both;&#13;
-}&#13;
-&#13;
-@keyframes cimob-rise {&#13;
-  from { opacity: 0; transform: translateY(16px); }&#13;
-  to   { opacity: 1; transform: translateY(0); }&#13;
-}&#13;
-&#13;
-&#13;
-/* ---------- Cartes de destination ---------- */&#13;
-.cimob-grid {&#13;
-  display: grid;&#13;
-  grid-template-columns: repeat(3, 1fr);&#13;
-  gap: 14px;&#13;
-}&#13;
-&#13;
-.cimob-card {&#13;
-  position: relative;&#13;
-  background: var(--tile);&#13;
-  border: 1px solid var(--border);&#13;
-  border-radius: var(--radius-tile);&#13;
-  padding: 20px 14px;&#13;
-  cursor: pointer;&#13;
-  text-align: center;&#13;
-  font-family: inherit;&#13;
-  font-size: inherit;&#13;
-  display: flex;&#13;
-  flex-direction: column;&#13;
-  align-items: center;&#13;
-  gap: 8px;&#13;
-  /* survol adouci : transition lente et courbe douce */&#13;
-  transition: transform 0.32s cubic-bezier(0.33, 1, 0.68, 1),&#13;
-              box-shadow 0.32s cubic-bezier(0.33, 1, 0.68, 1),&#13;
-              background 0.32s ease,&#13;
-              border-color 0.32s ease;&#13;
-  animation: cimob-rise 0.45s cubic-bezier(0.22, 0.7, 0.3, 1) both;&#13;
-}&#13;
-&#13;
-/* Survol doux : 2 px de montée, ombre légère, bordure bleutée */&#13;
-.cimob-card:hover {&#13;
-  transform: translateY(-2px);&#13;
-  background: var(--card);&#13;
-  border-color: var(--blue-soft);&#13;
-  box-shadow: var(--shadow-soft);&#13;
-}&#13;
-&#13;
-/* Sélection : anneau dans la couleur de la zone */&#13;
-.cimob-card.is-selected {&#13;
-  background: var(--card);&#13;
-  border-color: var(--zone);&#13;
-  box-shadow: 0 0 0 2px var(--zone), var(--shadow-soft);&#13;
-}&#13;
-&#13;
-/* Pastille d'icône, couleur injectée par --zone / --zone-tint */&#13;
-.cimob-card__icon {&#13;
-  display: inline-flex;&#13;
-  align-items: center;&#13;
-  justify-content: center;&#13;
-  width: 46px;&#13;
-  height: 46px;&#13;
-  border-radius: 12px;&#13;
-  background: var(--zone-tint);&#13;
-  color: var(--zone);&#13;
-}&#13;
-&#13;
-.cimob-card__icon .icn {&#13;
-  width: 22px;&#13;
-  height: 22px;&#13;
-}&#13;
-&#13;
-/* Textes en noir */&#13;
-.cimob-card__title {&#13;
-  font-weight: 700;&#13;
-  font-size: 14px;&#13;
-  margin: 0;&#13;
-  color: var(--text);&#13;
-}&#13;
-&#13;
-.cimob-card__desc {&#13;
-  font-size: 12px;&#13;
-  line-height: 1.4;&#13;
-  margin: 0;&#13;
-  color: var(--text);&#13;
-}&#13;
-&#13;
-/* Coche de sélection, avec rebond */&#13;
-.cimob-card__check {&#13;
-  position: absolute;&#13;
-  top: 10px;&#13;
-  right: 10px;&#13;
-  width: 22px;&#13;
-  height: 22px;&#13;
-  border-radius: 50%;&#13;
-  background: var(--zone);&#13;
-  color: #FFFFFF;&#13;
-  display: flex;&#13;
-  align-items: center;&#13;
-  justify-content: center;&#13;
-  opacity: 0;&#13;
-  transform: scale(0.4);&#13;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);&#13;
-}&#13;
-&#13;
-.cimob-card__check .icn {&#13;
-  width: 12px;&#13;
-  height: 12px;&#13;
-  stroke-width: 2.6;&#13;
-}&#13;
-&#13;
-.cimob-card.is-selected .cimob-card__check {&#13;
-  opacity: 1;&#13;
-  transform: scale(1);&#13;
-}&#13;
-&#13;
-&#13;
-/* ---------- Résumé du trajet (pilule) ---------- */&#13;
-.cimob-summary {&#13;
-  display: flex;&#13;
-  align-items: center;&#13;
-  justify-content: center;&#13;
-  gap: 10px;&#13;
-  flex-wrap: wrap;&#13;
-  background: var(--blue-tint);&#13;
-  border-radius: 999px;&#13;
-  padding: 10px 20px;&#13;
-  margin: 0 auto 22px;&#13;
-  width: fit-content;&#13;
-  font-size: 14px;&#13;
-  color: var(--text-soft);&#13;
-}&#13;
-&#13;
-.cimob-summary strong {&#13;
-  color: var(--blue);&#13;
-}&#13;
-&#13;
-.cimob-summary .icn {&#13;
-  color: var(--blue);&#13;
-  width: 16px;&#13;
-  height: 16px;&#13;
-}&#13;
-&#13;
-/* Le petit avion entre les deux sites */&#13;
-.cimob-mini-plane {&#13;
-  display: inline-flex;&#13;
-  color: var(--blue);&#13;
-  transform: rotate(90deg);&#13;
-}&#13;
-&#13;
-.cimob-mini-plane .icn {&#13;
-  width: 16px;&#13;
-  height: 16px;&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   C. BLOCS DE RÉSULTATS&#13;
-   ============================================================ */&#13;
-.cimob-result-card {&#13;
-  background: var(--tile);&#13;
-  border: 1px solid var(--border);&#13;
-  border-radius: 16px;&#13;
-  padding: 20px 22px;&#13;
-  margin-bottom: 14px;&#13;
-  animation: cimob-rise 0.5s cubic-bezier(0.22, 0.7, 0.3, 1) both;&#13;
-}&#13;
-&#13;
-.cimob-result-card__header {&#13;
-  display: flex;&#13;
-  align-items: center;&#13;
-  gap: 12px;&#13;
-  margin-bottom: 12px;&#13;
-}&#13;
-&#13;
-/* Pastille d'icône du thème */&#13;
-.cimob-result-card__icon {&#13;
-  width: 44px;&#13;
-  height: 44px;&#13;
-  border-radius: 12px;&#13;
-  background: var(--theme-tint);&#13;
-  color: var(--theme);&#13;
-  display: flex;&#13;
-  align-items: center;&#13;
-  justify-content: center;&#13;
-  flex-shrink: 0;&#13;
-}&#13;
-&#13;
-.cimob-result-card__icon .icn {&#13;
-  width: 22px;&#13;
-  height: 22px;&#13;
-}&#13;
-&#13;
-.cimob-result-card__title {&#13;
-  font-size: 16px;&#13;
-  font-weight: 700;&#13;
-  margin: 0;&#13;
-  flex: 1;&#13;
-  color: var(--text);&#13;
-}&#13;
-&#13;
-/* Compteur d'offres en pilule */&#13;
-.cimob-result-card__count {&#13;
-  font-size: 12px;&#13;
-  font-weight: 700;&#13;
-  color: var(--theme);&#13;
-  background: var(--theme-tint);&#13;
-  border-radius: 999px;&#13;
-  padding: 4px 11px;&#13;
-  white-space: nowrap;&#13;
-}&#13;
-&#13;
-.cimob-result-card__list {&#13;
-  list-style: none;&#13;
-  margin: 0;&#13;
-  padding: 0;&#13;
-}&#13;
-&#13;
-.cimob-result-card__list li {&#13;
-  display: flex;&#13;
-  align-items: flex-start;&#13;
-  gap: 9px;&#13;
-  padding: 8px 0;&#13;
-  font-size: 14px;&#13;
-  line-height: 1.5;&#13;
-  color: var(--text);&#13;
-}&#13;
-&#13;
-.cimob-result-card__list li + li {&#13;
-  border-top: 1px solid #EFEFEF;&#13;
-}&#13;
-&#13;
-.cimob-result-card__list li .icn {&#13;
-  width: 15px;&#13;
-  height: 15px;&#13;
-  color: var(--theme);&#13;
-  stroke-width: 2.2;&#13;
-  margin-top: 3px;&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   D. BOUTONS ET ALERTE&#13;
-   ============================================================ */&#13;
-.cimob-actions {&#13;
-  display: flex;&#13;
-  gap: 12px;&#13;
-  justify-content: center;&#13;
-  flex-wrap: wrap;&#13;
-  margin-top: 22px;&#13;
-}&#13;
-&#13;
-.cimob-btn {&#13;
-  font-family: inherit;&#13;
-  font-size: 14px;&#13;
-  font-weight: 600;&#13;
-  border: none;&#13;
-  border-radius: 10px;&#13;
-  padding: 11px 22px;&#13;
-  cursor: pointer;&#13;
-  display: inline-flex;&#13;
-  align-items: center;&#13;
-  gap: 8px;&#13;
-  background: var(--blue);&#13;
-  color: #FFFFFF;&#13;
-  transition: background 0.2s ease, transform 0.2s ease;&#13;
-}&#13;
-&#13;
-.cimob-btn:hover {&#13;
-  background: var(--blue-hover);&#13;
-  transform: translateY(-2px);&#13;
-}&#13;
-&#13;
-.cimob-btn .icn {&#13;
-  width: 15px;&#13;
-  height: 15px;&#13;
-}&#13;
-&#13;
-/* Bouton secondaire : liseré bleu */&#13;
-.cimob-btn--secondary {&#13;
-  background: var(--card);&#13;
-  color: var(--blue);&#13;
-  box-shadow: inset 0 0 0 1.5px var(--blue);&#13;
-}&#13;
-&#13;
-.cimob-btn--secondary:hover {&#13;
-  background: var(--blue-tint);&#13;
-}&#13;
-&#13;
-/* La flèche avance au survol */&#13;
-.cimob-btn [data-icn] {&#13;
-  display: inline-flex;&#13;
-  transition: transform 0.2s ease;&#13;
-}&#13;
-&#13;
-.cimob-btn:hover [data-icn] {&#13;
-  transform: translateX(4px);&#13;
-}&#13;
-&#13;
-/* Alerte "combinaison non renseignée" */&#13;
-.cimob-alert {&#13;
-  background: var(--tile);&#13;
-  border: 1px solid var(--border);&#13;
-  border-left: 4px solid #0063CB;&#13;
-  border-radius: var(--radius-tile);&#13;
-  padding: 20px 22px;&#13;
-}&#13;
-&#13;
-.cimob-alert strong {&#13;
-  display: block;&#13;
-  margin-bottom: 4px;&#13;
-  font-size: 16px;&#13;
-}&#13;
-&#13;
-.cimob-alert p {&#13;
-  margin: 0;&#13;
-  color: var(--text-soft);&#13;
-  font-size: 14px;&#13;
-}&#13;
-&#13;
-/* Accessibilité clavier */&#13;
-.cimob-card:focus-visible,&#13;
-.cimob-btn:focus-visible {&#13;
-  outline: 3px solid var(--blue);&#13;
-  outline-offset: 3px;&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   E. MOBILE&#13;
-   ============================================================ */&#13;
-@media (max-width: 620px) {&#13;
-  .cimob-container { padding: 24px 14px 60px; }&#13;
-&#13;
-  .cimob-route { padding: 24px 16px 20px; }&#13;
-  .cimob-route__circle { width: 44px; height: 44px; }&#13;
-  .cimob-route__track::before,&#13;
-  .cimob-route__done { top: 21px; }&#13;
-  .cimob-plane { top: 8px; width: 22px; height: 22px; }&#13;
-  .cimob-route__label { font-size: 12px; }&#13;
-  .cimob-route__title { font-size: 20px; }&#13;
-&#13;
-  .cimob-step { padding: 20px 16px; }&#13;
-  .cimob-grid { grid-template-columns: 1fr 1fr; gap: 10px; }&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   F. ACCESSIBILITÉ — couper les animations si demandé (RGAA)&#13;
-   ============================================================ */&#13;
-@media (prefers-reduced-motion: reduce) {&#13;
-  .cimob-container *,&#13;
-  .cimob-container *::before,&#13;
-  .cimob-container *::after {&#13;
-    animation: none !important;&#13;
-    transition: none !important;&#13;
-  }&#13;
+        <css>/* ============================================================
+   PORTAIL HABITAT — SIMULATEUR CIMOB
+   Composants DSFR reproduits à la main (mêmes noms de classes,
+   mêmes couleurs), comme sur l'accueil et les actualités.
+
+   Sommaire :
+     1. Base
+     2. Étapier
+     3. Grille et tuiles (sites)
+     4. Rappel du trajet
+     5. Cartes d'offres et alerte
+     6. Boutons
+     7. Fiche d'offre : lien, modale, onglets
+     8. Mobile
+   ============================================================ */
+
+
+/* ===================== 1. BASE ===================== */
+.cimob {
+  font-family: 'Marianne', Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #161616;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 3rem 4rem 4rem;
+}
+
+.cimob *,
+.cimob *::before,
+.cimob *::after {
+  box-sizing: border-box;
+}
+
+/* Bootstrap (ServiceNow) impose ses marges : on les neutralise */
+.cimob h1,
+.cimob h2,
+.cimob h3,
+.cimob p,
+.cimob ul,
+.cimob ol,
+.cimob dl,
+.cimob dd {
+  margin: 0;
+  padding: 0;
+}
+
+.cimob button:focus-visible {
+  outline: 2px solid #0a76f6;
+  outline-offset: 2px;
+}
+
+/* Couleurs officielles des pictogrammes DSFR */
+.cimob .fr-artwork {
+  width: 4rem;
+  height: 4rem;
+}
+
+.cimob .fr-artwork-decorative { fill: #ececff; }
+.cimob .fr-artwork-minor      { fill: #e1000f; }
+.cimob .fr-artwork-major      { fill: #000091; }
+
+.cimob .fleche {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: currentColor;
+}
+
+
+/* ===================== 2. ÉTAPIER ===================== */
+.cimob .fr-stepper {
+  margin-bottom: 2.5rem;
+}
+
+.cimob .fr-stepper__title {
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+}
+
+.cimob .fr-stepper__state {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  font-weight: 400;
+  color: #666666;
+  margin-bottom: 0.25rem;
+}
+
+/* La barre en 3 segments : bleus jusqu'à l'étape courante */
+.cimob .fr-stepper__steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem;
+  height: 0.5rem;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.cimob .fr-stepper__steps span {
+  background-color: #eeeeee;
+  transition: background-color 0.3s;
+}
+
+.cimob .fr-stepper__steps span.est-faite {
+  background-color: #000091;
+}
+
+.cimob .fr-stepper__details {
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: #666666;
+}
+
+
+/* ===================== 3. GRILLE ET TUILES ===================== */
+.cimob__grille {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+/* Une tuile est un bouton : tout le bloc est cliquable */
+.cimob .fr-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.5rem 2.25rem;
+  font-family: inherit;
+  background-color: #ffffff;
+  border: none;
+  box-shadow: inset 0 -4px 0 0 #000091, inset 0 0 0 1px #dddddd;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.cimob .fr-tile:hover {
+  background-color: #f6f6f6;
+}
+
+/* Tuile choisie : fond bleu pâle, cadre bleu, coche */
+.cimob .fr-tile.est-choisie {
+  background-color: #f5f5fe;
+  box-shadow: inset 0 -4px 0 0 #000091, inset 0 0 0 2px #000091;
+}
+
+.cimob .fr-tile__coche {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: #000091 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M10 15.17l9.19-9.19 1.41 1.41L10 18 4.4 12.4l1.41-1.41z'/%3E%3C/svg%3E") center / 1rem no-repeat;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.cimob .fr-tile.est-choisie .fr-tile__coche {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.cimob .fr-tile__pictogram {
+  margin-bottom: 1rem;
+}
+
+.cimob .fr-tile__title {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 700;
+  color: #000091;
+  margin-bottom: 0.25rem;
+}
+
+.cimob .fr-tile__desc {
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  color: #3a3a3a;
+}
+
+
+/* ===================== 4. RAPPEL DU TRAJET ===================== */
+.cimob__trajet {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #000091;
+  background-color: #f5f5fe;
+}
+
+.cimob .fr-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #3a3a3a;
+  background-color: #eeeeee;
+  border-radius: 0.25rem;
+}
+
+.cimob .etiquette {
+  color: #f5f5fe;
+  background-color: #000091;
+}
+
+
+/* ===================== 5. CARTES D'OFFRES ET ALERTE ===================== */
+.cimob .fr-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  box-shadow: inset 0 0 0 1px #dddddd;
+}
+
+.cimob .fr-card__pictogram .fr-artwork {
+  width: 3rem;
+  height: 3rem;
+}
+
+.cimob .fr-card__title {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 700;
+  color: #000091;
+}
+
+.cimob .fr-card__liste {
+  list-style: none;
+  width: 100%;
+}
+
+.cimob .fr-card__liste li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid #dddddd;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+
+/* La coche verte devant chaque offre */
+.cimob .fr-card__liste li::before {
+  content: "";
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1.5rem;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2318753c' d='M10 15.17l9.19-9.19 1.41 1.41L10 18 4.4 12.4l1.41-1.41z'/%3E%3C/svg%3E") center / 1rem no-repeat;
+}
+
+.cimob .fr-card__libelle {
+  flex: 1;
+}
+
+/* Alerte DSFR "information" */
+.cimob .fr-alert {
+  padding: 1rem 1.5rem 1rem 1.5rem;
+  border: 1px solid #0063cb;
+  border-left-width: 2.5rem;
+  background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-11v6h2v-6h-2zm0-4v2h2V7h-2z'/%3E%3C/svg%3E") no-repeat;
+  background-position: -1.75rem 1rem;
+  background-size: 1.5rem;
+}
+
+.cimob .fr-alert__title {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+
+/* ===================== 6. BOUTONS ===================== */
+.cimob .fr-btns-group {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.cimob .fr-btns-group--right {
+  justify-content: flex-end;
+}
+
+.cimob .fr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.5rem 1.5rem;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+  color: #f5f5fe;
+  background-color: #000091;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.cimob .fr-btn:hover  { background-color: #1212ff; color: #f5f5fe; }
+.cimob .fr-btn:active { background-color: #2323ff; }
+
+.cimob .fr-btn--secondary {
+  color: #000091;
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px #000091;
+}
+
+.cimob .fr-btn--secondary:hover  { background-color: #f6f6f6; color: #000091; }
+.cimob .fr-btn--secondary:active { background-color: #ededed; }
+
+
+/* ===================== 7. FICHE D'OFFRE : LIEN, MODALE, ONGLETS ===================== */
+
+/* Lien "Voir l'offre" sous chaque offre */
+.cimob .fr-link {
+  flex-basis: 100%;
+  padding: 0 0 0 1.5rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  color: #000091;
+  background: none;
+  border: none;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 0.1875rem;
+  cursor: pointer;
+}
+
+.cimob .fr-link:hover    { text-decoration-thickness: 2px; }
+.cimob .fr-link:disabled { color: #929292; cursor: wait; }
+
+/* Voile et fenêtre */
+.cimob .fr-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1750;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(22, 22, 22, 0.64);
+}
+
+.cimob .fr-modal__body { 
+  width: min(92vw, 52rem);
+  max-height: min(90vh, 50rem);
+  overflow-y: auto;
+  padding: 1.5rem 2.5rem 2.5rem;
+  background-color: #ffffff;
+  outline: none;
+}
+
+.cimob .fr-modal__header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+/* Bouton "Fermer" tertiaire avec la croix à droite */
+.cimob .fr-btn--close {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+  color: #000091;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.cimob .fr-btn--close::after {
+  content: "";
+  width: 1rem;
+  height: 1rem;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000091' d='M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z'/%3E%3C/svg%3E") center / 1rem no-repeat;
+}
+
+.cimob .fr-btn--close:hover { background-color: #f6f6f6; }
+
+.cimob .fr-modal__title {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  margin: 0.75rem 0 0;
+}
+
+/* Onglets */
+.cimob .fr-tabs {
+  margin-top: 1.5rem;
+}
+
+.cimob .fr-tabs__list {
+  list-style: none;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0 0.25rem;
+  overflow-x: auto;
+}
+
+.cimob .fr-tabs__tab {
+  padding: 0.5rem 1rem;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 700;
+  color: #161616;
+  background-color: #e3e3fd;
+  border: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cimob .fr-tabs__tab:hover {
+  background-color: #c1c1fb;
+}
+
+.cimob .fr-tabs__tab[aria-selected="true"] {
+  color: #000091;
+  background-color: #ffffff;
+  box-shadow: inset 0 2px 0 0 #000091, inset 1px 0 0 0 #dddddd, inset -1px 0 0 0 #dddddd;
+}
+
+.cimob .fr-tabs__panel {
+  padding: 2rem 1.5rem;
+  border: 1px solid #dddddd;
+  margin-top: -1px;
+  min-height: 16rem;
+}
+
+/* Le texte de présentation garde une largeur de lecture confortable */
+.cimob .fr-tabs__panel p {
+  max-width: 42rem;
+}
+
+.cimob .fr-tabs__panel p + p {
+  margin-top: 1rem;
+}
+/* Conditions et démarches sur deux colonnes quand la place le permet */
+.cimob .fr-tabs__panel .fr-card__liste,
+.cimob .cimob__demarches {
+  columns: 2;
+  column-gap: 2.5rem;
+}
+
+.cimob .fr-tabs__panel .fr-card__liste li,
+.cimob .cimob__demarches li {
+  break-inside: avoid;
+}
+
+/* Démarches numérotées */
+.cimob .cimob__demarches {
+  list-style: none;
+  counter-reset: demarche;
+}
+
+.cimob .cimob__demarches li {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  counter-increment: demarche;
+}
+
+.cimob .cimob__demarches li::before {
+  content: counter(demarche);
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.5rem;
+  text-align: center;
+  color: #f5f5fe;
+  background-color: #000091;
+}
+
+/* Contact */
+.cimob .cimob__contact {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: 0.5rem 1rem;
+}
+
+.cimob .cimob__contact dt { font-weight: 700; }
+.cimob .cimob__contact a  { color: #000091; }
+
+/* Pied de modale */
+.cimob .fr-modal__footer .fr-btns-group {
+  margin-top: 1.5rem;
+}
+
+
+/* ===================== 8. MOBILE ===================== */
+@media (max-width: 47.99em) {
+
+  .cimob {
+    padding: 2rem 1rem 3rem;
+  }
+
+  .cimob .fr-stepper__title {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .cimob__grille {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .cimob .fr-tile {
+    padding: 1.5rem 1rem 1.75rem;
+  }
+
+  .cimob .fr-btns-group li,
+  .cimob .fr-btn {
+    width: 100%;
+  }
+
+  .cimob .fr-modal {
+    padding: 0;
+  }
+
+  .cimob .fr-modal__body {
+    max-width: none;
+    max-height: 100vh;
+    height: 100%;
+    padding: 1rem 1rem 1.5rem;
+  }
+
+  .cimob .cimob__contact {
+    grid-template-columns: 1fr;
+  }
+    .cimob .fr-tabs__panel .fr-card__liste,
+  .cimob .cimob__demarches {
+    columns: 1;
+  }
+
+  .cimob .fr-tabs__panel {
+    padding: 1.5rem 1rem;
+    min-height: 0;
+  }
 }</css>
         <data_table>sp_instance</data_table>
         <demo_data/>
@@ -963,116 +706,106 @@
         <option_schema/>
         <public>false</public>
         <roles/>
-        <script><![CDATA[/* ============================================================
-   SERVER SCRIPT — Widget "Simulateur CIMob"
-   Fournit au client : les 6 sites, les 3 thèmes, les 3 étapes
-   et la matrice d'éligibilité 6 x 6.
-   ➜ À coller dans le champ "Server script" du widget.
-   ============================================================ */
-(function() {
+        <script><![CDATA[(function() {
+
+	/* ----------------------------------------------------------
+     0. FICHES DÉTAILLÉES DES OFFRES
+     Source : table x_snc_habitat_offre_mutation
+     ---------------------------------------------------------- */
+  var TABLE_FICHES = "x_snc_habitat_offre_mutation";
+
+  // Découpe un champ multiligne en tableau (une ligne = un élément)
+  function lignes(texte) {
+    return String(texte || "")
+      .split("\n")
+      .map(function(l) { return l.trim(); })
+      .filter(Boolean);
+  }
+
+  // Préfixe des colonnes : "" ou "u_", déterminé UNE SEULE FOIS
+  var P = (function() {
+    var test = new GlideRecord(TABLE_FICHES);
+    return test.isValidField("cle") ? "" : "u_";
+  })();
+
+  /* Appel à la demande depuis le client : une seule fiche */
+  if (input && input.action === "fiche") {
+    data.fiche = null;
+
+    var gr = new GlideRecord(TABLE_FICHES);
+    gr.addQuery(P + "cle", input.cle);
+    gr.addQuery(P + "actif", true);
+    gr.setLimit(1);
+    gr.query();
+
+    if (gr.next()) {
+      data.fiche = {
+        titre:        gr.getValue(P + "titre"),
+        theme:        gr.getDisplayValue(P + "theme"),
+        lien:         gr.getValue(P + "lien"),
+        presentation: lignes(gr.getValue(P + "presentation")),
+        conditions:   lignes(gr.getValue(P + "conditions")),
+        demarches:    lignes(gr.getValue(P + "demarches")),
+        contact: {
+          service:   gr.getValue(P + "contact_service"),
+          telephone: gr.getValue(P + "contact_telephone"),
+          courriel:  gr.getValue(P + "contact_courriel")
+        }
+      };
+    }
+    return;
+  }
+
+  /* Chargement initial : libellés reconnus uniquement, sans le contenu */
+  data.fiches = {};   // libellé (clé ou alias) -> clé de la fiche
+
+  var grOffres = new GlideRecord(TABLE_FICHES);
+  grOffres.addQuery(P + "actif", true);
+  grOffres.setLimit(200);
+  grOffres.query();
+
+  while (grOffres.next()) {
+    var cleFiche = grOffres.getValue(P + "cle");
+    if (!cleFiche) continue;
+    data.fiches[cleFiche] = cleFiche;
+    lignes(grOffres.getValue(P + "alias")).forEach(function(a) {
+      data.fiches[a] = cleFiche;
+    });
+  }
+
+
 
   /* ----------------------------------------------------------
      1. LES 6 SITES
-     color / tint : couleur de la zone (pastille, anneau, coche)
+     id    : clé de la matrice d'éligibilité (ne pas modifier)
+     picto : pictogramme DSFR affiché dans la tuile (voir le HTML)
      ---------------------------------------------------------- */
   data.sites = [
-    {
-      id: "Metropole et IDF",
-      label: "Métropole et IDF",
-      desc: "France métropolitaine et Île-de-France",
-      icon: "building",
-      color: "#000091",
-      tint: "#F5F5FE"
-    },
-    {
-      id: "Europe",
-      label: "Europe",
-      desc: "Pays européens hors France",
-      icon: "earth",
-      color: "#C9191E",
-      tint: "#FEE9E9"
-    },
-    {
-      id: "PF, REU et MAY",
-      label: "PF, REU et MAY",
-      desc: "Polynésie, La Réunion, Mayotte",
-      icon: "anchor",
-      color: "#006A6F",
-      tint: "#DFFDF7"
-    },
-    {
-      id: "DJI",
-      label: "Djibouti",
-      desc: "Base de Djibouti",
-      icon: "sun",
-      color: "#B34000",
-      tint: "#FEECC2"
-    },
-    {
-      id: "Autre OM",
-      label: "Autre Outre-Mer",
-      desc: "Autres territoires ultramarins",
-      icon: "pin",
-      color: "#297254",
-      tint: "#E3FDEB"
-    },
-    {
-      id: "Autres étranger",
-      label: "Autres étranger",
-      desc: "Reste du monde",
-      icon: "flag",
-      color: "#6E445A",
-      tint: "#FEE7FC"
-    }
+    { id: "Metropole et IDF", label: "Métropole et IDF", desc: "France métropolitaine et Île-de-France", picto: "france" },
+    { id: "Europe",           label: "Europe",           desc: "Pays européens hors France",              picto: "europe" },
+    { id: "PF, REU et MAY",   label: "PF, REU et MAY",   desc: "Polynésie, La Réunion, Mayotte",          picto: "soleil" },
+    { id: "DJI",              label: "Djibouti",         desc: "Base de Djibouti",                        picto: "montagne" },
+    { id: "Autre OM",         label: "Autre Outre-Mer",  desc: "Autres territoires ultramarins",          picto: "avion" },
+    { id: "Autres étranger",  label: "Autres étranger",  desc: "Reste du monde",                          picto: "valise" }
   ];
 
   /* ----------------------------------------------------------
-     2. LES 3 THÈMES D'OFFRES (étape 3)
+     2. LES 3 THÈMES D'OFFRES
+     key : clé dans la matrice (logement, demenagement, accompagnement)
      ---------------------------------------------------------- */
   data.themes = [
-    {
-      key: "logement",
-      titre: "Logement",
-      icon: "home",
-      color: "#00A95F",
-      tint: "#DFFDF0"
-    },
-    {
-      key: "demenagement",
-      titre: "Déménagement",
-      icon: "truck",
-      color: "#0063CB",
-      tint: "#E8EDFF"
-    },
-    {
-      key: "accompagnement",
-      titre: "Accompagnement",
-      icon: "team",
-      color: "#6E445A",
-      tint: "#FEE7FC"
-    }
+    { key: "logement",       titre: "Logement",       picto: "maison" },
+    { key: "demenagement",   titre: "Déménagement",   picto: "valise" },
+    { key: "accompagnement", titre: "Accompagnement", picto: "communaute" }
   ];
 
   /* ----------------------------------------------------------
-     3. LES 3 ÉTAPES
-     titleHtml : le <span> est surligné au marqueur bleu par le CSS
+     3. LES 3 ÉTAPES (titres de l'étapier)
      ---------------------------------------------------------- */
-  data.steps = [
-    {
-      titleHtml: "Site de <span>départ</span>",
-      titlePlain: "Site de départ",
-      label: "Départ"
-    },
-    {
-      titleHtml: "Site d'<span>arrivée</span>",
-      titlePlain: "Site d'arrivée",
-      label: "Arrivée"
-    },
-    {
-      titleHtml: "Vos offres <span>éligibles</span>",
-      titlePlain: "Vos offres éligibles",
-      label: "Offres"
-    }
+  data.etapes = [
+    { titre: "Site de départ" },
+    { titre: "Site d'arrivée" },
+    { titre: "Vos offres éligibles" }
   ];
 
   /* ----------------------------------------------------------
@@ -1693,106 +1426,285 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2026-08-17 09:12:50</sys_created_on>
         <sys_id>9da740852bf2c710d2bef8c76e91bfc3</sys_id>
-        <sys_mod_count>1</sys_mod_count>
+        <sys_mod_count>8</sys_mod_count>
         <sys_name>Simulateur Mutation</sys_name>
         <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
         <sys_policy/>
         <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
         <sys_update_name>sp_widget_9da740852bf2c710d2bef8c76e91bfc3</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2026-08-17 12:43:22</sys_updated_on>
-        <template><![CDATA[<!-- ============================================================
-     HTML TEMPLATE — Widget "Simulateur CIMob"
-     Les identifiants sont préfixés "cimob-" et les boutons
-     appellent les méthodes du contrôleur avec ng-click.
-     ➜ À coller dans le champ "Body HTML template" du widget.
-     ============================================================ -->
-<div class="cimob-container">
-
-  <!-- ============================================================
-       STEPPER-TRAJET : 3 escales, l'avion vole entre elles
-       ============================================================ -->
-  <div class="cimob-route" role="group" aria-label="Progression du simulateur">
-
-    <div class="cimob-route__track">
-      <div class="cimob-route__done"></div>
-      <span class="cimob-plane" aria-hidden="true" data-icn="plane"></span>
+        <sys_updated_on>2026-09-16 07:36:05</sys_updated_on>
+        <template><![CDATA[<div class="cimob">
+    
+  <!-- ===================== ÉTAPIER ===================== -->
+  <div class="fr-stepper">
+    <h2 class="fr-stepper__title">
+      <span class="fr-stepper__state">Étape {{c.etape}} sur 3</span>
+      {{c.etapes[c.etape - 1].titre}}
+    </h2>
+    <div class="fr-stepper__steps" aria-hidden="true">
+      <span ng-class="{ 'est-faite': c.etape >= 1 }"></span>
+      <span ng-class="{ 'est-faite': c.etape >= 2 }"></span>
+      <span ng-class="{ 'est-faite': c.etape >= 3 }"></span>
     </div>
-
-    <div class="cimob-route__meta">
-      <p class="cimob-kicker">
-        Étape <span class="cimob-route__num">1</span> sur 3
-      </p>
-      <p class="cimob-route__title">Site de départ</p>
-      <p class="cimob-route__next">prochaine étape : Site d'arrivée</p>
-    </div>
-
+    <p class="fr-stepper__details" ng-if="c.etape < 3">
+      <strong>Étape suivante :</strong> {{c.etapes[c.etape].titre}}
+    </p>
   </div>
 
-  <!-- ============================================================
-       ÉTAPE 1 : site de départ
-       ============================================================ -->
-  <section id="cimob-step-1" class="cimob-step">
-    <div class="cimob-grid" id="cimob-grid-depart" role="list"></div>
-  </section>
 
-  <!-- ============================================================
-       ÉTAPE 2 : site d'arrivée
-       ============================================================ -->
-  <section id="cimob-step-2" class="cimob-step" style="display: none;">
+  <!-- ===================== ÉTAPE 1 : SITE DE DÉPART ===================== -->
+  <section ng-if="c.etape === 1">
 
-    <div class="cimob-summary">
-      <span data-icn="pin"></span>
-      Départ : <strong class="cimob-summary-depart"></strong>
-    </div>
-
-    <div class="cimob-grid" id="cimob-grid-arrivee" role="list"></div>
-
-    <div class="cimob-actions">
-      <button type="button"
-              class="cimob-btn cimob-btn--secondary"
-              ng-click="c.retourDepart()">
-        <span data-icn="arrowLeft"></span> Revenir au site de départ
+    <div class="cimob__grille">
+      <button type="button" class="fr-tile" ng-repeat="site in c.sites"
+              ng-class="{ 'est-choisie': c.depart === site }"
+              ng-click="c.choisirDepart(site)">
+        <span class="fr-tile__coche" aria-hidden="true"></span>
+        <span class="fr-tile__pictogram">
+          <span ng-switch="site.picto">
+            <span ng-switch-when="france">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M70,69c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S70.5514,69,70,69z M68,13c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S68.5514,13,68,13z M14,69c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S14.5514,69,14,69z M10,17 c-0.5514,0-1-0.4486-1-1c0-0.5514,0.4486-1,1-1s1,0.4486,1,1C11,16.5514,10.5514,17,10,17z"/></g>
+                <g class="fr-artwork-minor"><path d="M19,30c-1.65692,0-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V39l0.00671,0.11658 C18.06451,39.61401,18.48718,40,19,40c0.55231,0,1-0.44769,1-1v-3.18365c1.1626-0.41327,2-1.51196,2-2.81635 C22,31.34308,20.65692,30,19,30z M19,34c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S19.55231,34,19,34z M41,26 c-1.65692,0-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V35l0.00671,0.11658C40.06451,35.61401,40.48718,36,41,36 c0.55231,0,1-0.44769,1-1v-3.18365c1.1626-0.41327,2-1.51196,2-2.81635C44,27.34308,42.65692,26,41,26z M41,30 c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S41.55231,30,41,30z M62,17c0-1.65692-1.34308-3-3-3s-3,1.34308-3,3 c0,1.30438,0.8374,2.40308,2,2.81635V23l0.00671,0.11658C58.06451,23.61401,58.48718,24,59,24c0.55231,0,1-0.44769,1-1v-3.18365 C61.1626,19.40308,62,18.30438,62,17z M59,18c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S59.55231,18,59,18z M50,45 l0.00671,0.11658C50.06451,45.61401,50.48718,46,51,46c0.55231,0,1-0.44769,1-1v-3.18365c1.1626-0.41327,2-1.51196,2-2.81635 c0-1.65692-1.34308-3-3-3s-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V45z M51,38c0.55231,0,1,0.44769,1,1s-0.44769,1-1,1 s-1-0.44769-1-1S50.44769,38,51,38z M37,46c-1.65692,0-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V55l0.00671,0.11658 C36.06451,55.61401,36.48718,56,37,56c0.55231,0,1-0.44769,1-1v-3.18365c1.1626-0.41327,2-1.51196,2-2.81635 C40,47.34308,38.65692,46,37,46z M37,50c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S37.55231,50,37,50z M53,56 c-1.65692,0-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V65l0.00671,0.11658C52.06451,65.61401,52.48718,66,53,66 c0.55231,0,1-0.44769,1-1v-3.18365c1.1626-0.41327,2-1.51196,2-2.81635C56,57.34308,54.65692,56,53,56z M53,60 c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S53.55231,60,53,60z"/></g>
+                <g class="fr-artwork-major"><path d="M67.51508,57.55048l-0.01617,0.02155l-0.00092,0.12549C67.46472,58.4624,67.1264,59.19,66.54468,59.7251 l-0.15039,0.12958l-2.0528,1.64154l-0.09827,0.0694L63.7829,61.849l-0.0097,0.0661c-0.03027,0.15118-0.07251,0.29993-0.1264,0.44427 l-0.08948,0.21332c-0.3042,0.65912-0.85541,1.18732-1.53198,1.48132l-0.18762,0.07428l-1.81683,0.646 c-0.16644,0.05542-0.31366,0.09491-0.45868,0.12201l-0.1449,0.02301l-1.34558,0.185 c-0.38049,0.05261-0.7757,0.03357-1.14972-0.05664c-0.53687-0.12927-0.86731-0.66949-0.73792-1.20636 c0.12012-0.4986,0.59442-0.81903,1.09143-0.75873l0.11499,0.02081c0.08667,0.02087,0.17932,0.03088,0.2713,0.02979l0.13678-0.01019 l1.35199-0.18579c0.04303-0.00568,0.08685-0.01471,0.13751-0.02881l0.08203-0.02509l1.7948-0.63849 c0.26031-0.09332,0.47211-0.28394,0.57867-0.51489c0.04669-0.09979,0.07471-0.20642,0.08331-0.31433l0.00201-0.10809 c-0.01361-0.32098,0.12781-0.62622,0.37518-0.82367l0.09772-0.06885l0.8421-0.52197l1.9978-1.59741 c0.2381-0.19232,0.36481-0.46362,0.35876-0.74237l-0.0108-0.11975c-0.03485-0.2193,0.00433-0.44257,0.10931-0.63538l0.07092-0.11182 l0.13269-0.18066c0.18982-0.242,0.24457-0.54773,0.15649-0.82831L65.9126,55.5589l-0.33276-0.69568 c-0.20593-0.42603-0.70044-0.65222-1.1853-0.54572l-0.12085,0.03369l-0.2572,0.08801 c-0.25317,0.08667-0.5285,0.06781-0.76538-0.04883l-0.11487-0.06628l-0.24213-0.16211 c-0.46338-0.3103-0.57788-0.93286-0.27643-1.3847l0.07104-0.09399c0.12561-0.14777,0.20007-0.32532,0.21649-0.51648 c0.02118-0.24493-0.05499-0.48114-0.21564-0.66998l-0.08716-0.09045l-0.14429-0.13226 c-0.43231-0.39648-0.42731-1.06903-0.0141-1.461l0.09479-0.07953c0.20117-0.14911,0.33716-0.3642,0.38196-0.59247l0.01471-0.11499 l0.05499-1.0152c0.0094-0.19434-0.04449-0.38605-0.1546-0.5517l-0.07275-0.09601l-0.76984-0.88611 c-0.28131-0.32379-0.32196-0.78644-0.11377-1.15112l0.06989-0.1062c0.2121-0.28168,0.24261-0.65167,0.08948-0.9585l-0.06598-0.11182 l-0.60242-0.87109l-0.27747-0.33649c-0.05609-0.06799-0.10284-0.14301-0.1391-0.2229l-0.04651-0.12341l-0.2168-0.71539 c-0.08813-0.28992-0.31873-0.5238-0.6214-0.63379l-0.11682-0.03528c-0.672-0.16382-0.96777-0.935-0.61182-1.50092l0.0697-0.0976 l1.9939-2.4776c0.10034-0.12463,0.22852-0.22284,0.37366-0.28723l0.11176-0.04181c0.08923-0.02734,0.17322-0.06494,0.24939-0.11108 l0.10803-0.07532l1.16058-0.93256c0.20288-0.16333,0.32489-0.38269,0.35193-0.62164l0.00549-0.12085l-0.04944-2.92511 c-0.0014-0.08063,0.00702-0.16089,0.0249-0.2392l0.03381-0.11572l0.63049-1.75537l0.02954-0.10382l0.01678-0.10687l0.04541-0.48682 c0.00836-0.09052,0.02917-0.1792,0.0614-0.26373l0.05688-0.12329l0.88672-1.62109c0.17755-0.3241,0.13257-0.71808-0.09363-1.0072 l-0.09198-0.10132l-2.35693-0.09576c-0.51239-0.021-0.91888-0.42389-0.9563-0.92322l-0.00195-0.11676 c0.02087-0.51245,0.42389-0.91901,0.92316-0.95642l0.11682-0.00201l2.66748,0.10913c0.1709,0.00696,0.33734,0.05768,0.48303,0.1474 c1.28711,0.79156,1.77478,2.40375,1.14856,3.74115l-0.08411,0.16565l-0.78674,1.43689l-0.02704,0.28906 c-0.01556,0.15692-0.04248,0.30811-0.08221,0.45911l-0.06946,0.22699l-0.57233,1.59082l0.04681,2.73999 c0.01727,0.84149-0.33142,1.63934-0.9549,2.21069l-0.14868,0.12781l-1.16266,0.93414 c-0.18079,0.14478-0.37817,0.26837-0.58765,0.36877l-0.1189,0.05157l-1.07501,1.336l0.07037,0.06122 c0.32959,0.3056,0.58978,0.68433,0.75311,1.11469l0.06403,0.1875l0.15948,0.52661l0.19879,0.24469l0.65442,0.94 c0.51605,0.7489,0.6449,1.67169,0.3916,2.50519l-0.0578,0.1651l0.32605,0.37524c0.44855,0.52277,0.69934,1.1731,0.71375,1.85266 l-0.00293,0.20471l-0.05548,1.0257c-0.02783,0.46991-0.16998,0.92059-0.4054,1.31799l-0.06,0.09271l0.08008,0.13348 c0.24512,0.4436,0.37158,0.94574,0.36108,1.4613l-0.00916,0.15924l0.14996,0.01569c0.92853,0.12518,1.77332,0.6665,2.2486,1.51422 l0.08472,0.1626l0.33569,0.7016C68.16309,55.63483,68.07471,56.7218,67.51508,57.55048z M53.22192,21.67999l0.88348,1.76721 l0.05817,0.10132c0.27411,0.41901,0.82483,0.57526,1.28351,0.34589c0.49402-0.24701,0.69421-0.8476,0.4472-1.34161l-1-2 l-0.06439-0.11047c-0.07117-0.1059-0.16217-0.19763-0.26849-0.26971l-0.71948-0.48859l-0.05151-0.21771 c-0.17133-0.61029-0.54059-1.15509-1.065-1.55353l-0.17279-0.12146c-0.7063-0.461-1.58459-0.61761-2.40228-0.4198l-0.06842,0.0155 l-0.06042-0.05884c-0.20966-0.18787-0.44708-0.34778-0.7066-0.47498l-0.82397-0.3963l-0.18652-0.08362 c-0.06329-0.02588-0.12756-0.04962-0.19287-0.07117l-0.05359-0.01611l-0.03723-0.0376 c-0.25281-0.23584-0.5451-0.4267-0.8728-0.56842l-0.01208-0.0379c-0.39783-1.03906-1.349-1.76007-2.46393-1.89386l-0.17596-0.01624 l-0.32263-0.45477l-0.11755-0.1557c-0.73401-0.90625-1.96271-1.31451-3.12891-1.0343l-3.29504,0.82739l-0.20099,0.0578 c-0.79236,0.2569-1.44257,0.81897-1.79791,1.5683l-0.72278,1.52698l-0.08179,0.19403 c-0.14923,0.39227-0.21271,0.80878-0.18701,1.22479l0.09863,1.50049l-0.40503,0.35797l-3.26202,1.07855l-0.18738,0.06805 c-0.73682,0.29535-1.31732,0.85901-1.62817,1.55774l-0.03143,0.07666l-0.55499-0.10596l-1.18231-1.224l-0.15009-0.14435 c-0.61938-0.5556-1.46039-0.85175-2.2547-0.77618l-1.59027,0.0769l-0.20801,0.01813 c-0.82581,0.09918-1.57092,0.51807-2.06683,1.17249c-0.54041,0.70691-0.729,1.61438-0.51221,2.47906l0.54089,2.12305 l0.05133,0.15027l0.07819,0.18359l-0.28821-0.28339l-0.14801-0.13568c-0.60864-0.521-1.4115-0.7793-2.24805-0.72803l-4.01703,0.3479 l-0.2019,0.02313c-0.26819,0.0401-0.53259,0.11719-0.79822,0.23248l-2.91077,1.3092l-0.16693,0.0813 c-1.30695,0.68512-1.9259,2.19928-1.42511,3.5918l0.44244,1.22717l0.07953,0.19666c0.14429,0.32208,0.34686,0.61584,0.59625,0.86896 l0.008,0.00751l0.0127,0.23718c0.04102,0.43634,0.1803,0.86182,0.41339,1.24121C11.33722,35.3667,12.07147,36,12.99988,36 c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1c-0.00537,0-0.01575-0.00513-0.03088-0.01617l-0.05872-0.05176l-0.08417-0.09186 l-0.1073-0.13684c-0.01971-0.02679-0.04022-0.05566-0.06152-0.08679l-0.13727-0.21295l-0.0752-0.1275 c-0.13434-0.21954-0.17419-0.45691-0.12622-0.68402l0.01788-0.12048c0.03131-0.36163-0.13641-0.71613-0.44427-0.92004 l-0.1076-0.08069c-0.1347-0.1145-0.23389-0.25488-0.28851-0.40558l-0.44171-1.22522l-0.03119-0.1062 c-0.09821-0.42639,0.12213-0.86707,0.5625-1.06561l2.89819-1.30359l0.11981-0.04498 c0.07922-0.02509,0.15741-0.04041,0.23792-0.04681l3.99866-0.34662l0.13892-0.00055 c0.27472,0.01428,0.52863,0.12067,0.70929,0.29797l0.7395,0.72449l0.09741,0.08405c0.27179,0.2052,0.63293,0.25958,0.95691,0.13678 l0.15527-0.0589l0.11426-0.03589c0.1543-0.03961,0.3158-0.04559,0.4715-0.01709l0.5437,0.09467l0.11066,0.01331 c0.73004,0.04822,1.27942-0.70038,0.97852-1.39569l-0.69128-1.59644l-0.51941-2.04089l-0.02118-0.11597 c-0.02722-0.23254,0.03699-0.4671,0.18579-0.6618c0.18115-0.23914,0.46539-0.38721,0.78625-0.40448l1.6311-0.08002l0.12561-0.0022 c0.2536,0.01331,0.5163,0.13171,0.69873,0.31958l1.40161,1.45129l0.09094,0.08319c0.12762,0.10315,0.27905,0.17365,0.44141,0.20441 l1.82172,0.34662l0.11591,0.0152c0.53741,0.03918,1.01978-0.3606,1.06732-0.91162l0.01917-0.22266l0.0191-0.12292 c0.07312-0.32202,0.32153-0.59363,0.66913-0.70752l3.45978-1.14368l0.12451-0.05072c0.08051-0.03918,0.15552-0.08917,0.2229-0.14868 l0.92749-0.81763l0.09302-0.09357c0.1723-0.198,0.26111-0.45752,0.24341-0.7229l-0.13202-1.98743l0.00018-0.11267 c0.00732-0.11304,0.03571-0.22589,0.08392-0.3299l0.71912-1.51904l0.06128-0.11005c0.13647-0.21112,0.354-0.36621,0.61792-0.43274 l3.28436-0.82477l0.1308-0.02319c0.39362-0.04572,0.79083,0.12097,1.00531,0.42517l0.6181,0.8725l0.07562,0.09399 c0.18829,0.2074,0.4566,0.32782,0.74036,0.32782h0.32062l0.12683,0.0069c0.41528,0.04529,0.75079,0.31189,0.86768,0.6864 l0.11328,0.35638l0.04279,0.11133c0.1308,0.28766,0.39172,0.49921,0.70575,0.56476l0.14038,0.03931 c0.18201,0.06439,0.34137,0.17572,0.45898,0.3208l0.07971,0.08734c0.14081,0.1369,0.31952,0.22998,0.51428,0.2663l0.0929,0.02167 c0.0611,0.01733,0.12103,0.04022,0.17993,0.06909l0.82428,0.39655l0.10309,0.0575c0.1319,0.08325,0.24084,0.19189,0.31903,0.31757 l0.07379,0.10339c0.23853,0.29303,0.62598,0.4295,1.0011,0.34253l0.67261-0.15588l0.13458-0.02325 c0.27161-0.02875,0.55383,0.04761,0.7713,0.21222c0.21069,0.16003,0.34033,0.38043,0.37299,0.62292l0.01581,0.24597 c0.03522,0.28394,0.19092,0.5415,0.43091,0.70441L53.22192,21.67999z M47.84192,64.242l0.36456-0.71033l0.04712-0.10687 c0.17511-0.46899-0.02533-1.00519-0.48187-1.23883c-0.49164-0.25159-1.09412-0.05695-1.3457,0.43475l-0.54584,1.06665 l-0.05066,0.11682c-0.07166,0.19897-0.07861,0.41669-0.01825,0.62158l0.53064,1.79901l0.02606,0.12061 c0.0293,0.20337-0.01166,0.41669-0.11829,0.5968c-0.12891,0.22101-0.35889,0.3927-0.62891,0.46381l-2.18396,0.55969l-0.08661,0.0188 C43.2901,67.99457,43.22607,68,43.16193,68l-0.21674-0.0191l-1.73999-0.30353l-0.12073-0.01324 c-0.08087-0.00391-0.16199,0.00195-0.2417,0.0177l-0.83197,0.1637l-0.13721,0.01715c-0.18469,0.0116-0.3739-0.02167-0.5365-0.09607 l-0.97198-0.45508l-0.10614-0.05743c-0.20386-0.12598-0.35565-0.31787-0.4245-0.53558L37.78821,66.599 c-0.10742-0.23138-0.29999-0.41467-0.54028-0.50952l-0.80365-0.31677L36.28162,65.724l-0.3363-0.07013l-0.11993-0.01746 c-0.31958-0.0271-0.63605,0.1012-0.8468,0.34961l-0.05426,0.05878l-0.06183,0.05658 c-0.22839,0.19354-0.53632,0.28229-0.8418,0.23981l-3.47382-0.4516l-0.14099-0.0274 c-0.09155-0.02417-0.17871-0.06018-0.26208-0.10822l-0.5907-0.33588l-0.11639-0.05658 c-0.11963-0.04883-0.24792-0.0741-0.37793-0.0741h-0.88025l-0.12402-0.00714c-0.24579-0.02808-0.4762-0.13849-0.64203-0.30859 l-0.59479-0.60858l-0.1004-0.08978c-0.07068-0.05511-0.14868-0.10065-0.23199-0.13513l-1.98517-0.82269l-0.1189-0.05859 c-0.15302-0.08801-0.28204-0.21393-0.36804-0.35992l-0.40558-0.68695l-0.0611-0.09161 c-0.08789-0.11719-0.20081-0.21399-0.33093-0.28308L22.3667,61.3844l-0.1095-0.06738 c-0.20801-0.146-0.34857-0.35693-0.39673-0.59381c-0.05334-0.27283,0.02014-0.55298,0.2066-0.77228l1.32104-1.54901l0.07758-0.104 c0.07062-0.10864,0.11969-0.23029,0.14398-0.3584l0.73309-3.8623l0.0141-0.06219l0.01996-0.06622 c0.0741-0.22168,0.06818-0.46246-0.01672-0.6803l-0.03363-0.10492c-0.02686-0.10657-0.03375-0.21759-0.02008-0.33069l0.60669-5.104 l0.0105-0.06836l0.04163-0.19525c0.02948-0.21844-0.01404-0.44208-0.12579-0.63495l-0.0528-0.1059 c-0.04584-0.10852-0.07043-0.22375-0.07202-0.33801c-0.00391-0.26691,0.112-0.52899,0.3255-0.724l0.08661-0.08954 c0.26721-0.31305,0.31757-0.76367,0.11481-1.13165l-0.04431-0.0918c-0.02588-0.06244-0.04449-0.12683-0.0556-0.1922 l-0.02692-0.11621c-0.07849-0.2655-0.2644-0.48865-0.51569-0.61292l-0.99707-0.49139c-0.02185-0.0097-0.0448-0.01941-0.06952-0.0293 l-0.17322-0.06451l-1.0694-0.35651l-0.39801-0.14398l-0.19379-0.0799l0.0957,0.12939 c-0.33582-0.43842-0.9635-0.52161-1.40192-0.18579c-0.43848,0.33588-0.52161,0.96356-0.18579,1.40198 c0.20679,0.2699,0.43781,0.40308,0.9422,0.59332l0.48938,0.1756l1.14075,0.3819l0.32458,0.1601l-0.01312,0.02362 c-0.25018,0.44666-0.38257,0.9527-0.375,1.4726l0.01093,0.21228c0.02496,0.28192,0.09167,0.55908,0.19678,0.82227l0.00739,0.01825 l-0.60907,5.12585l-0.01758,0.2038c-0.01392,0.27191,0.0105,0.54346,0.07245,0.80756l0.01324,0.04974L22.3772,53.7077 l-0.68433,3.59827l-1.1485,1.34821l-0.12799,0.1615c-0.4873,0.6604-0.67609,1.48853-0.51715,2.29883l0.04749,0.19867 c0.21661,0.78473,0.7478,1.44354,1.47791,1.83545l0.60327,0.32037l0.26239,0.44373l0.11609,0.18146 c0.3269,0.47192,0.79095,0.84619,1.32782,1.06891l1.79669,0.7439l0.45044,0.46179l0.14746,0.14124 c0.55719,0.49786,1.29144,0.7774,2.04974,0.7774l0.61639-0.00043l0.35559,0.20282l0.21356,0.112 c0.29034,0.13788,0.60223,0.22968,0.92651,0.2713l3.46332,0.4502l0.19849,0.021c0.72852,0.05298,1.45782-0.15759,2.0495-0.59631 l0.12604,0.04999l0.04626,0.08801c0.30402,0.53448,0.77271,0.9704,1.34369,1.23712l0.979,0.45837l0.19952,0.08301 c0.53882,0.20233,1.12811,0.25214,1.69409,0.14471l0.65839-0.13019l1.65222,0.28467l0.38599,0.03351l0.19751-0.00269 c0.25281-0.0094,0.46527-0.04193,0.66077-0.0946l2.17841-0.55823l0.19342-0.05756c0.69983-0.2334,1.29382-0.70624,1.65692-1.32874 l0.09515-0.1745c0.32635-0.65027,0.39813-1.41119,0.19183-2.11877L47.84192,64.242z M34.99988,38l0.11664-0.00671 c0.49731-0.0578,0.88336-0.48047,0.88336-0.99329c0-0.55231-0.44769-1-1-1h-2l-0.1167,0.00671 c-0.49725,0.0578-0.8833,0.48047-0.8833,0.99329c0,0.55231,0.44775,1,1,1H34.99988z M54.99988,30h-2l-0.1167,0.00671 c-0.49725,0.0578-0.8833,0.48047-0.8833,0.99329c0,0.55231,0.44775,1,1,1h2l0.11664-0.00671 c0.49731-0.0578,0.88336-0.48047,0.88336-0.99329C55.99988,30.44769,55.55219,30,54.99988,30z M48.99988,50h-2l-0.1167,0.00671 c-0.49725,0.0578-0.8833,0.48047-0.8833,0.99329c0,0.55231,0.44775,1,1,1h2l0.11664-0.00671 c0.49731-0.0578,0.88336-0.48047,0.88336-0.99329C49.99988,50.44769,49.55219,50,48.99988,50z"/></g>
+              </svg>
+            </span>
+            <span ng-switch-when="europe">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M17,8c-0.5514,0-1-0.4486-1-1c0-0.55145,0.4486-1,1-1s1,0.44855,1,1C18,7.5514,17.5514,8,17,8z M21,76 c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S21.5514,76,21,76z M63,74c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1 S63.5514,74,63,74z M65,10c-0.5514,0-1-0.4486-1-1c0-0.55145,0.4486-1,1-1s1,0.44855,1,1C66,9.5514,65.5514,10,65,10z M41,80 c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S41.5514,80,41,80z"/></g>
+                <g class="fr-artwork-minor"><path d="M33,17c-1.65692,0-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V26l0.00671,0.11658 C32.06451,26.61401,32.48718,27,33,27c0.55231,0,1-0.44769,1-1v-3.18365c1.1626-0.41327,2-1.51196,2-2.81635 C36,18.34308,34.65692,17,33,17z M33,21c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S33.55231,21,33,21z M58,44 c0-1.65692-1.34308-3-3-3s-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V50l0.00671,0.11658 C54.06451,50.61401,54.48718,51,55,51c0.55231,0,1-0.44769,1-1v-3.18365C57.1626,46.40308,58,45.30438,58,44z M55,45 c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S55.55231,45,55,45z M26,47c-1.65692,0-3,1.34308-3,3 c0,1.30438,0.8374,2.40308,2,2.81635V56l0.00671,0.11658C25.06451,56.61401,25.48718,57,26,57c0.55231,0,1-0.44769,1-1v-3.18365 c1.1626-0.41327,2-1.51196,2-2.81635C29,48.34308,27.65692,47,26,47z M26,51c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1 S26.55231,51,26,51z"/></g>
+                <g class="fr-artwork-major"><path d="M72,20v3v3v3v3v2v28c0,0.51282-0.38599,0.93549-0.88342,0.99329L71,63H31c-0.55231,0-1-0.44769-1-1 c0-0.51282,0.38599-0.93549,0.88342-0.99329L31,61h12.07935l-0.61896-0.88422c-0.31671-0.45251-0.20667-1.07599,0.24579-1.3927 s1.07593-0.20667,1.39264,0.24573L45.52063,61h5.55872l-0.61896-0.88422c-0.31671-0.45251-0.20667-1.07599,0.24579-1.3927 s1.07593-0.20667,1.39264,0.24573L53.52063,61H70V43h-1c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1h1v-6c-0.55231,0-1-0.44769-1-1 s0.44769-1,1-1v-1v-3v-3v-3v-2h-3h-3h-3h-1v3c0,0.55231-0.44769,1-1,1s-1-0.44769-1-1v-3h-8v1c0,0.55231-0.44769,1-1,1 s-1-0.44769-1-1v-1h-7c-0.51282,0-0.93549-0.38599-0.99329-0.88342L40,20c0-0.51282,0.38599-0.93549,0.88342-0.99329L41,19h20h3h3h3 h1c0.13361,0,0.25964,0.02838,0.37616,0.07593c0.03918,0.01593,0.06927,0.04449,0.10577,0.06512 c0.07208,0.04065,0.14368,0.08044,0.20325,0.13708c0.03528,0.03357,0.05853,0.07544,0.08868,0.11377 c0.04645,0.05896,0.09235,0.11633,0.12469,0.18488c0.0224,0.0473,0.03143,0.09869,0.04626,0.14978 c0.01538,0.05286,0.04193,0.10077,0.04846,0.15686L72,20z M24,62c0,0.51282-0.38599,0.93549-0.88342,0.99329L23,63l-9.4223-0.00403 C9.95514,62.67261,8,60.57782,8,57c0-0.1712,0.0047-0.33893,0.01416-0.50317l0.01685-0.24982l-0.00458-0.0177 c-0.00867-0.0368-0.01526-0.0744-0.01971-0.11273L8,56l0.00079-33.0979c0.05328-3.19379,2.62683-5.75427,5.79401-5.8183 l0.22192-0.00031l3.03326,0.05048c1.23462,0.02057,2.2757,0.78931,2.71753,1.86603H25c0.55231,0,1,0.44769,1,1 c0,0.51282-0.38599,0.93549-0.88342,0.99329L25,21h-5v12h2c0.55231,0,1,0.44769,1,1s-0.44769,1-1,1h-2v6.21185 c0.24438,0.18231,0.41309,0.45978,0.41309,0.78815S20.24438,42.60583,20,42.78815V50c0,1.59772-1.2489,2.90369-2.82367,2.99487 L17,53l-2.91699-0.00348C11.25092,53.2326,10,54.48352,10,57c0,2.4516,1.08258,3.69061,3.42792,3.97479L13.66669,61H23 C23.55231,61,24,61.44769,24,62z M10,52.35999l0.16132-0.11938c0.91101-0.65021,2.10291-1.05963,3.56201-1.21448L14,51h3 c0.51282,0,0.93549-0.38599,0.99329-0.88342L18,50V20.13361c0-0.50684-0.37732-0.9267-0.86823-0.99139l-0.11505-0.00848 l-3.03345-0.05054c-2.09589-0.03491-3.8349,1.58252-3.9743,3.6507l-0.00848,0.20154L10,52.35999z M25.41309,41h-3 c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1h3c0.55231,0,1-0.44769,1-1S25.96539,41,25.41309,41z M32.38379,43.97687 c-0.45239,0.31671-0.5625,0.94025-0.24567,1.3927l1.72028,2.4577c0.31683,0.45245,0.94031,0.5625,1.3927,0.24585 c0.45251-0.31683,0.5625-0.94031,0.24579-1.3927l-1.7204-2.4577C33.45978,43.7702,32.8363,43.66022,32.38379,43.97687z M31.81042,43.15771c0.45239-0.31683,0.5625-0.94031,0.24567-1.3927l-0.23688-0.3385C31.63208,41.15918,31.32629,41,31,41h-2.58691 c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1l2.00464-0.08807C30.73438,43.36432,31.35791,43.47443,31.81042,43.15771z M39.01959,55.20038l1.7204,2.4577c0.31671,0.45239,0.94019,0.5625,1.3927,0.24573c0.45239-0.31671,0.5625-0.94019,0.24579-1.3927 l-1.7204-2.4577c-0.31665-0.45239-0.94031-0.56238-1.3927-0.24573C38.81293,54.12439,38.70288,54.74792,39.01959,55.20038z M35.5788,50.28497l1.7204,2.4577c0.31671,0.45239,0.94031,0.5625,1.3927,0.24573c0.45251-0.31671,0.5625-0.94019,0.24579-1.3927 l-1.7204-2.45758c-0.31671-0.45251-0.94019-0.5625-1.3927-0.24585C35.37219,49.20898,35.26208,49.83252,35.5788,50.28497z M44.58691,41c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1h3c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1H44.58691z M48.73999,57.65808 c0.31671,0.45239,0.94019,0.5625,1.3927,0.24573c0.45239-0.31671,0.5625-0.94019,0.24579-1.3927l-1.7204-2.4577 c-0.31665-0.45239-0.94031-0.56238-1.3927-0.24573c-0.45245,0.31671-0.5625,0.94025-0.24579,1.3927L48.73999,57.65808z M45.29919,52.74268c0.31671,0.45239,0.94031,0.5625,1.3927,0.24573c0.45251-0.31671,0.5625-0.94019,0.24579-1.3927l-1.7204-2.45758 c-0.31671-0.45251-0.94019-0.5625-1.3927-0.24585c-0.45239,0.31671-0.5625,0.94025-0.24579,1.3927L45.29919,52.74268z M43.49689,46.68042l-1.7204-2.4577c-0.31671-0.45251-0.94019-0.5625-1.3927-0.24585 c-0.45239,0.31671-0.5625,0.94025-0.24567,1.3927l1.72028,2.4577c0.31683,0.45245,0.94031,0.5625,1.3927,0.24585 C43.70361,47.75629,43.8136,47.13281,43.49689,46.68042z M41.58691,43c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1H39 c-0.80902,0-1.2832,0.91071-0.81921,1.57349l0.23694,0.33844c0.31665,0.45239,0.94019,0.5625,1.3927,0.24579 C40.26282,42.84088,41.58691,43,41.58691,43z M62,42c0,0.55231,0.44769,1,1,1h3c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-3 C62.44769,41,62,41.44769,62,42z M49,24c-0.55231,0-1,0.44769-1,1v3c0,0.55231,0.44769,1,1,1s1-0.44769,1-1v-3 C50,24.44769,49.55231,24,49,24z M24,34c0,0.55231,0.44769,1,1,1h3c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-3 C24.44769,33,24,33.44769,24,34z M37,35h3c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-3c-0.55231,0-1,0.44769-1,1S36.44769,35,37,35z M48,34c0,0.55231,0.44769,1,1,1s1-0.44769,1-1v-3c0-0.55231-0.44769-1-1-1s-1,0.44769-1,1V34z M43,35h3c0.55231,0,1-0.44769,1-1 s-0.44769-1-1-1h-3c-0.55231,0-1,0.44769-1,1S42.44769,35,43,35z M31,35h3c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-3 c-0.55231,0-1,0.44769-1,1S30.44769,35,31,35z M41,31c0.55231,0,1-0.44769,1-1v-3c0-0.55231-0.44769-1-1-1s-1,0.44769-1,1v3 C40,30.55231,40.44769,31,41,31z M43,27h3c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-3c-0.55231,0-1,0.44769-1,1S42.44769,27,43,27z M59,31c0.55231,0,1-0.44769,1-1v-3c0-0.55231-0.44769-1-1-1s-1,0.44769-1,1v3C58,30.55231,58.44769,31,59,31z M67,35 c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-3c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1H67z M58,34c0,0.55231,0.44769,1,1,1h2 c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-1c0-0.55231-0.44769-1-1-1s-1,0.44769-1,1V34z"/></g>
+              </svg>
+            </span>
+            <span ng-switch-when="soleil">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M19,72c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S19.5514,72,19,72z M31,10c-0.5514,0-1-0.4486-1-1 c0-0.55145,0.4486-1,1-1s1,0.44855,1,1C32,9.5514,31.5514,10,31,10z M67,66c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1 S67.5514,66,67,66z M67,16c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S67.5514,16,67,16z M9,32c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S9.5514,32,9,32z"/></g>
+                <g class="fr-artwork-minor"><path d="M32.4453,44.1679c0.4595-0.3063,1.0804-0.1821,1.3867,0.2774C35.3156,46.6706,38.5061,48,41,48 c0.5523,0,1,0.4477,1,1s-0.4477,1-1,1c-3.1061,0-6.931-1.5937-8.8321-4.4453C31.8616,45.0952,31.9858,44.4743,32.4453,44.1679z"/></g>
+                <g class="fr-artwork-major"><path d="M39.00671,20.04651L39,19.92981v-5.47369c0-0.55225,0.44769-1,1-1c0.51282,0,0.93549,0.38611,0.99329,0.88336 L41,14.45612v5.47369c0,0.55231-0.44769,1-1,1C39.48718,20.92981,39.06451,20.54382,39.00671,20.04651z M19.37927,39H14 l-0.11658,0.00671C13.38599,39.06451,13,39.48718,13,40c0,0.55231,0.44769,1,1,1h5.37927l0.11664-0.00671 c0.49738-0.0578,0.88336-0.48047,0.88336-0.99329C20.37927,39.44769,19.93158,39,19.37927,39z M66,39h-5.37927l-0.11664,0.00671 c-0.49738,0.0578-0.88336,0.48047-0.88336,0.99329c0,0.55231,0.44769,1,1,1H66l0.11658-0.00671C66.61401,40.93549,67,40.51282,67,40 C67,39.44769,66.55231,39,66,39z M40,59.07019c-0.55231,0-1,0.44769-1,1v5.47369l0.00671,0.11664 c0.0578,0.49725,0.48047,0.88336,0.99329,0.88336c0.55231,0,1-0.44769,1-1v-5.47369l-0.00671-0.11658 C40.93549,59.45618,40.51282,59.07019,40,59.07019z M24.04541,53.89557l-1.79309,1.82452l-0.0824,0.09503 c-0.30164,0.3949-0.26892,0.96185,0.09467,1.31915c0.39392,0.38715,1.02704,0.38159,1.41412-0.01227l1.79309-1.82458l0.0824-0.09491 c0.30157-0.3949,0.26898-0.96191-0.0946-1.31921C25.06561,53.49622,24.4325,53.50171,24.04541,53.89557z M55.95459,24.27991 l1.79309-1.82458l0.0824-0.09491c0.30164-0.3949,0.26892-0.96191-0.09467-1.31921c-0.39392-0.38721-1.02704-0.38159-1.41412,0.01233 l-1.79321,1.82446L54.4458,22.9729c-0.30157,0.39502-0.26898,0.96191,0.0946,1.31927 C54.93439,24.67932,55.5675,24.67383,55.95459,24.27991z M23.67871,21.05353l-0.09338-0.08405 c-0.38971-0.30847-0.95715-0.28571-1.32074,0.07172c-0.39386,0.38708-0.39941,1.0202-0.01227,1.41412l1.79309,1.82458 l0.09351,0.08398c0.38959,0.30841,0.95697,0.28558,1.32068-0.07172c0.39392-0.38708,0.39941-1.02026,0.01221-1.41418 L23.67871,21.05353z M55.95459,53.89557l-0.09351-0.08398c-0.38959-0.30847-0.95697-0.28571-1.32068,0.07172 c-0.39392,0.38708-0.39941,1.0202-0.01233,1.41412l1.79321,1.82458l0.09338,0.08398 c0.38971,0.30841,0.95715,0.28558,1.32074-0.07172c0.39386-0.38708,0.39941-1.02026,0.01227-1.41418L55.95459,53.89557z M40,26 c-7.73199,0-14,6.26801-14,14c0,1.91528,0.38538,3.77838,1.12323,5.50281c0.21716,0.50781,0.80499,0.74329,1.31268,0.52606 c0.50781-0.21729,0.74329-0.80499,0.52606-1.31274C28.33002,43.2392,28,41.64362,28,40c0-6.62738,5.37262-12,12-12s12,5.37262,12,12 s-5.37262,12-12,12c-3.5495,0-6.84521-1.54871-9.11212-4.19141c-0.35956-0.41907-0.99091-0.46747-1.4101-0.10791 c-0.41919,0.35962-0.46747,0.99091-0.10791,1.4101C32.01282,52.19177,35.86072,54,40,54c7.73199,0,14-6.26801,14-14 S47.73199,26,40,26z"/></g>
+              </svg>
+            </span>
+            <span ng-switch-when="montagne">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M53,77c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S53.5514,77,53,77z M57,5c-0.5514,0-1-0.4486-1-1 c0-0.55145,0.4486-1,1-1s1,0.44855,1,1C58,4.5514,57.5514,5,57,5z M23,77c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1 S23.5514,77,23,77z"/></g>
+                <g class="fr-artwork-minor"><path d="M26.00671,17.11658L26,17v-2c0-0.55231,0.44769-1,1-1c0.51282,0,0.93549,0.38599,0.99329,0.88342L28,15v2 c0,0.55231-0.44769,1-1,1C26.48718,18,26.06451,17.61401,26.00671,17.11658z M30,25c0,1.65692-1.34308,3-3,3s-3-1.34308-3-3 s1.34308-3,3-3S30,23.34308,30,25z M28,25c0-0.55231-0.44769-1-1-1s-1,0.44769-1,1s0.44769,1,1,1S28,25.55231,28,25z M19.11658,25.99329C19.61401,25.93549,20,25.51282,20,25c0-0.55231-0.44769-1-1-1h-2l-0.11658,0.00671 C16.38599,24.06451,16,24.48718,16,25c0,0.55231,0.44769,1,1,1h2L19.11658,25.99329z M37,24h-2l-0.11658,0.00671 C34.38599,24.06451,34,24.48718,34,25c0,0.55231,0.44769,1,1,1h2l0.11658-0.00671C37.61401,25.93549,38,25.51282,38,25 C38,24.44769,37.55231,24,37,24z M27,32c-0.55231,0-1,0.44769-1,1v2l0.00671,0.11658C26.06451,35.61401,26.48718,36,27,36 c0.55231,0,1-0.44769,1-1v-2l-0.00671-0.11658C27.93549,32.38599,27.51282,32,27,32z M20.63599,17.2218l-0.08716-0.0777 c-0.39252-0.31079-0.96436-0.28491-1.32703,0.0777c-0.3905,0.3905-0.3905,1.02368,0,1.41418l1.41418,1.41431l0.08734,0.0777 c0.39246,0.31079,0.96429,0.28491,1.32697-0.0777c0.3905-0.39056,0.3905-1.02368,0-1.41431L20.63599,17.2218z M33.36401,29.94971 l-0.08734-0.0777c-0.39246-0.31079-0.96429-0.28491-1.32697,0.0777c-0.3905,0.39056-0.3905,1.02368,0,1.41431l1.41431,1.41418 l0.08716,0.0777c0.39252,0.31079,0.96436,0.28491,1.32703-0.0777c0.3905-0.39062,0.3905-1.02368,0-1.41418L33.36401,29.94971z M33.36401,20.05029l1.41418-1.41431l0.0777-0.08716c0.31079-0.39252,0.28491-0.96436-0.0777-1.32703 c-0.39062-0.3905-1.02368-0.3905-1.41418,0l-1.41431,1.41418l-0.0777,0.08734c-0.31079,0.39246-0.28491,0.96429,0.0777,1.32697 C32.34033,20.4408,32.97339,20.4408,33.36401,20.05029z M20.63599,29.94971l-1.41418,1.41431l-0.0777,0.08716 c-0.31079,0.39252-0.28491,0.96436,0.0777,1.32703c0.3905,0.3905,1.02368,0.3905,1.41418,0l1.41431-1.41418l0.0777-0.08734 c0.31079-0.39246,0.28491-0.96429-0.0777-1.32697C21.65973,29.5592,21.02661,29.5592,20.63599,29.94971z"/></g>
+                <g class="fr-artwork-major"><path d="M32.47528,43.81702c-0.414-0.29755-0.53296-0.85284-0.29529-1.28925l0.06689-0.10638l12.9411-18.005 c0.38031-0.52917,1.14551-0.55219,1.56122-0.0791l0.07831,0.1012l19,28c0.31012,0.45703,0.19098,1.07892-0.26599,1.38904 c-0.42444,0.2879-0.99091,0.20581-1.31793-0.17334l-0.07111-0.09265L53.61279,38H43c-0.55231,0-1-0.44769-1-1 c0-0.51282,0.38599-0.93549,0.88342-0.99329L43,36h9.25562l-1.35724-2H45c-0.55231,0-1-0.44769-1-1 c0-0.51282,0.38599-0.93549,0.88342-0.99329L45,32h4.54132l-3.56531-5.25403l-12.1051,16.84265 c-0.29749,0.414-0.85278,0.53296-1.28918,0.29529L32.47528,43.81702z M25.11658,57.99329C25.61401,57.93549,26,57.51282,26,57 c0-0.55231-0.44769-1-1-1h-8.099L26,42.76501L36.16772,57.5545c0.0257,0.03857,0.05408,0.0752,0.08478,0.1098l0.00092,0.00122 c0.08167,0.09186,0.17767,0.16565,0.28217,0.2204c0.11932,0.06256,0.25281,0.10187,0.39453,0.11169 c0.02808,0.00195,0.0564,0.00281,0.08472,0.00238H51l0.11658-0.00671C51.61401,57.93549,52,57.51282,52,57c0-0.55231-0.44769-1-1-1 H37.526L26.82397,40.43347l-0.07959-0.10156c-0.42261-0.47412-1.19586-0.44031-1.56836,0.10156L14.474,56H11l-0.11658,0.00671 C10.38599,56.06451,10,56.48718,10,57c0,0.55231,0.44769,1,1,1h3.98529c0.00922,0.00012,0.01843,0.00012,0.02759,0H25 L25.11658,57.99329z M69,60H17l-0.11658,0.00671C16.38599,60.06451,16,60.48718,16,61c0,0.55231,0.44769,1,1,1h52l0.11658-0.00671 C69.61401,61.93549,70,61.51282,70,61C70,60.44769,69.55231,60,69,60z M59,64H29l-0.11658,0.00671 C28.38599,64.06451,28,64.48718,28,65c0,0.55231,0.44769,1,1,1h30l0.11658-0.00671C59.61401,65.93549,60,65.51282,60,65 C60,64.44769,59.55231,64,59,64z"/></g>
+              </svg>
+            </span>
+            <span ng-switch-when="avion">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M21,76c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S21.5514,76,21,76z M67,12c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S67.5514,12,67,12z M3,54c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S3.5514,54,3,54z"/></g>
+                <g class="fr-artwork-minor"><path d="M18,25c0,0.55231-0.44769,1-1,1s-1-0.44769-1-1s0.44769-1,1-1S18,24.44769,18,25z M23,24 c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1s1-0.44769,1-1S23.55231,24,23,24z M36.68378,42.05127l-6,2l-0.10846,0.04333 c-0.45361,0.2121-0.68622,0.73511-0.52399,1.22162c0.17468,0.52399,0.74097,0.80707,1.26489,0.63245l6-2l0.10846-0.04327 c0.45361-0.2121,0.68622-0.73511,0.52405-1.22162C37.77399,42.15979,37.2077,41.87671,36.68378,42.05127z M41.31622,45.94867l12-4 l0.10846-0.04327c0.45361-0.2121,0.68622-0.73511,0.52405-1.22162c-0.17474-0.52399-0.74103-0.80707-1.26495-0.63251l-12,4 l-0.10846,0.04333c-0.45361,0.2121-0.68622,0.73511-0.52399,1.22162C40.22601,45.84021,40.7923,46.12329,41.31622,45.94867z M67,64 c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1s1-0.44769,1-1S67.55231,64,67,64z M63,64c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1 s1-0.44769,1-1S63.55231,64,63,64z M49,60c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1s1-0.44769,1-1S49.55231,60,49,60z M55,60h-2 l-0.11658,0.00671C52.38599,60.06451,52,60.48718,52,61c0,0.55231,0.44769,1,1,1h2l0.11658-0.00671 C55.61401,61.93549,56,61.51282,56,61C56,60.44769,55.55231,60,55,60z M45,60h-4l-0.11658,0.00671 C40.38599,60.06451,40,60.48718,40,61c0,0.55231,0.44769,1,1,1h4l0.11658-0.00671C45.61401,61.93549,46,61.51282,46,61 C46,60.44769,45.55231,60,45,60z M71.62799,29.84808l-0.22888,0.08643l-27.2511,9.91858 c-0.07971,0.02899-0.1626,0.04773-0.2467,0.05579l-0.12683,0.00403l-5.38245-0.16931 c-0.3678-0.01147-0.69592-0.22357-0.85992-0.54602l-0.04828-0.11145l-0.68414-1.87933 c-0.08447-0.2323-0.07867-0.48267,0.00793-0.7052l-5.28479-6.17548c-0.45404-0.53052-0.2384-1.35114,0.41766-1.5899l3.75879-1.36798 c0.3559-0.12964,0.75452-0.04694,1.0296,0.2135l4.87122,4.61206c0.01843,0.01752,0.03613,0.03552,0.05292,0.05402l2.57788-0.93829 c0.51898-0.1889,1.09283,0.07867,1.28168,0.59772c0.17542,0.48187-0.04279,1.01105-0.49036,1.23547l-0.1073,0.0462l-3.53864,1.2879 l-2.48645,2.62689l0.24066,0.6615l4.51501,0.1424l27.06952-9.85248c1.36121-0.49542,1.74939-0.90094,1.65308-1.29602 l-0.01801-0.0592c-0.23151-0.63617-1.22522-1.146-2.73938-1.37531c-0.64899-0.09821-1.36853-0.13177-1.95819-0.12109 l-0.37183,0.01343c-0.2901,0.0163-0.52649,0.0448-0.67468,0.08209l-0.07812,0.02338l-5.37207,1.95532l0.2771,0.05688 c0.98767,0.20288,1.08838,1.5744,0.14081,1.91931l-8.45721,3.07819c-0.2301,0.08368-0.48303,0.08008-0.71069-0.01019 L41.2124,27.88263c-0.85468-0.33905-0.8374-1.55481,0.02667-1.86932l4.69843-1.71008c0.17389-0.06329,0.362-0.07715,0.54327-0.03979 l10.93695,2.24646l8.42609-3.06689c2.26227-0.82336,7.43457-0.04022,8.38568,2.57281 C74.8396,27.69202,73.80219,28.99707,71.62799,29.84808z M57.56818,28.5827L46.35413,26.2793l-1.96112,0.71381l8.39502,3.32947 L57.56818,28.5827z M39.76459,33.2713l-3.68671-3.48999l-1.82111,0.66278l3.88544,4.54083L39.76459,33.2713z"/></g>
+                <g class="fr-artwork-major"><path d="M38,67c0,0.51282-0.38599,0.93549-0.88342,0.99329L37,68H9c-0.55231,0-1-0.44769-1-1 c0-0.51282,0.38605-0.93549,0.88336-0.99329L9,66h28C37.55231,66,38,66.44769,38,67z M10.02991,21.24249 C9.87207,20.61139,10.34943,20,11,20h4.38159l-1.00061-2H13l-0.13318-0.00702c-1.1557-0.12396-1.1557-1.862,0-1.98596L13,16h5v-2h-1 l-0.13318-0.00702c-1.1557-0.12396-1.1557-1.862,0-1.98596L17,12h6c1.28741,0,1.33173,1.86438,0.13318,1.99298L23,14h-1v2h5 c1.28741,0,1.33173,1.86438,0.13318,1.99298L27,18h-1.38202l-1,2H29c0.65057,0,1.12793,0.61139,0.97009,1.24249l-2,8 C27.85889,29.68768,27.45892,30,27,30h-2.99817l0.00348,1.89062l0.02167,3.43866l0.02094,1.97003l0.02692,1.8999l0.04498,2.42419 l0.07086,2.85431l0.08722,2.65869l0.06,1.50098l0.08911,1.89142l0.07349,1.33582l0.07922,1.26489l0.08496,1.19366l0.09064,1.12262 l0.0636,0.7088l0.0661,0.67712l0.10382,0.95605l0.1095,0.88464l0.07605,0.54987l0.07855,0.51813l0.07269,0.43829 c0.12421,0.7171,0.25696,1.3244,0.39807,1.82129H27c0.55231,0,1,0.44769,1,1c0,0.51282-0.38599,0.93549-0.88342,0.99329L27,64 h-1.97668c-0.01544,0.00037-0.03094,0.00037-0.0462,0h-9.95422c-0.01526,0.00037-0.03076,0.00037-0.0462,0H13 c-0.55231,0-1-0.44769-1-1c0-0.51282,0.38599-0.93549,0.88342-0.99329L13,62h1.27631 c0.14111-0.49689,0.27386-1.10419,0.39807-1.82129l0.07269-0.43829l0.07855-0.51813l0.07605-0.54987l0.07361-0.58185 l0.10571-0.93219l0.1001-1.00378l0.09442-1.07501l0.08881-1.14636l0.08301-1.21753l0.10187-1.73383l0.11292-2.34448l0.06-1.50098 l0.07111-2.11133l0.07416-2.81519l0.03674-1.78302l0.04797-3.12756l0.02094-1.97003l0.02167-3.43866L15.99823,30H13 c-0.45892,0-0.85889-0.31232-0.97009-0.75751L10.02991,21.24249z M23.66241,62l-0.05463-0.23108l-0.12598-0.59863l-0.08112-0.43048 l-0.07867-0.45569l-0.07642-0.48083l-0.0741-0.50598l-0.07172-0.53119l-0.10327-0.84424l-0.09821-0.901l-0.0625-0.63226 l-0.11823-1.34064l-0.0556-0.70837l-0.07916-1.11011l-0.0741-1.1673l-0.09082-1.64557l-0.06219-1.30103l-0.07513-1.82422 l-0.06598-1.92651l-0.0437-1.51208l-0.05048-2.1059l-0.04163-2.2088l-0.0459-3.50616l-0.02307-3.0993L22,30h-4.00098 l-0.00891,2.96362l-0.03009,3.74146l-0.04053,2.93634l-0.03107,1.68256l-0.04944,2.15125l-0.04297,1.54449L17.73071,46.987 l-0.07458,1.86249l-0.06201,1.32819l-0.0907,1.6795l-0.0741,1.1911l-0.10699,1.49695l-0.05701,0.70947l-0.0899,1.0155 l-0.09521,0.95709l-0.10052,0.89868l-0.1059,0.84064l-0.07349,0.52795l-0.07587,0.50232l-0.07831,0.47644l-0.12189,0.66626 L16.44,61.5517l-0.08673,0.38629L16.33801,62H23.66241z M16.61798,18l1,2h4.76379l0.99921-2H16.61798z M12.28101,22l1.5,6h12.43701 l1.5-6h-4.69794c-0.01385,0.00031-0.02777,0.00031-0.04181,0h-5.95654c-0.01404,0.00031-0.02795,0.00031-0.04181,0H12.28101z M72,61 v6c0,0.55231-0.44769,1-1,1c-0.51282,0-0.93549-0.38599-0.99329-0.88342L70,67v-5H60v5c0,0.51282-0.38599,0.93549-0.88342,0.99329 L59,68H43.40002c-0.55231,0-1-0.44769-1-1c0-0.51282,0.38599-0.93549,0.88336-0.99329L43.40002,66H58v-8H34v3 c0,0.51282-0.38599,0.93549-0.88342,0.99329L33,62c-0.51282,0-0.93549-0.38599-0.99329-0.88342L32,61v-4 c0-0.51282,0.38599-0.93549,0.88342-0.99329L33,56h9v-2h-1l-0.13318-0.00702c-1.1557-0.12396-1.1557-1.862,0-1.98596L41,52h10 l0.13318,0.00702c1.1557,0.12396,1.1557,1.862,0,1.98596L51,54h-1v2h9c0.51282,0,0.93549,0.38599,0.99329,0.88342L60,57v3h11 c0.51282,0,0.93549,0.38599,0.99329,0.88342L72,61z M48,54h-4v2h4V54z"/></g>
+              </svg>
+            </span>
+            <span ng-switch-when="valise">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M21,76c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S21.5514,76,21,76z M77,24c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S77.5514,24,77,24z M47,2c-0.5514,0-1-0.4486-1-1c0-0.55145,0.4486-1,1-1s1,0.44855,1,1 C48,1.5514,47.5514,2,47,2z"/></g>
+                <g class="fr-artwork-minor"><path d="M17,28c0.5128,0,0.9355,0.386,0.9933,0.8834L18,29v4c0,0.5523-0.4477,1-1,1 c-0.5128,0-0.9355-0.386-0.9933-0.8834L16,33v-4C16,28.4477,16.4477,28,17,28z M17,46c0.5128,0,0.9355,0.386,0.9933,0.8834L18,47v10 c0,0.5523-0.4477,1-1,1c-0.5128,0-0.9355-0.386-0.9933-0.8834L16,57V47C16,46.4477,16.4477,46,17,46z M23.9933,28.8834 C23.9355,28.386,23.5128,28,23,28c-0.5523,0-1,0.4477-1,1v28l0.0067,0.1166C22.0645,57.614,22.4872,58,23,58c0.5523,0,1-0.4477,1-1 V29L23.9933,28.8834z M29,28c0.5128,0,0.9355,0.386,0.9933,0.8834L30,29v2c0,0.5523-0.4477,1-1,1 c-0.5128,0-0.9355-0.386-0.9933-0.8834L28,31v-2C28,28.4477,28.4477,28,29,28z M35.9933,28.8834C35.9355,28.386,35.5128,28,35,28 c-0.5523,0-1,0.4477-1,1v2l0.0067,0.1166C34.0645,31.614,34.4872,32,35,32c0.5523,0,1-0.4477,1-1v-2L35.9933,28.8834z"/></g>
+                <g class="fr-artwork-major"><path d="M50.4472,46.10559l-8-4c-0.5722-0.28607-1.26221,0.03119-1.4173,0.65192l-2,8 c-0.19788,0.79138,0.58411,1.47388,1.34149,1.17102l10-4C51.17249,47.60797,51.21899,46.49152,50.4472,46.10559z M41.44403,49.34399 l1.224-4.89197L47.56,46.89801L41.44403,49.34399z M56,48c-2.76141,0-5,2.23859-5,5s2.23859,5,5,5s5-2.23859,5-5S58.76141,48,56,48z M56,56c-1.65692,0-3-1.34308-3-3s1.34308-3,3-3c1.6568,0,3,1.34308,3,3S57.6568,56,56,56z M67,34h-7v-5l-0.00513-0.17633 C59.90369,27.2489,58.59772,26,57,26H45l-0.17627,0.00513C43.2489,26.09631,42,27.40228,42,29v5h-9c-2.76141,0-5,2.23859-5,5v20 c0,2.76141,2.23859,5,5,5h1.17072C34.06018,64.31281,34,64.64941,34,65c0,1.65692,1.34308,3,3,3s3-1.34308,3-3 c0-0.35059-0.06018-0.68719-0.17072-1h20.34143C60.06018,64.31281,60,64.64941,60,65c0,1.65692,1.34308,3,3,3 c1.6568,0,3-1.34308,3-3c0-0.35059-0.06018-0.68719-0.17072-1H67c2.76141,0,5-2.23859,5-5V39C72,36.23859,69.76141,34,67,34z M44,29 l0.00671-0.11658C44.06451,28.38599,44.48718,28,45,28h12l0.11658,0.00671C57.61401,28.06451,58,28.48718,58,29v5h-2v-3 l-0.00671-0.11658C55.93549,30.38599,55.51282,30,55,30h-8l-0.11658,0.00671C46.38599,30.06451,46,30.48718,46,31v3h-2V29z M54,32v2 h-6v-2H54z M30,39c0-1.65692,1.34308-3,3-3h1v4h-4V39z M34,62h-1c-1.65692,0-3-1.34308-3-3v-1h4V62z M37,66 c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S37.55231,66,37,66z M63,66c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1 s1,0.44769,1,1S63.55231,66,63,66z M70,59c0,1.65692-1.3432,3-3,3h-1v-4h4V59z M70,56h-5l-0.11658,0.00671 C64.38599,56.06451,64,56.48718,64,57v5H36v-5l-0.00671-0.11658C35.93549,56.38599,35.51282,56,35,56h-5V42h5l0.11658-0.00671 C35.61401,41.93549,36,41.51282,36,41v-5h28v5l0.00671,0.11658C64.06451,41.61401,64.48718,42,65,42h5V56z M70,40h-4v-4h1 c1.6568,0,3,1.34308,3,3V40z M23,62h-8l-0.17627-0.00513C13.2489,61.90369,12,60.59772,12,59V44.69299l7.35107-2.75671 l0.10712-0.0473c0.48022-0.24646,0.68402-0.84058,0.43622-1.33618l-2-4l-0.06152-0.10638 c-0.2467-0.37183-0.71637-0.53931-1.14911-0.39514L12,37.61261V27l0.00513-0.17633C12.09631,25.2489,13.40228,24,15,24h24 l0.11658-0.00671C39.61401,23.93549,40,23.51282,40,23c0-0.55231-0.44769-1-1-1h-9v-6h1c1.65692,0,3-1.34308,3-3s-1.34308-3-3-3H19 c-1.65692,0-3,1.34308-3,3s1.34308,3,3,3h1v6h-5l-0.21692,0.00458C12.12231,22.11823,10,24.31122,10,27v11.97668 c-0.00037,0.01544-0.00037,0.03088,0,0.04639v4.95392c-0.00037,0.01538-0.00037,0.03088,0,0.04633V59l0.00458,0.21692 c0.10205,2.3894,1.88092,4.34448,4.18982,4.71851C14.06879,64.2663,14,64.62512,14,65c0,1.65692,1.34308,3,3,3s3-1.34308,3-3 c0-0.35059-0.06018-0.68719-0.17072-1H23l0.11658-0.00671C23.61401,63.93549,24,63.51282,24,63C24,62.44769,23.55231,62,23,62z M28,22h-6v-6h6V22z M19,14c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1h12c0.55231,0,1,0.44769,1,1s-0.44769,1-1,1H19z M12,39.72058 l4.49298-1.4986l1.11499,2.23102L12,42.55682V39.72058z M17,66c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1 S17.55231,66,17,66z"/></g>
+              </svg>
+            </span>
+          </span>
+        </span>
+        <span class="fr-tile__title">{{site.label}}</span>
+        <span class="fr-tile__desc">{{site.desc}}</span>
       </button>
     </div>
 
   </section>
 
-  <!-- ============================================================
-       ÉTAPE 3 : offres éligibles
-       ============================================================ -->
-  <section id="cimob-step-3" class="cimob-step" style="display: none;">
 
-    <div class="cimob-summary">
-      <strong class="cimob-result-depart"></strong>
-      <span class="cimob-mini-plane" data-icn="plane"></span>
-      <strong class="cimob-result-arrivee"></strong>
-    </div>
+  <!-- ===================== ÉTAPE 2 : SITE D'ARRIVÉE ===================== -->
+  <section ng-if="c.etape === 2">
 
-    <!-- Les 3 blocs d'offres sont injectés ici -->
-    <div id="cimob-results" aria-live="polite"></div>
+    <p class="cimob__trajet">
+      <span class="fr-badge">Départ</span> {{c.depart.label}}
+    </p>
 
-    <!-- Affiché si la combinaison n'existe pas dans la matrice -->
-    <div id="cimob-results-empty" class="cimob-alert" style="display: none;">
-      <strong>Combinaison non renseignée</strong>
-      <p>Les offres pour ce trajet ne sont pas encore disponibles.
-         Rapprochez-vous de votre gestionnaire mobilité.</p>
-    </div>
-
-    <div class="cimob-actions">
-      <button type="button"
-              class="cimob-btn cimob-btn--secondary"
-              ng-click="c.retourArrivee()">
-        <span data-icn="arrowLeft"></span> Modifier le site d'arrivée
+    <div class="cimob__grille">
+      <button type="button" class="fr-tile" ng-repeat="site in c.sites"
+              ng-class="{ 'est-choisie': c.arrivee === site }"
+              ng-click="c.choisirArrivee(site)">
+        <span class="fr-tile__coche" aria-hidden="true"></span>
+        <span class="fr-tile__pictogram">
+          <span ng-switch="site.picto">
+            <span ng-switch-when="france">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M70,69c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S70.5514,69,70,69z M68,13c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S68.5514,13,68,13z M14,69c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S14.5514,69,14,69z M10,17 c-0.5514,0-1-0.4486-1-1c0-0.5514,0.4486-1,1-1s1,0.4486,1,1C11,16.5514,10.5514,17,10,17z"/></g>
+                <g class="fr-artwork-minor"><path d="M19,30c-1.65692,0-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V39l0.00671,0.11658 C18.06451,39.61401,18.48718,40,19,40c0.55231,0,1-0.44769,1-1v-3.18365c1.1626-0.41327,2-1.51196,2-2.81635 C22,31.34308,20.65692,30,19,30z M19,34c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S19.55231,34,19,34z M41,26 c-1.65692,0-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V35l0.00671,0.11658C40.06451,35.61401,40.48718,36,41,36 c0.55231,0,1-0.44769,1-1v-3.18365c1.1626-0.41327,2-1.51196,2-2.81635C44,27.34308,42.65692,26,41,26z M41,30 c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S41.55231,30,41,30z M62,17c0-1.65692-1.34308-3-3-3s-3,1.34308-3,3 c0,1.30438,0.8374,2.40308,2,2.81635V23l0.00671,0.11658C58.06451,23.61401,58.48718,24,59,24c0.55231,0,1-0.44769,1-1v-3.18365 C61.1626,19.40308,62,18.30438,62,17z M59,18c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S59.55231,18,59,18z M50,45 l0.00671,0.11658C50.06451,45.61401,50.48718,46,51,46c0.55231,0,1-0.44769,1-1v-3.18365c1.1626-0.41327,2-1.51196,2-2.81635 c0-1.65692-1.34308-3-3-3s-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V45z M51,38c0.55231,0,1,0.44769,1,1s-0.44769,1-1,1 s-1-0.44769-1-1S50.44769,38,51,38z M37,46c-1.65692,0-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V55l0.00671,0.11658 C36.06451,55.61401,36.48718,56,37,56c0.55231,0,1-0.44769,1-1v-3.18365c1.1626-0.41327,2-1.51196,2-2.81635 C40,47.34308,38.65692,46,37,46z M37,50c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S37.55231,50,37,50z M53,56 c-1.65692,0-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V65l0.00671,0.11658C52.06451,65.61401,52.48718,66,53,66 c0.55231,0,1-0.44769,1-1v-3.18365c1.1626-0.41327,2-1.51196,2-2.81635C56,57.34308,54.65692,56,53,56z M53,60 c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S53.55231,60,53,60z"/></g>
+                <g class="fr-artwork-major"><path d="M67.51508,57.55048l-0.01617,0.02155l-0.00092,0.12549C67.46472,58.4624,67.1264,59.19,66.54468,59.7251 l-0.15039,0.12958l-2.0528,1.64154l-0.09827,0.0694L63.7829,61.849l-0.0097,0.0661c-0.03027,0.15118-0.07251,0.29993-0.1264,0.44427 l-0.08948,0.21332c-0.3042,0.65912-0.85541,1.18732-1.53198,1.48132l-0.18762,0.07428l-1.81683,0.646 c-0.16644,0.05542-0.31366,0.09491-0.45868,0.12201l-0.1449,0.02301l-1.34558,0.185 c-0.38049,0.05261-0.7757,0.03357-1.14972-0.05664c-0.53687-0.12927-0.86731-0.66949-0.73792-1.20636 c0.12012-0.4986,0.59442-0.81903,1.09143-0.75873l0.11499,0.02081c0.08667,0.02087,0.17932,0.03088,0.2713,0.02979l0.13678-0.01019 l1.35199-0.18579c0.04303-0.00568,0.08685-0.01471,0.13751-0.02881l0.08203-0.02509l1.7948-0.63849 c0.26031-0.09332,0.47211-0.28394,0.57867-0.51489c0.04669-0.09979,0.07471-0.20642,0.08331-0.31433l0.00201-0.10809 c-0.01361-0.32098,0.12781-0.62622,0.37518-0.82367l0.09772-0.06885l0.8421-0.52197l1.9978-1.59741 c0.2381-0.19232,0.36481-0.46362,0.35876-0.74237l-0.0108-0.11975c-0.03485-0.2193,0.00433-0.44257,0.10931-0.63538l0.07092-0.11182 l0.13269-0.18066c0.18982-0.242,0.24457-0.54773,0.15649-0.82831L65.9126,55.5589l-0.33276-0.69568 c-0.20593-0.42603-0.70044-0.65222-1.1853-0.54572l-0.12085,0.03369l-0.2572,0.08801 c-0.25317,0.08667-0.5285,0.06781-0.76538-0.04883l-0.11487-0.06628l-0.24213-0.16211 c-0.46338-0.3103-0.57788-0.93286-0.27643-1.3847l0.07104-0.09399c0.12561-0.14777,0.20007-0.32532,0.21649-0.51648 c0.02118-0.24493-0.05499-0.48114-0.21564-0.66998l-0.08716-0.09045l-0.14429-0.13226 c-0.43231-0.39648-0.42731-1.06903-0.0141-1.461l0.09479-0.07953c0.20117-0.14911,0.33716-0.3642,0.38196-0.59247l0.01471-0.11499 l0.05499-1.0152c0.0094-0.19434-0.04449-0.38605-0.1546-0.5517l-0.07275-0.09601l-0.76984-0.88611 c-0.28131-0.32379-0.32196-0.78644-0.11377-1.15112l0.06989-0.1062c0.2121-0.28168,0.24261-0.65167,0.08948-0.9585l-0.06598-0.11182 l-0.60242-0.87109l-0.27747-0.33649c-0.05609-0.06799-0.10284-0.14301-0.1391-0.2229l-0.04651-0.12341l-0.2168-0.71539 c-0.08813-0.28992-0.31873-0.5238-0.6214-0.63379l-0.11682-0.03528c-0.672-0.16382-0.96777-0.935-0.61182-1.50092l0.0697-0.0976 l1.9939-2.4776c0.10034-0.12463,0.22852-0.22284,0.37366-0.28723l0.11176-0.04181c0.08923-0.02734,0.17322-0.06494,0.24939-0.11108 l0.10803-0.07532l1.16058-0.93256c0.20288-0.16333,0.32489-0.38269,0.35193-0.62164l0.00549-0.12085l-0.04944-2.92511 c-0.0014-0.08063,0.00702-0.16089,0.0249-0.2392l0.03381-0.11572l0.63049-1.75537l0.02954-0.10382l0.01678-0.10687l0.04541-0.48682 c0.00836-0.09052,0.02917-0.1792,0.0614-0.26373l0.05688-0.12329l0.88672-1.62109c0.17755-0.3241,0.13257-0.71808-0.09363-1.0072 l-0.09198-0.10132l-2.35693-0.09576c-0.51239-0.021-0.91888-0.42389-0.9563-0.92322l-0.00195-0.11676 c0.02087-0.51245,0.42389-0.91901,0.92316-0.95642l0.11682-0.00201l2.66748,0.10913c0.1709,0.00696,0.33734,0.05768,0.48303,0.1474 c1.28711,0.79156,1.77478,2.40375,1.14856,3.74115l-0.08411,0.16565l-0.78674,1.43689l-0.02704,0.28906 c-0.01556,0.15692-0.04248,0.30811-0.08221,0.45911l-0.06946,0.22699l-0.57233,1.59082l0.04681,2.73999 c0.01727,0.84149-0.33142,1.63934-0.9549,2.21069l-0.14868,0.12781l-1.16266,0.93414 c-0.18079,0.14478-0.37817,0.26837-0.58765,0.36877l-0.1189,0.05157l-1.07501,1.336l0.07037,0.06122 c0.32959,0.3056,0.58978,0.68433,0.75311,1.11469l0.06403,0.1875l0.15948,0.52661l0.19879,0.24469l0.65442,0.94 c0.51605,0.7489,0.6449,1.67169,0.3916,2.50519l-0.0578,0.1651l0.32605,0.37524c0.44855,0.52277,0.69934,1.1731,0.71375,1.85266 l-0.00293,0.20471l-0.05548,1.0257c-0.02783,0.46991-0.16998,0.92059-0.4054,1.31799l-0.06,0.09271l0.08008,0.13348 c0.24512,0.4436,0.37158,0.94574,0.36108,1.4613l-0.00916,0.15924l0.14996,0.01569c0.92853,0.12518,1.77332,0.6665,2.2486,1.51422 l0.08472,0.1626l0.33569,0.7016C68.16309,55.63483,68.07471,56.7218,67.51508,57.55048z M53.22192,21.67999l0.88348,1.76721 l0.05817,0.10132c0.27411,0.41901,0.82483,0.57526,1.28351,0.34589c0.49402-0.24701,0.69421-0.8476,0.4472-1.34161l-1-2 l-0.06439-0.11047c-0.07117-0.1059-0.16217-0.19763-0.26849-0.26971l-0.71948-0.48859l-0.05151-0.21771 c-0.17133-0.61029-0.54059-1.15509-1.065-1.55353l-0.17279-0.12146c-0.7063-0.461-1.58459-0.61761-2.40228-0.4198l-0.06842,0.0155 l-0.06042-0.05884c-0.20966-0.18787-0.44708-0.34778-0.7066-0.47498l-0.82397-0.3963l-0.18652-0.08362 c-0.06329-0.02588-0.12756-0.04962-0.19287-0.07117l-0.05359-0.01611l-0.03723-0.0376 c-0.25281-0.23584-0.5451-0.4267-0.8728-0.56842l-0.01208-0.0379c-0.39783-1.03906-1.349-1.76007-2.46393-1.89386l-0.17596-0.01624 l-0.32263-0.45477l-0.11755-0.1557c-0.73401-0.90625-1.96271-1.31451-3.12891-1.0343l-3.29504,0.82739l-0.20099,0.0578 c-0.79236,0.2569-1.44257,0.81897-1.79791,1.5683l-0.72278,1.52698l-0.08179,0.19403 c-0.14923,0.39227-0.21271,0.80878-0.18701,1.22479l0.09863,1.50049l-0.40503,0.35797l-3.26202,1.07855l-0.18738,0.06805 c-0.73682,0.29535-1.31732,0.85901-1.62817,1.55774l-0.03143,0.07666l-0.55499-0.10596l-1.18231-1.224l-0.15009-0.14435 c-0.61938-0.5556-1.46039-0.85175-2.2547-0.77618l-1.59027,0.0769l-0.20801,0.01813 c-0.82581,0.09918-1.57092,0.51807-2.06683,1.17249c-0.54041,0.70691-0.729,1.61438-0.51221,2.47906l0.54089,2.12305 l0.05133,0.15027l0.07819,0.18359l-0.28821-0.28339l-0.14801-0.13568c-0.60864-0.521-1.4115-0.7793-2.24805-0.72803l-4.01703,0.3479 l-0.2019,0.02313c-0.26819,0.0401-0.53259,0.11719-0.79822,0.23248l-2.91077,1.3092l-0.16693,0.0813 c-1.30695,0.68512-1.9259,2.19928-1.42511,3.5918l0.44244,1.22717l0.07953,0.19666c0.14429,0.32208,0.34686,0.61584,0.59625,0.86896 l0.008,0.00751l0.0127,0.23718c0.04102,0.43634,0.1803,0.86182,0.41339,1.24121C11.33722,35.3667,12.07147,36,12.99988,36 c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1c-0.00537,0-0.01575-0.00513-0.03088-0.01617l-0.05872-0.05176l-0.08417-0.09186 l-0.1073-0.13684c-0.01971-0.02679-0.04022-0.05566-0.06152-0.08679l-0.13727-0.21295l-0.0752-0.1275 c-0.13434-0.21954-0.17419-0.45691-0.12622-0.68402l0.01788-0.12048c0.03131-0.36163-0.13641-0.71613-0.44427-0.92004 l-0.1076-0.08069c-0.1347-0.1145-0.23389-0.25488-0.28851-0.40558l-0.44171-1.22522l-0.03119-0.1062 c-0.09821-0.42639,0.12213-0.86707,0.5625-1.06561l2.89819-1.30359l0.11981-0.04498 c0.07922-0.02509,0.15741-0.04041,0.23792-0.04681l3.99866-0.34662l0.13892-0.00055 c0.27472,0.01428,0.52863,0.12067,0.70929,0.29797l0.7395,0.72449l0.09741,0.08405c0.27179,0.2052,0.63293,0.25958,0.95691,0.13678 l0.15527-0.0589l0.11426-0.03589c0.1543-0.03961,0.3158-0.04559,0.4715-0.01709l0.5437,0.09467l0.11066,0.01331 c0.73004,0.04822,1.27942-0.70038,0.97852-1.39569l-0.69128-1.59644l-0.51941-2.04089l-0.02118-0.11597 c-0.02722-0.23254,0.03699-0.4671,0.18579-0.6618c0.18115-0.23914,0.46539-0.38721,0.78625-0.40448l1.6311-0.08002l0.12561-0.0022 c0.2536,0.01331,0.5163,0.13171,0.69873,0.31958l1.40161,1.45129l0.09094,0.08319c0.12762,0.10315,0.27905,0.17365,0.44141,0.20441 l1.82172,0.34662l0.11591,0.0152c0.53741,0.03918,1.01978-0.3606,1.06732-0.91162l0.01917-0.22266l0.0191-0.12292 c0.07312-0.32202,0.32153-0.59363,0.66913-0.70752l3.45978-1.14368l0.12451-0.05072c0.08051-0.03918,0.15552-0.08917,0.2229-0.14868 l0.92749-0.81763l0.09302-0.09357c0.1723-0.198,0.26111-0.45752,0.24341-0.7229l-0.13202-1.98743l0.00018-0.11267 c0.00732-0.11304,0.03571-0.22589,0.08392-0.3299l0.71912-1.51904l0.06128-0.11005c0.13647-0.21112,0.354-0.36621,0.61792-0.43274 l3.28436-0.82477l0.1308-0.02319c0.39362-0.04572,0.79083,0.12097,1.00531,0.42517l0.6181,0.8725l0.07562,0.09399 c0.18829,0.2074,0.4566,0.32782,0.74036,0.32782h0.32062l0.12683,0.0069c0.41528,0.04529,0.75079,0.31189,0.86768,0.6864 l0.11328,0.35638l0.04279,0.11133c0.1308,0.28766,0.39172,0.49921,0.70575,0.56476l0.14038,0.03931 c0.18201,0.06439,0.34137,0.17572,0.45898,0.3208l0.07971,0.08734c0.14081,0.1369,0.31952,0.22998,0.51428,0.2663l0.0929,0.02167 c0.0611,0.01733,0.12103,0.04022,0.17993,0.06909l0.82428,0.39655l0.10309,0.0575c0.1319,0.08325,0.24084,0.19189,0.31903,0.31757 l0.07379,0.10339c0.23853,0.29303,0.62598,0.4295,1.0011,0.34253l0.67261-0.15588l0.13458-0.02325 c0.27161-0.02875,0.55383,0.04761,0.7713,0.21222c0.21069,0.16003,0.34033,0.38043,0.37299,0.62292l0.01581,0.24597 c0.03522,0.28394,0.19092,0.5415,0.43091,0.70441L53.22192,21.67999z M47.84192,64.242l0.36456-0.71033l0.04712-0.10687 c0.17511-0.46899-0.02533-1.00519-0.48187-1.23883c-0.49164-0.25159-1.09412-0.05695-1.3457,0.43475l-0.54584,1.06665 l-0.05066,0.11682c-0.07166,0.19897-0.07861,0.41669-0.01825,0.62158l0.53064,1.79901l0.02606,0.12061 c0.0293,0.20337-0.01166,0.41669-0.11829,0.5968c-0.12891,0.22101-0.35889,0.3927-0.62891,0.46381l-2.18396,0.55969l-0.08661,0.0188 C43.2901,67.99457,43.22607,68,43.16193,68l-0.21674-0.0191l-1.73999-0.30353l-0.12073-0.01324 c-0.08087-0.00391-0.16199,0.00195-0.2417,0.0177l-0.83197,0.1637l-0.13721,0.01715c-0.18469,0.0116-0.3739-0.02167-0.5365-0.09607 l-0.97198-0.45508l-0.10614-0.05743c-0.20386-0.12598-0.35565-0.31787-0.4245-0.53558L37.78821,66.599 c-0.10742-0.23138-0.29999-0.41467-0.54028-0.50952l-0.80365-0.31677L36.28162,65.724l-0.3363-0.07013l-0.11993-0.01746 c-0.31958-0.0271-0.63605,0.1012-0.8468,0.34961l-0.05426,0.05878l-0.06183,0.05658 c-0.22839,0.19354-0.53632,0.28229-0.8418,0.23981l-3.47382-0.4516l-0.14099-0.0274 c-0.09155-0.02417-0.17871-0.06018-0.26208-0.10822l-0.5907-0.33588l-0.11639-0.05658 c-0.11963-0.04883-0.24792-0.0741-0.37793-0.0741h-0.88025l-0.12402-0.00714c-0.24579-0.02808-0.4762-0.13849-0.64203-0.30859 l-0.59479-0.60858l-0.1004-0.08978c-0.07068-0.05511-0.14868-0.10065-0.23199-0.13513l-1.98517-0.82269l-0.1189-0.05859 c-0.15302-0.08801-0.28204-0.21393-0.36804-0.35992l-0.40558-0.68695l-0.0611-0.09161 c-0.08789-0.11719-0.20081-0.21399-0.33093-0.28308L22.3667,61.3844l-0.1095-0.06738 c-0.20801-0.146-0.34857-0.35693-0.39673-0.59381c-0.05334-0.27283,0.02014-0.55298,0.2066-0.77228l1.32104-1.54901l0.07758-0.104 c0.07062-0.10864,0.11969-0.23029,0.14398-0.3584l0.73309-3.8623l0.0141-0.06219l0.01996-0.06622 c0.0741-0.22168,0.06818-0.46246-0.01672-0.6803l-0.03363-0.10492c-0.02686-0.10657-0.03375-0.21759-0.02008-0.33069l0.60669-5.104 l0.0105-0.06836l0.04163-0.19525c0.02948-0.21844-0.01404-0.44208-0.12579-0.63495l-0.0528-0.1059 c-0.04584-0.10852-0.07043-0.22375-0.07202-0.33801c-0.00391-0.26691,0.112-0.52899,0.3255-0.724l0.08661-0.08954 c0.26721-0.31305,0.31757-0.76367,0.11481-1.13165l-0.04431-0.0918c-0.02588-0.06244-0.04449-0.12683-0.0556-0.1922 l-0.02692-0.11621c-0.07849-0.2655-0.2644-0.48865-0.51569-0.61292l-0.99707-0.49139c-0.02185-0.0097-0.0448-0.01941-0.06952-0.0293 l-0.17322-0.06451l-1.0694-0.35651l-0.39801-0.14398l-0.19379-0.0799l0.0957,0.12939 c-0.33582-0.43842-0.9635-0.52161-1.40192-0.18579c-0.43848,0.33588-0.52161,0.96356-0.18579,1.40198 c0.20679,0.2699,0.43781,0.40308,0.9422,0.59332l0.48938,0.1756l1.14075,0.3819l0.32458,0.1601l-0.01312,0.02362 c-0.25018,0.44666-0.38257,0.9527-0.375,1.4726l0.01093,0.21228c0.02496,0.28192,0.09167,0.55908,0.19678,0.82227l0.00739,0.01825 l-0.60907,5.12585l-0.01758,0.2038c-0.01392,0.27191,0.0105,0.54346,0.07245,0.80756l0.01324,0.04974L22.3772,53.7077 l-0.68433,3.59827l-1.1485,1.34821l-0.12799,0.1615c-0.4873,0.6604-0.67609,1.48853-0.51715,2.29883l0.04749,0.19867 c0.21661,0.78473,0.7478,1.44354,1.47791,1.83545l0.60327,0.32037l0.26239,0.44373l0.11609,0.18146 c0.3269,0.47192,0.79095,0.84619,1.32782,1.06891l1.79669,0.7439l0.45044,0.46179l0.14746,0.14124 c0.55719,0.49786,1.29144,0.7774,2.04974,0.7774l0.61639-0.00043l0.35559,0.20282l0.21356,0.112 c0.29034,0.13788,0.60223,0.22968,0.92651,0.2713l3.46332,0.4502l0.19849,0.021c0.72852,0.05298,1.45782-0.15759,2.0495-0.59631 l0.12604,0.04999l0.04626,0.08801c0.30402,0.53448,0.77271,0.9704,1.34369,1.23712l0.979,0.45837l0.19952,0.08301 c0.53882,0.20233,1.12811,0.25214,1.69409,0.14471l0.65839-0.13019l1.65222,0.28467l0.38599,0.03351l0.19751-0.00269 c0.25281-0.0094,0.46527-0.04193,0.66077-0.0946l2.17841-0.55823l0.19342-0.05756c0.69983-0.2334,1.29382-0.70624,1.65692-1.32874 l0.09515-0.1745c0.32635-0.65027,0.39813-1.41119,0.19183-2.11877L47.84192,64.242z M34.99988,38l0.11664-0.00671 c0.49731-0.0578,0.88336-0.48047,0.88336-0.99329c0-0.55231-0.44769-1-1-1h-2l-0.1167,0.00671 c-0.49725,0.0578-0.8833,0.48047-0.8833,0.99329c0,0.55231,0.44775,1,1,1H34.99988z M54.99988,30h-2l-0.1167,0.00671 c-0.49725,0.0578-0.8833,0.48047-0.8833,0.99329c0,0.55231,0.44775,1,1,1h2l0.11664-0.00671 c0.49731-0.0578,0.88336-0.48047,0.88336-0.99329C55.99988,30.44769,55.55219,30,54.99988,30z M48.99988,50h-2l-0.1167,0.00671 c-0.49725,0.0578-0.8833,0.48047-0.8833,0.99329c0,0.55231,0.44775,1,1,1h2l0.11664-0.00671 c0.49731-0.0578,0.88336-0.48047,0.88336-0.99329C49.99988,50.44769,49.55219,50,48.99988,50z"/></g>
+              </svg>
+            </span>
+            <span ng-switch-when="europe">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M17,8c-0.5514,0-1-0.4486-1-1c0-0.55145,0.4486-1,1-1s1,0.44855,1,1C18,7.5514,17.5514,8,17,8z M21,76 c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S21.5514,76,21,76z M63,74c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1 S63.5514,74,63,74z M65,10c-0.5514,0-1-0.4486-1-1c0-0.55145,0.4486-1,1-1s1,0.44855,1,1C66,9.5514,65.5514,10,65,10z M41,80 c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S41.5514,80,41,80z"/></g>
+                <g class="fr-artwork-minor"><path d="M33,17c-1.65692,0-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V26l0.00671,0.11658 C32.06451,26.61401,32.48718,27,33,27c0.55231,0,1-0.44769,1-1v-3.18365c1.1626-0.41327,2-1.51196,2-2.81635 C36,18.34308,34.65692,17,33,17z M33,21c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S33.55231,21,33,21z M58,44 c0-1.65692-1.34308-3-3-3s-3,1.34308-3,3c0,1.30438,0.8374,2.40308,2,2.81635V50l0.00671,0.11658 C54.06451,50.61401,54.48718,51,55,51c0.55231,0,1-0.44769,1-1v-3.18365C57.1626,46.40308,58,45.30438,58,44z M55,45 c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S55.55231,45,55,45z M26,47c-1.65692,0-3,1.34308-3,3 c0,1.30438,0.8374,2.40308,2,2.81635V56l0.00671,0.11658C25.06451,56.61401,25.48718,57,26,57c0.55231,0,1-0.44769,1-1v-3.18365 c1.1626-0.41327,2-1.51196,2-2.81635C29,48.34308,27.65692,47,26,47z M26,51c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1 S26.55231,51,26,51z"/></g>
+                <g class="fr-artwork-major"><path d="M72,20v3v3v3v3v2v28c0,0.51282-0.38599,0.93549-0.88342,0.99329L71,63H31c-0.55231,0-1-0.44769-1-1 c0-0.51282,0.38599-0.93549,0.88342-0.99329L31,61h12.07935l-0.61896-0.88422c-0.31671-0.45251-0.20667-1.07599,0.24579-1.3927 s1.07593-0.20667,1.39264,0.24573L45.52063,61h5.55872l-0.61896-0.88422c-0.31671-0.45251-0.20667-1.07599,0.24579-1.3927 s1.07593-0.20667,1.39264,0.24573L53.52063,61H70V43h-1c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1h1v-6c-0.55231,0-1-0.44769-1-1 s0.44769-1,1-1v-1v-3v-3v-3v-2h-3h-3h-3h-1v3c0,0.55231-0.44769,1-1,1s-1-0.44769-1-1v-3h-8v1c0,0.55231-0.44769,1-1,1 s-1-0.44769-1-1v-1h-7c-0.51282,0-0.93549-0.38599-0.99329-0.88342L40,20c0-0.51282,0.38599-0.93549,0.88342-0.99329L41,19h20h3h3h3 h1c0.13361,0,0.25964,0.02838,0.37616,0.07593c0.03918,0.01593,0.06927,0.04449,0.10577,0.06512 c0.07208,0.04065,0.14368,0.08044,0.20325,0.13708c0.03528,0.03357,0.05853,0.07544,0.08868,0.11377 c0.04645,0.05896,0.09235,0.11633,0.12469,0.18488c0.0224,0.0473,0.03143,0.09869,0.04626,0.14978 c0.01538,0.05286,0.04193,0.10077,0.04846,0.15686L72,20z M24,62c0,0.51282-0.38599,0.93549-0.88342,0.99329L23,63l-9.4223-0.00403 C9.95514,62.67261,8,60.57782,8,57c0-0.1712,0.0047-0.33893,0.01416-0.50317l0.01685-0.24982l-0.00458-0.0177 c-0.00867-0.0368-0.01526-0.0744-0.01971-0.11273L8,56l0.00079-33.0979c0.05328-3.19379,2.62683-5.75427,5.79401-5.8183 l0.22192-0.00031l3.03326,0.05048c1.23462,0.02057,2.2757,0.78931,2.71753,1.86603H25c0.55231,0,1,0.44769,1,1 c0,0.51282-0.38599,0.93549-0.88342,0.99329L25,21h-5v12h2c0.55231,0,1,0.44769,1,1s-0.44769,1-1,1h-2v6.21185 c0.24438,0.18231,0.41309,0.45978,0.41309,0.78815S20.24438,42.60583,20,42.78815V50c0,1.59772-1.2489,2.90369-2.82367,2.99487 L17,53l-2.91699-0.00348C11.25092,53.2326,10,54.48352,10,57c0,2.4516,1.08258,3.69061,3.42792,3.97479L13.66669,61H23 C23.55231,61,24,61.44769,24,62z M10,52.35999l0.16132-0.11938c0.91101-0.65021,2.10291-1.05963,3.56201-1.21448L14,51h3 c0.51282,0,0.93549-0.38599,0.99329-0.88342L18,50V20.13361c0-0.50684-0.37732-0.9267-0.86823-0.99139l-0.11505-0.00848 l-3.03345-0.05054c-2.09589-0.03491-3.8349,1.58252-3.9743,3.6507l-0.00848,0.20154L10,52.35999z M25.41309,41h-3 c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1h3c0.55231,0,1-0.44769,1-1S25.96539,41,25.41309,41z M32.38379,43.97687 c-0.45239,0.31671-0.5625,0.94025-0.24567,1.3927l1.72028,2.4577c0.31683,0.45245,0.94031,0.5625,1.3927,0.24585 c0.45251-0.31683,0.5625-0.94031,0.24579-1.3927l-1.7204-2.4577C33.45978,43.7702,32.8363,43.66022,32.38379,43.97687z M31.81042,43.15771c0.45239-0.31683,0.5625-0.94031,0.24567-1.3927l-0.23688-0.3385C31.63208,41.15918,31.32629,41,31,41h-2.58691 c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1l2.00464-0.08807C30.73438,43.36432,31.35791,43.47443,31.81042,43.15771z M39.01959,55.20038l1.7204,2.4577c0.31671,0.45239,0.94019,0.5625,1.3927,0.24573c0.45239-0.31671,0.5625-0.94019,0.24579-1.3927 l-1.7204-2.4577c-0.31665-0.45239-0.94031-0.56238-1.3927-0.24573C38.81293,54.12439,38.70288,54.74792,39.01959,55.20038z M35.5788,50.28497l1.7204,2.4577c0.31671,0.45239,0.94031,0.5625,1.3927,0.24573c0.45251-0.31671,0.5625-0.94019,0.24579-1.3927 l-1.7204-2.45758c-0.31671-0.45251-0.94019-0.5625-1.3927-0.24585C35.37219,49.20898,35.26208,49.83252,35.5788,50.28497z M44.58691,41c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1h3c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1H44.58691z M48.73999,57.65808 c0.31671,0.45239,0.94019,0.5625,1.3927,0.24573c0.45239-0.31671,0.5625-0.94019,0.24579-1.3927l-1.7204-2.4577 c-0.31665-0.45239-0.94031-0.56238-1.3927-0.24573c-0.45245,0.31671-0.5625,0.94025-0.24579,1.3927L48.73999,57.65808z M45.29919,52.74268c0.31671,0.45239,0.94031,0.5625,1.3927,0.24573c0.45251-0.31671,0.5625-0.94019,0.24579-1.3927l-1.7204-2.45758 c-0.31671-0.45251-0.94019-0.5625-1.3927-0.24585c-0.45239,0.31671-0.5625,0.94025-0.24579,1.3927L45.29919,52.74268z M43.49689,46.68042l-1.7204-2.4577c-0.31671-0.45251-0.94019-0.5625-1.3927-0.24585 c-0.45239,0.31671-0.5625,0.94025-0.24567,1.3927l1.72028,2.4577c0.31683,0.45245,0.94031,0.5625,1.3927,0.24585 C43.70361,47.75629,43.8136,47.13281,43.49689,46.68042z M41.58691,43c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1H39 c-0.80902,0-1.2832,0.91071-0.81921,1.57349l0.23694,0.33844c0.31665,0.45239,0.94019,0.5625,1.3927,0.24579 C40.26282,42.84088,41.58691,43,41.58691,43z M62,42c0,0.55231,0.44769,1,1,1h3c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-3 C62.44769,41,62,41.44769,62,42z M49,24c-0.55231,0-1,0.44769-1,1v3c0,0.55231,0.44769,1,1,1s1-0.44769,1-1v-3 C50,24.44769,49.55231,24,49,24z M24,34c0,0.55231,0.44769,1,1,1h3c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-3 C24.44769,33,24,33.44769,24,34z M37,35h3c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-3c-0.55231,0-1,0.44769-1,1S36.44769,35,37,35z M48,34c0,0.55231,0.44769,1,1,1s1-0.44769,1-1v-3c0-0.55231-0.44769-1-1-1s-1,0.44769-1,1V34z M43,35h3c0.55231,0,1-0.44769,1-1 s-0.44769-1-1-1h-3c-0.55231,0-1,0.44769-1,1S42.44769,35,43,35z M31,35h3c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-3 c-0.55231,0-1,0.44769-1,1S30.44769,35,31,35z M41,31c0.55231,0,1-0.44769,1-1v-3c0-0.55231-0.44769-1-1-1s-1,0.44769-1,1v3 C40,30.55231,40.44769,31,41,31z M43,27h3c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-3c-0.55231,0-1,0.44769-1,1S42.44769,27,43,27z M59,31c0.55231,0,1-0.44769,1-1v-3c0-0.55231-0.44769-1-1-1s-1,0.44769-1,1v3C58,30.55231,58.44769,31,59,31z M67,35 c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-3c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1H67z M58,34c0,0.55231,0.44769,1,1,1h2 c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1h-1c0-0.55231-0.44769-1-1-1s-1,0.44769-1,1V34z"/></g>
+              </svg>
+            </span>
+            <span ng-switch-when="soleil">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M19,72c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S19.5514,72,19,72z M31,10c-0.5514,0-1-0.4486-1-1 c0-0.55145,0.4486-1,1-1s1,0.44855,1,1C32,9.5514,31.5514,10,31,10z M67,66c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1 S67.5514,66,67,66z M67,16c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S67.5514,16,67,16z M9,32c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S9.5514,32,9,32z"/></g>
+                <g class="fr-artwork-minor"><path d="M32.4453,44.1679c0.4595-0.3063,1.0804-0.1821,1.3867,0.2774C35.3156,46.6706,38.5061,48,41,48 c0.5523,0,1,0.4477,1,1s-0.4477,1-1,1c-3.1061,0-6.931-1.5937-8.8321-4.4453C31.8616,45.0952,31.9858,44.4743,32.4453,44.1679z"/></g>
+                <g class="fr-artwork-major"><path d="M39.00671,20.04651L39,19.92981v-5.47369c0-0.55225,0.44769-1,1-1c0.51282,0,0.93549,0.38611,0.99329,0.88336 L41,14.45612v5.47369c0,0.55231-0.44769,1-1,1C39.48718,20.92981,39.06451,20.54382,39.00671,20.04651z M19.37927,39H14 l-0.11658,0.00671C13.38599,39.06451,13,39.48718,13,40c0,0.55231,0.44769,1,1,1h5.37927l0.11664-0.00671 c0.49738-0.0578,0.88336-0.48047,0.88336-0.99329C20.37927,39.44769,19.93158,39,19.37927,39z M66,39h-5.37927l-0.11664,0.00671 c-0.49738,0.0578-0.88336,0.48047-0.88336,0.99329c0,0.55231,0.44769,1,1,1H66l0.11658-0.00671C66.61401,40.93549,67,40.51282,67,40 C67,39.44769,66.55231,39,66,39z M40,59.07019c-0.55231,0-1,0.44769-1,1v5.47369l0.00671,0.11664 c0.0578,0.49725,0.48047,0.88336,0.99329,0.88336c0.55231,0,1-0.44769,1-1v-5.47369l-0.00671-0.11658 C40.93549,59.45618,40.51282,59.07019,40,59.07019z M24.04541,53.89557l-1.79309,1.82452l-0.0824,0.09503 c-0.30164,0.3949-0.26892,0.96185,0.09467,1.31915c0.39392,0.38715,1.02704,0.38159,1.41412-0.01227l1.79309-1.82458l0.0824-0.09491 c0.30157-0.3949,0.26898-0.96191-0.0946-1.31921C25.06561,53.49622,24.4325,53.50171,24.04541,53.89557z M55.95459,24.27991 l1.79309-1.82458l0.0824-0.09491c0.30164-0.3949,0.26892-0.96191-0.09467-1.31921c-0.39392-0.38721-1.02704-0.38159-1.41412,0.01233 l-1.79321,1.82446L54.4458,22.9729c-0.30157,0.39502-0.26898,0.96191,0.0946,1.31927 C54.93439,24.67932,55.5675,24.67383,55.95459,24.27991z M23.67871,21.05353l-0.09338-0.08405 c-0.38971-0.30847-0.95715-0.28571-1.32074,0.07172c-0.39386,0.38708-0.39941,1.0202-0.01227,1.41412l1.79309,1.82458 l0.09351,0.08398c0.38959,0.30841,0.95697,0.28558,1.32068-0.07172c0.39392-0.38708,0.39941-1.02026,0.01221-1.41418 L23.67871,21.05353z M55.95459,53.89557l-0.09351-0.08398c-0.38959-0.30847-0.95697-0.28571-1.32068,0.07172 c-0.39392,0.38708-0.39941,1.0202-0.01233,1.41412l1.79321,1.82458l0.09338,0.08398 c0.38971,0.30841,0.95715,0.28558,1.32074-0.07172c0.39386-0.38708,0.39941-1.02026,0.01227-1.41418L55.95459,53.89557z M40,26 c-7.73199,0-14,6.26801-14,14c0,1.91528,0.38538,3.77838,1.12323,5.50281c0.21716,0.50781,0.80499,0.74329,1.31268,0.52606 c0.50781-0.21729,0.74329-0.80499,0.52606-1.31274C28.33002,43.2392,28,41.64362,28,40c0-6.62738,5.37262-12,12-12s12,5.37262,12,12 s-5.37262,12-12,12c-3.5495,0-6.84521-1.54871-9.11212-4.19141c-0.35956-0.41907-0.99091-0.46747-1.4101-0.10791 c-0.41919,0.35962-0.46747,0.99091-0.10791,1.4101C32.01282,52.19177,35.86072,54,40,54c7.73199,0,14-6.26801,14-14 S47.73199,26,40,26z"/></g>
+              </svg>
+            </span>
+            <span ng-switch-when="montagne">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M53,77c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S53.5514,77,53,77z M57,5c-0.5514,0-1-0.4486-1-1 c0-0.55145,0.4486-1,1-1s1,0.44855,1,1C58,4.5514,57.5514,5,57,5z M23,77c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1 S23.5514,77,23,77z"/></g>
+                <g class="fr-artwork-minor"><path d="M26.00671,17.11658L26,17v-2c0-0.55231,0.44769-1,1-1c0.51282,0,0.93549,0.38599,0.99329,0.88342L28,15v2 c0,0.55231-0.44769,1-1,1C26.48718,18,26.06451,17.61401,26.00671,17.11658z M30,25c0,1.65692-1.34308,3-3,3s-3-1.34308-3-3 s1.34308-3,3-3S30,23.34308,30,25z M28,25c0-0.55231-0.44769-1-1-1s-1,0.44769-1,1s0.44769,1,1,1S28,25.55231,28,25z M19.11658,25.99329C19.61401,25.93549,20,25.51282,20,25c0-0.55231-0.44769-1-1-1h-2l-0.11658,0.00671 C16.38599,24.06451,16,24.48718,16,25c0,0.55231,0.44769,1,1,1h2L19.11658,25.99329z M37,24h-2l-0.11658,0.00671 C34.38599,24.06451,34,24.48718,34,25c0,0.55231,0.44769,1,1,1h2l0.11658-0.00671C37.61401,25.93549,38,25.51282,38,25 C38,24.44769,37.55231,24,37,24z M27,32c-0.55231,0-1,0.44769-1,1v2l0.00671,0.11658C26.06451,35.61401,26.48718,36,27,36 c0.55231,0,1-0.44769,1-1v-2l-0.00671-0.11658C27.93549,32.38599,27.51282,32,27,32z M20.63599,17.2218l-0.08716-0.0777 c-0.39252-0.31079-0.96436-0.28491-1.32703,0.0777c-0.3905,0.3905-0.3905,1.02368,0,1.41418l1.41418,1.41431l0.08734,0.0777 c0.39246,0.31079,0.96429,0.28491,1.32697-0.0777c0.3905-0.39056,0.3905-1.02368,0-1.41431L20.63599,17.2218z M33.36401,29.94971 l-0.08734-0.0777c-0.39246-0.31079-0.96429-0.28491-1.32697,0.0777c-0.3905,0.39056-0.3905,1.02368,0,1.41431l1.41431,1.41418 l0.08716,0.0777c0.39252,0.31079,0.96436,0.28491,1.32703-0.0777c0.3905-0.39062,0.3905-1.02368,0-1.41418L33.36401,29.94971z M33.36401,20.05029l1.41418-1.41431l0.0777-0.08716c0.31079-0.39252,0.28491-0.96436-0.0777-1.32703 c-0.39062-0.3905-1.02368-0.3905-1.41418,0l-1.41431,1.41418l-0.0777,0.08734c-0.31079,0.39246-0.28491,0.96429,0.0777,1.32697 C32.34033,20.4408,32.97339,20.4408,33.36401,20.05029z M20.63599,29.94971l-1.41418,1.41431l-0.0777,0.08716 c-0.31079,0.39252-0.28491,0.96436,0.0777,1.32703c0.3905,0.3905,1.02368,0.3905,1.41418,0l1.41431-1.41418l0.0777-0.08734 c0.31079-0.39246,0.28491-0.96429-0.0777-1.32697C21.65973,29.5592,21.02661,29.5592,20.63599,29.94971z"/></g>
+                <g class="fr-artwork-major"><path d="M32.47528,43.81702c-0.414-0.29755-0.53296-0.85284-0.29529-1.28925l0.06689-0.10638l12.9411-18.005 c0.38031-0.52917,1.14551-0.55219,1.56122-0.0791l0.07831,0.1012l19,28c0.31012,0.45703,0.19098,1.07892-0.26599,1.38904 c-0.42444,0.2879-0.99091,0.20581-1.31793-0.17334l-0.07111-0.09265L53.61279,38H43c-0.55231,0-1-0.44769-1-1 c0-0.51282,0.38599-0.93549,0.88342-0.99329L43,36h9.25562l-1.35724-2H45c-0.55231,0-1-0.44769-1-1 c0-0.51282,0.38599-0.93549,0.88342-0.99329L45,32h4.54132l-3.56531-5.25403l-12.1051,16.84265 c-0.29749,0.414-0.85278,0.53296-1.28918,0.29529L32.47528,43.81702z M25.11658,57.99329C25.61401,57.93549,26,57.51282,26,57 c0-0.55231-0.44769-1-1-1h-8.099L26,42.76501L36.16772,57.5545c0.0257,0.03857,0.05408,0.0752,0.08478,0.1098l0.00092,0.00122 c0.08167,0.09186,0.17767,0.16565,0.28217,0.2204c0.11932,0.06256,0.25281,0.10187,0.39453,0.11169 c0.02808,0.00195,0.0564,0.00281,0.08472,0.00238H51l0.11658-0.00671C51.61401,57.93549,52,57.51282,52,57c0-0.55231-0.44769-1-1-1 H37.526L26.82397,40.43347l-0.07959-0.10156c-0.42261-0.47412-1.19586-0.44031-1.56836,0.10156L14.474,56H11l-0.11658,0.00671 C10.38599,56.06451,10,56.48718,10,57c0,0.55231,0.44769,1,1,1h3.98529c0.00922,0.00012,0.01843,0.00012,0.02759,0H25 L25.11658,57.99329z M69,60H17l-0.11658,0.00671C16.38599,60.06451,16,60.48718,16,61c0,0.55231,0.44769,1,1,1h52l0.11658-0.00671 C69.61401,61.93549,70,61.51282,70,61C70,60.44769,69.55231,60,69,60z M59,64H29l-0.11658,0.00671 C28.38599,64.06451,28,64.48718,28,65c0,0.55231,0.44769,1,1,1h30l0.11658-0.00671C59.61401,65.93549,60,65.51282,60,65 C60,64.44769,59.55231,64,59,64z"/></g>
+              </svg>
+            </span>
+            <span ng-switch-when="avion">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M21,76c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S21.5514,76,21,76z M67,12c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S67.5514,12,67,12z M3,54c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S3.5514,54,3,54z"/></g>
+                <g class="fr-artwork-minor"><path d="M18,25c0,0.55231-0.44769,1-1,1s-1-0.44769-1-1s0.44769-1,1-1S18,24.44769,18,25z M23,24 c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1s1-0.44769,1-1S23.55231,24,23,24z M36.68378,42.05127l-6,2l-0.10846,0.04333 c-0.45361,0.2121-0.68622,0.73511-0.52399,1.22162c0.17468,0.52399,0.74097,0.80707,1.26489,0.63245l6-2l0.10846-0.04327 c0.45361-0.2121,0.68622-0.73511,0.52405-1.22162C37.77399,42.15979,37.2077,41.87671,36.68378,42.05127z M41.31622,45.94867l12-4 l0.10846-0.04327c0.45361-0.2121,0.68622-0.73511,0.52405-1.22162c-0.17474-0.52399-0.74103-0.80707-1.26495-0.63251l-12,4 l-0.10846,0.04333c-0.45361,0.2121-0.68622,0.73511-0.52399,1.22162C40.22601,45.84021,40.7923,46.12329,41.31622,45.94867z M67,64 c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1s1-0.44769,1-1S67.55231,64,67,64z M63,64c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1 s1-0.44769,1-1S63.55231,64,63,64z M49,60c-0.55231,0-1,0.44769-1,1s0.44769,1,1,1s1-0.44769,1-1S49.55231,60,49,60z M55,60h-2 l-0.11658,0.00671C52.38599,60.06451,52,60.48718,52,61c0,0.55231,0.44769,1,1,1h2l0.11658-0.00671 C55.61401,61.93549,56,61.51282,56,61C56,60.44769,55.55231,60,55,60z M45,60h-4l-0.11658,0.00671 C40.38599,60.06451,40,60.48718,40,61c0,0.55231,0.44769,1,1,1h4l0.11658-0.00671C45.61401,61.93549,46,61.51282,46,61 C46,60.44769,45.55231,60,45,60z M71.62799,29.84808l-0.22888,0.08643l-27.2511,9.91858 c-0.07971,0.02899-0.1626,0.04773-0.2467,0.05579l-0.12683,0.00403l-5.38245-0.16931 c-0.3678-0.01147-0.69592-0.22357-0.85992-0.54602l-0.04828-0.11145l-0.68414-1.87933 c-0.08447-0.2323-0.07867-0.48267,0.00793-0.7052l-5.28479-6.17548c-0.45404-0.53052-0.2384-1.35114,0.41766-1.5899l3.75879-1.36798 c0.3559-0.12964,0.75452-0.04694,1.0296,0.2135l4.87122,4.61206c0.01843,0.01752,0.03613,0.03552,0.05292,0.05402l2.57788-0.93829 c0.51898-0.1889,1.09283,0.07867,1.28168,0.59772c0.17542,0.48187-0.04279,1.01105-0.49036,1.23547l-0.1073,0.0462l-3.53864,1.2879 l-2.48645,2.62689l0.24066,0.6615l4.51501,0.1424l27.06952-9.85248c1.36121-0.49542,1.74939-0.90094,1.65308-1.29602 l-0.01801-0.0592c-0.23151-0.63617-1.22522-1.146-2.73938-1.37531c-0.64899-0.09821-1.36853-0.13177-1.95819-0.12109 l-0.37183,0.01343c-0.2901,0.0163-0.52649,0.0448-0.67468,0.08209l-0.07812,0.02338l-5.37207,1.95532l0.2771,0.05688 c0.98767,0.20288,1.08838,1.5744,0.14081,1.91931l-8.45721,3.07819c-0.2301,0.08368-0.48303,0.08008-0.71069-0.01019 L41.2124,27.88263c-0.85468-0.33905-0.8374-1.55481,0.02667-1.86932l4.69843-1.71008c0.17389-0.06329,0.362-0.07715,0.54327-0.03979 l10.93695,2.24646l8.42609-3.06689c2.26227-0.82336,7.43457-0.04022,8.38568,2.57281 C74.8396,27.69202,73.80219,28.99707,71.62799,29.84808z M57.56818,28.5827L46.35413,26.2793l-1.96112,0.71381l8.39502,3.32947 L57.56818,28.5827z M39.76459,33.2713l-3.68671-3.48999l-1.82111,0.66278l3.88544,4.54083L39.76459,33.2713z"/></g>
+                <g class="fr-artwork-major"><path d="M38,67c0,0.51282-0.38599,0.93549-0.88342,0.99329L37,68H9c-0.55231,0-1-0.44769-1-1 c0-0.51282,0.38605-0.93549,0.88336-0.99329L9,66h28C37.55231,66,38,66.44769,38,67z M10.02991,21.24249 C9.87207,20.61139,10.34943,20,11,20h4.38159l-1.00061-2H13l-0.13318-0.00702c-1.1557-0.12396-1.1557-1.862,0-1.98596L13,16h5v-2h-1 l-0.13318-0.00702c-1.1557-0.12396-1.1557-1.862,0-1.98596L17,12h6c1.28741,0,1.33173,1.86438,0.13318,1.99298L23,14h-1v2h5 c1.28741,0,1.33173,1.86438,0.13318,1.99298L27,18h-1.38202l-1,2H29c0.65057,0,1.12793,0.61139,0.97009,1.24249l-2,8 C27.85889,29.68768,27.45892,30,27,30h-2.99817l0.00348,1.89062l0.02167,3.43866l0.02094,1.97003l0.02692,1.8999l0.04498,2.42419 l0.07086,2.85431l0.08722,2.65869l0.06,1.50098l0.08911,1.89142l0.07349,1.33582l0.07922,1.26489l0.08496,1.19366l0.09064,1.12262 l0.0636,0.7088l0.0661,0.67712l0.10382,0.95605l0.1095,0.88464l0.07605,0.54987l0.07855,0.51813l0.07269,0.43829 c0.12421,0.7171,0.25696,1.3244,0.39807,1.82129H27c0.55231,0,1,0.44769,1,1c0,0.51282-0.38599,0.93549-0.88342,0.99329L27,64 h-1.97668c-0.01544,0.00037-0.03094,0.00037-0.0462,0h-9.95422c-0.01526,0.00037-0.03076,0.00037-0.0462,0H13 c-0.55231,0-1-0.44769-1-1c0-0.51282,0.38599-0.93549,0.88342-0.99329L13,62h1.27631 c0.14111-0.49689,0.27386-1.10419,0.39807-1.82129l0.07269-0.43829l0.07855-0.51813l0.07605-0.54987l0.07361-0.58185 l0.10571-0.93219l0.1001-1.00378l0.09442-1.07501l0.08881-1.14636l0.08301-1.21753l0.10187-1.73383l0.11292-2.34448l0.06-1.50098 l0.07111-2.11133l0.07416-2.81519l0.03674-1.78302l0.04797-3.12756l0.02094-1.97003l0.02167-3.43866L15.99823,30H13 c-0.45892,0-0.85889-0.31232-0.97009-0.75751L10.02991,21.24249z M23.66241,62l-0.05463-0.23108l-0.12598-0.59863l-0.08112-0.43048 l-0.07867-0.45569l-0.07642-0.48083l-0.0741-0.50598l-0.07172-0.53119l-0.10327-0.84424l-0.09821-0.901l-0.0625-0.63226 l-0.11823-1.34064l-0.0556-0.70837l-0.07916-1.11011l-0.0741-1.1673l-0.09082-1.64557l-0.06219-1.30103l-0.07513-1.82422 l-0.06598-1.92651l-0.0437-1.51208l-0.05048-2.1059l-0.04163-2.2088l-0.0459-3.50616l-0.02307-3.0993L22,30h-4.00098 l-0.00891,2.96362l-0.03009,3.74146l-0.04053,2.93634l-0.03107,1.68256l-0.04944,2.15125l-0.04297,1.54449L17.73071,46.987 l-0.07458,1.86249l-0.06201,1.32819l-0.0907,1.6795l-0.0741,1.1911l-0.10699,1.49695l-0.05701,0.70947l-0.0899,1.0155 l-0.09521,0.95709l-0.10052,0.89868l-0.1059,0.84064l-0.07349,0.52795l-0.07587,0.50232l-0.07831,0.47644l-0.12189,0.66626 L16.44,61.5517l-0.08673,0.38629L16.33801,62H23.66241z M16.61798,18l1,2h4.76379l0.99921-2H16.61798z M12.28101,22l1.5,6h12.43701 l1.5-6h-4.69794c-0.01385,0.00031-0.02777,0.00031-0.04181,0h-5.95654c-0.01404,0.00031-0.02795,0.00031-0.04181,0H12.28101z M72,61 v6c0,0.55231-0.44769,1-1,1c-0.51282,0-0.93549-0.38599-0.99329-0.88342L70,67v-5H60v5c0,0.51282-0.38599,0.93549-0.88342,0.99329 L59,68H43.40002c-0.55231,0-1-0.44769-1-1c0-0.51282,0.38599-0.93549,0.88336-0.99329L43.40002,66H58v-8H34v3 c0,0.51282-0.38599,0.93549-0.88342,0.99329L33,62c-0.51282,0-0.93549-0.38599-0.99329-0.88342L32,61v-4 c0-0.51282,0.38599-0.93549,0.88342-0.99329L33,56h9v-2h-1l-0.13318-0.00702c-1.1557-0.12396-1.1557-1.862,0-1.98596L41,52h10 l0.13318,0.00702c1.1557,0.12396,1.1557,1.862,0,1.98596L51,54h-1v2h9c0.51282,0,0.93549,0.38599,0.99329,0.88342L60,57v3h11 c0.51282,0,0.93549,0.38599,0.99329,0.88342L72,61z M48,54h-4v2h4V54z"/></g>
+              </svg>
+            </span>
+            <span ng-switch-when="valise">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M21,76c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S21.5514,76,21,76z M77,24c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S77.5514,24,77,24z M47,2c-0.5514,0-1-0.4486-1-1c0-0.55145,0.4486-1,1-1s1,0.44855,1,1 C48,1.5514,47.5514,2,47,2z"/></g>
+                <g class="fr-artwork-minor"><path d="M17,28c0.5128,0,0.9355,0.386,0.9933,0.8834L18,29v4c0,0.5523-0.4477,1-1,1 c-0.5128,0-0.9355-0.386-0.9933-0.8834L16,33v-4C16,28.4477,16.4477,28,17,28z M17,46c0.5128,0,0.9355,0.386,0.9933,0.8834L18,47v10 c0,0.5523-0.4477,1-1,1c-0.5128,0-0.9355-0.386-0.9933-0.8834L16,57V47C16,46.4477,16.4477,46,17,46z M23.9933,28.8834 C23.9355,28.386,23.5128,28,23,28c-0.5523,0-1,0.4477-1,1v28l0.0067,0.1166C22.0645,57.614,22.4872,58,23,58c0.5523,0,1-0.4477,1-1 V29L23.9933,28.8834z M29,28c0.5128,0,0.9355,0.386,0.9933,0.8834L30,29v2c0,0.5523-0.4477,1-1,1 c-0.5128,0-0.9355-0.386-0.9933-0.8834L28,31v-2C28,28.4477,28.4477,28,29,28z M35.9933,28.8834C35.9355,28.386,35.5128,28,35,28 c-0.5523,0-1,0.4477-1,1v2l0.0067,0.1166C34.0645,31.614,34.4872,32,35,32c0.5523,0,1-0.4477,1-1v-2L35.9933,28.8834z"/></g>
+                <g class="fr-artwork-major"><path d="M50.4472,46.10559l-8-4c-0.5722-0.28607-1.26221,0.03119-1.4173,0.65192l-2,8 c-0.19788,0.79138,0.58411,1.47388,1.34149,1.17102l10-4C51.17249,47.60797,51.21899,46.49152,50.4472,46.10559z M41.44403,49.34399 l1.224-4.89197L47.56,46.89801L41.44403,49.34399z M56,48c-2.76141,0-5,2.23859-5,5s2.23859,5,5,5s5-2.23859,5-5S58.76141,48,56,48z M56,56c-1.65692,0-3-1.34308-3-3s1.34308-3,3-3c1.6568,0,3,1.34308,3,3S57.6568,56,56,56z M67,34h-7v-5l-0.00513-0.17633 C59.90369,27.2489,58.59772,26,57,26H45l-0.17627,0.00513C43.2489,26.09631,42,27.40228,42,29v5h-9c-2.76141,0-5,2.23859-5,5v20 c0,2.76141,2.23859,5,5,5h1.17072C34.06018,64.31281,34,64.64941,34,65c0,1.65692,1.34308,3,3,3s3-1.34308,3-3 c0-0.35059-0.06018-0.68719-0.17072-1h20.34143C60.06018,64.31281,60,64.64941,60,65c0,1.65692,1.34308,3,3,3 c1.6568,0,3-1.34308,3-3c0-0.35059-0.06018-0.68719-0.17072-1H67c2.76141,0,5-2.23859,5-5V39C72,36.23859,69.76141,34,67,34z M44,29 l0.00671-0.11658C44.06451,28.38599,44.48718,28,45,28h12l0.11658,0.00671C57.61401,28.06451,58,28.48718,58,29v5h-2v-3 l-0.00671-0.11658C55.93549,30.38599,55.51282,30,55,30h-8l-0.11658,0.00671C46.38599,30.06451,46,30.48718,46,31v3h-2V29z M54,32v2 h-6v-2H54z M30,39c0-1.65692,1.34308-3,3-3h1v4h-4V39z M34,62h-1c-1.65692,0-3-1.34308-3-3v-1h4V62z M37,66 c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S37.55231,66,37,66z M63,66c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1 s1,0.44769,1,1S63.55231,66,63,66z M70,59c0,1.65692-1.3432,3-3,3h-1v-4h4V59z M70,56h-5l-0.11658,0.00671 C64.38599,56.06451,64,56.48718,64,57v5H36v-5l-0.00671-0.11658C35.93549,56.38599,35.51282,56,35,56h-5V42h5l0.11658-0.00671 C35.61401,41.93549,36,41.51282,36,41v-5h28v5l0.00671,0.11658C64.06451,41.61401,64.48718,42,65,42h5V56z M70,40h-4v-4h1 c1.6568,0,3,1.34308,3,3V40z M23,62h-8l-0.17627-0.00513C13.2489,61.90369,12,60.59772,12,59V44.69299l7.35107-2.75671 l0.10712-0.0473c0.48022-0.24646,0.68402-0.84058,0.43622-1.33618l-2-4l-0.06152-0.10638 c-0.2467-0.37183-0.71637-0.53931-1.14911-0.39514L12,37.61261V27l0.00513-0.17633C12.09631,25.2489,13.40228,24,15,24h24 l0.11658-0.00671C39.61401,23.93549,40,23.51282,40,23c0-0.55231-0.44769-1-1-1h-9v-6h1c1.65692,0,3-1.34308,3-3s-1.34308-3-3-3H19 c-1.65692,0-3,1.34308-3,3s1.34308,3,3,3h1v6h-5l-0.21692,0.00458C12.12231,22.11823,10,24.31122,10,27v11.97668 c-0.00037,0.01544-0.00037,0.03088,0,0.04639v4.95392c-0.00037,0.01538-0.00037,0.03088,0,0.04633V59l0.00458,0.21692 c0.10205,2.3894,1.88092,4.34448,4.18982,4.71851C14.06879,64.2663,14,64.62512,14,65c0,1.65692,1.34308,3,3,3s3-1.34308,3-3 c0-0.35059-0.06018-0.68719-0.17072-1H23l0.11658-0.00671C23.61401,63.93549,24,63.51282,24,63C24,62.44769,23.55231,62,23,62z M28,22h-6v-6h6V22z M19,14c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1h12c0.55231,0,1,0.44769,1,1s-0.44769,1-1,1H19z M12,39.72058 l4.49298-1.4986l1.11499,2.23102L12,42.55682V39.72058z M17,66c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1 S17.55231,66,17,66z"/></g>
+              </svg>
+            </span>
+          </span>
+        </span>
+        <span class="fr-tile__title">{{site.label}}</span>
+        <span class="fr-tile__desc">{{site.desc}}</span>
       </button>
-      <button type="button"
-              class="cimob-btn"
-              ng-click="c.recommencer()">
-        <span data-icn="refresh"></span> Nouvelle simulation
-      </button>
     </div>
+
+    <ul class="fr-btns-group">
+      <li><button type="button" class="fr-btn fr-btn--secondary" ng-click="c.retour(1)">Revenir au site de départ</button></li>
+    </ul>
 
   </section>
+
+
+  <!-- ===================== ÉTAPE 3 : OFFRES ÉLIGIBLES ===================== -->
+  <section ng-if="c.etape === 3">
+
+    <p class="cimob__trajet">
+      {{c.depart.label}}
+      <svg class="fleche" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"/></svg>
+      {{c.arrivee.label}}
+    </p>
+
+    <!-- Une carte par thème -->
+    <div class="cimob__grille" ng-if="c.offres">
+      <div class="fr-card" ng-repeat="theme in c.themes" ng-if="c.offres[theme.key].length">
+        <span class="fr-card__pictogram">
+          <span ng-switch="theme.picto">
+            <span ng-switch-when="maison">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M68 13c-.5514 0-1-.4486-1-1s.4486-1 1-1 1 .4486 1 1-.4486 1-1 1ZM41 76c-.5514 0-1-.4486-1-1s.4486-1 1-1 1 .4486 1 1-.4486 1-1 1ZM15 10c-.5514 0-1-.4486-1-1s.4486-1 1-1 1 .4486 1 1-.4486 1-1 1Z" /></g>
+                <g class="fr-artwork-minor"><path d="M53 44c.5523 0 1 .4477 1 1v10c0 .5523-.4477 1-1 1H43c-.5523 0-1-.4477-1-1V45c0-.5523.4477-1 1-1Zm-6 7h-3v3h3v-3Zm5 0h-3v3h3v-3Zm-5-5h-3v3h3v-3Zm5 0h-3v3h3v-3Zm-7-14c.5523 0 1 .4477 1 1s-.4477 1-1 1H35c-.5523 0-1-.4477-1-1s.4477-1 1-1h10Z" /></g>
+                <g class="fr-artwork-major"><path d="M29 18c.5523 0 1 .4477 1 1s-.4477 1-1 1h-7v2h3c.5128 0 .9355.386.9933.8834L26 23c0 .5523-.4477 1-1 1h-1v2.722l15.5601-7.62.1077-.0453a.9899.9899 0 0 1 .332-.057.9936.9936 0 0 1 .2976.0454l.0136.0045.0212.007.1077.0453 24.5 12a1 1 0 0 1 .4705 1.3119l-2.5 5.5c-.2375.5225-.865.7383-1.3737.4724L60 37.583v4.8876c0 .5523-.4477 1-1 1s-1-.4477-1-1V36.649l-18-9.518-18 9.517V60h4V45c0-.5523.4477-1 1-1h10c.5523 0 1 .4477 1 1v15h11c.5523 0 1 .4477 1 1s-.4477 1-1 1H9c-.5523 0-1-.4477-1-1s.4477-1 1-1h3l.0003-2.0629C9.4143 57.5952 8 55.8685 8 53c0-2.8613 1.3748-6.9856 4.1056-12.4472l.0134-.0268.027-.047.036-.0545a.9497.9497 0 0 1 .0741-.0932.9717.9717 0 0 1 .1207-.1136l.0478-.0358.0534-.0359.0748-.0404.0118-.0058a.9768.9768 0 0 1 .0656-.029l.0203-.0078.0206-.0075a1.1595 1.1595 0 0 1 .1145-.0325l.0197-.004a.9768.9768 0 0 1 .1863-.0192h.0168a.9939.9939 0 0 1 .111.007l.0753.0123.0198.0041a.878.878 0 0 1 .0663.0169l.0239.0074.0237.008a1.0318 1.0318 0 0 1 .1072.0443l.0116.0058.0728.0404.0555.036a.9497.9497 0 0 1 .0932.0741.9717.9717 0 0 1 .1136.1207l.0358.0478.0349.0534.027.048.0144.0268C16.6252 46.0144 18 50.1388 18 53c0 2.8682-1.414 4.5948-3.9993 4.937L14 60h6V37.583l-1.5367.8032c-.5087.2659-1.1362.05-1.3737-.4724l-2.5-5.5a1 1 0 0 1 .4705-1.3119l7.1421-3.4988A.9956.9956 0 0 1 22 27v-3h-1c-.5523 0-1-.4477-1-1v-4c0-.5523.4477-1 1-1h8Zm36.059 28.0017a.9962.9962 0 0 1 .6481.2912C67.2487 47.8345 68 50.0884 68 53c0 2.5869-.6252 4.2985-1.999 4.8266L66 60h3c.5523 0 1 .4477 1 1s-.4477 1-1 1H55c-.5523 0-1-.4477-1-1s.4477-1 1-1h3V49c0-.5523.4477-1 1-1s1 .4477 1 1v11h4v-2.173c-1.3745-.5277-2-2.2395-2-4.827 0-2.9116.7513-5.1655 2.2929-6.7071a.9962.9962 0 0 1 .648-.2912h.1181ZM36 46h-8v14h8V46Zm29.0007 2.6123-.035.056C64.3274 49.7474 64 51.1836 64 53c0 2.1012.3766 2.9353.9325 2.9964L65 56l.0675-.0036C65.6234 55.9353 66 55.1012 66 53c0-1.8478-.3389-3.3023-.9993-4.3877ZM13 43.2933l-.1982.428C10.93 47.7945 10 50.9025 10 53c0 2.1144.8856 3 3 3l.2074-.003C15.1724 55.9396 16 55.044 16 53c0-2.1704-.9958-5.4226-3.0001-9.7067ZM33 50c.5523 0 1 .4477 1 1v2c0 .5523-.4477 1-1 1s-1-.4477-1-1v-2c0-.5523.4477-1 1-1Zm6.999-28.887L16.812 32.47l1.66 3.653 21.0647-11.0092.038-.019.0163-.0078.0128-.0052.0102-.0048.058-.0218a1.1536 1.1536 0 0 1 .0802-.0242l.0339-.0079a1.0048 1.0048 0 0 1 .0865-.0152l.0233-.0026a1.0007 1.0007 0 0 1 .0461-.0038l.016-.0008.0684-.0006.0236.001c.019.001.0381.0025.057.0045.004.0006.0086.001.0132.0016a.7857.7857 0 0 1 .0454.0063l.0272.0052.018.0035.014.0031c.0044.0013.0094.0025.0143.0037a.8034.8034 0 0 1 .0369.0096l.023.0072.029.0094.0682.0266.0178.0082.0173.0077.032.016L61.528 36.123l1.66-3.653-23.189-11.357Z" /></g>
+              </svg>
+            </span>
+            <span ng-switch-when="valise">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M21,76c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S21.5514,76,21,76z M77,24c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S77.5514,24,77,24z M47,2c-0.5514,0-1-0.4486-1-1c0-0.55145,0.4486-1,1-1s1,0.44855,1,1 C48,1.5514,47.5514,2,47,2z"/></g>
+                <g class="fr-artwork-minor"><path d="M17,28c0.5128,0,0.9355,0.386,0.9933,0.8834L18,29v4c0,0.5523-0.4477,1-1,1 c-0.5128,0-0.9355-0.386-0.9933-0.8834L16,33v-4C16,28.4477,16.4477,28,17,28z M17,46c0.5128,0,0.9355,0.386,0.9933,0.8834L18,47v10 c0,0.5523-0.4477,1-1,1c-0.5128,0-0.9355-0.386-0.9933-0.8834L16,57V47C16,46.4477,16.4477,46,17,46z M23.9933,28.8834 C23.9355,28.386,23.5128,28,23,28c-0.5523,0-1,0.4477-1,1v28l0.0067,0.1166C22.0645,57.614,22.4872,58,23,58c0.5523,0,1-0.4477,1-1 V29L23.9933,28.8834z M29,28c0.5128,0,0.9355,0.386,0.9933,0.8834L30,29v2c0,0.5523-0.4477,1-1,1 c-0.5128,0-0.9355-0.386-0.9933-0.8834L28,31v-2C28,28.4477,28.4477,28,29,28z M35.9933,28.8834C35.9355,28.386,35.5128,28,35,28 c-0.5523,0-1,0.4477-1,1v2l0.0067,0.1166C34.0645,31.614,34.4872,32,35,32c0.5523,0,1-0.4477,1-1v-2L35.9933,28.8834z"/></g>
+                <g class="fr-artwork-major"><path d="M50.4472,46.10559l-8-4c-0.5722-0.28607-1.26221,0.03119-1.4173,0.65192l-2,8 c-0.19788,0.79138,0.58411,1.47388,1.34149,1.17102l10-4C51.17249,47.60797,51.21899,46.49152,50.4472,46.10559z M41.44403,49.34399 l1.224-4.89197L47.56,46.89801L41.44403,49.34399z M56,48c-2.76141,0-5,2.23859-5,5s2.23859,5,5,5s5-2.23859,5-5S58.76141,48,56,48z M56,56c-1.65692,0-3-1.34308-3-3s1.34308-3,3-3c1.6568,0,3,1.34308,3,3S57.6568,56,56,56z M67,34h-7v-5l-0.00513-0.17633 C59.90369,27.2489,58.59772,26,57,26H45l-0.17627,0.00513C43.2489,26.09631,42,27.40228,42,29v5h-9c-2.76141,0-5,2.23859-5,5v20 c0,2.76141,2.23859,5,5,5h1.17072C34.06018,64.31281,34,64.64941,34,65c0,1.65692,1.34308,3,3,3s3-1.34308,3-3 c0-0.35059-0.06018-0.68719-0.17072-1h20.34143C60.06018,64.31281,60,64.64941,60,65c0,1.65692,1.34308,3,3,3 c1.6568,0,3-1.34308,3-3c0-0.35059-0.06018-0.68719-0.17072-1H67c2.76141,0,5-2.23859,5-5V39C72,36.23859,69.76141,34,67,34z M44,29 l0.00671-0.11658C44.06451,28.38599,44.48718,28,45,28h12l0.11658,0.00671C57.61401,28.06451,58,28.48718,58,29v5h-2v-3 l-0.00671-0.11658C55.93549,30.38599,55.51282,30,55,30h-8l-0.11658,0.00671C46.38599,30.06451,46,30.48718,46,31v3h-2V29z M54,32v2 h-6v-2H54z M30,39c0-1.65692,1.34308-3,3-3h1v4h-4V39z M34,62h-1c-1.65692,0-3-1.34308-3-3v-1h4V62z M37,66 c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S37.55231,66,37,66z M63,66c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1 s1,0.44769,1,1S63.55231,66,63,66z M70,59c0,1.65692-1.3432,3-3,3h-1v-4h4V59z M70,56h-5l-0.11658,0.00671 C64.38599,56.06451,64,56.48718,64,57v5H36v-5l-0.00671-0.11658C35.93549,56.38599,35.51282,56,35,56h-5V42h5l0.11658-0.00671 C35.61401,41.93549,36,41.51282,36,41v-5h28v5l0.00671,0.11658C64.06451,41.61401,64.48718,42,65,42h5V56z M70,40h-4v-4h1 c1.6568,0,3,1.34308,3,3V40z M23,62h-8l-0.17627-0.00513C13.2489,61.90369,12,60.59772,12,59V44.69299l7.35107-2.75671 l0.10712-0.0473c0.48022-0.24646,0.68402-0.84058,0.43622-1.33618l-2-4l-0.06152-0.10638 c-0.2467-0.37183-0.71637-0.53931-1.14911-0.39514L12,37.61261V27l0.00513-0.17633C12.09631,25.2489,13.40228,24,15,24h24 l0.11658-0.00671C39.61401,23.93549,40,23.51282,40,23c0-0.55231-0.44769-1-1-1h-9v-6h1c1.65692,0,3-1.34308,3-3s-1.34308-3-3-3H19 c-1.65692,0-3,1.34308-3,3s1.34308,3,3,3h1v6h-5l-0.21692,0.00458C12.12231,22.11823,10,24.31122,10,27v11.97668 c-0.00037,0.01544-0.00037,0.03088,0,0.04639v4.95392c-0.00037,0.01538-0.00037,0.03088,0,0.04633V59l0.00458,0.21692 c0.10205,2.3894,1.88092,4.34448,4.18982,4.71851C14.06879,64.2663,14,64.62512,14,65c0,1.65692,1.34308,3,3,3s3-1.34308,3-3 c0-0.35059-0.06018-0.68719-0.17072-1H23l0.11658-0.00671C23.61401,63.93549,24,63.51282,24,63C24,62.44769,23.55231,62,23,62z M28,22h-6v-6h6V22z M19,14c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1h12c0.55231,0,1,0.44769,1,1s-0.44769,1-1,1H19z M12,39.72058 l4.49298-1.4986l1.11499,2.23102L12,42.55682V39.72058z M17,66c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1 S17.55231,66,17,66z"/></g>
+              </svg>
+            </span>
+            <span ng-switch-when="communaute">
+              <svg class="fr-artwork" viewBox="0 0 80 80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M59,76c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S59.5514,76,59,76z M67,12c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S67.5514,12,67,12z M9,16c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S9.5514,16,9,16z"/></g>
+                <g class="fr-artwork-minor"><path d="M37,23c0,0.51282-0.38599,0.93549-0.88342,0.99329L36,24H24c-0.55231,0-1-0.44769-1-1 c0-0.51282,0.38599-0.93549,0.88342-0.99329L24,22h12C36.55231,22,37,22.44769,37,23z M40,46c0.55231,0,1-0.44769,1-1 s-0.44769-1-1-1l-0.09412-0.00342c-0.11938-0.00879-0.22668-0.0354-0.32196-0.08319C40.40363,43.66357,41,42.90149,41,42 c0-1.10461-0.89539-2-2-2s-2,0.89539-2,2C37,44.487,38.00861,46,40,46z M46,46c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1 l-0.09412-0.00342c-0.11938-0.00879-0.22668-0.0354-0.32196-0.08319C46.40363,43.66357,47,42.90149,47,42c0-1.10461-0.89539-2-2-2 s-2,0.89539-2,2C43,44.487,44.00861,46,46,46z M34,26H24l-0.11658,0.00671C23.38599,26.06451,23,26.48718,23,27 c0,0.55231,0.44769,1,1,1h10l0.11658-0.00671C34.61401,27.93549,35,27.51282,35,27C35,26.44769,34.55231,26,34,26z M30,30h-6 l-0.11658,0.00671C23.38599,30.06451,23,30.48718,23,31c0,0.55231,0.44769,1,1,1h6l0.11658-0.00671 C30.61401,31.93549,31,31.51282,31,31C31,30.44769,30.55231,30,30,30z M56,50H38l-0.11658,0.00671 C37.38599,50.06451,37,50.48718,37,51c0,0.55231,0.44769,1,1,1h18l0.11658-0.00671C56.61401,51.93549,57,51.51282,57,51 C57,50.44769,56.55231,50,56,50z M52,54H38l-0.11658,0.00671C37.38599,54.06451,37,54.48718,37,55c0,0.55231,0.44769,1,1,1h14 l0.11658-0.00671C52.61401,55.93549,53,55.51282,53,55C53,54.44769,52.55231,54,52,54z"/></g>
+                <g class="fr-artwork-major"><path d="M23,45c0,0.51282-0.38599,0.93549-0.88342,0.99329L22,46h-8c-0.79138,0-1.2547-0.86652-0.8562-1.51727 l0.06281-0.09143l4.6134-6.01331l-0.05652-0.08362c-1.71271-2.61768-2.67731-5.66528-2.758-8.85809L15,29 c0-9.38879,7.61121-17,17-17c6.85413,0,12.2879,4.05713,14.92792,10.6272c0.20587,0.51239-0.0426,1.09479-0.55511,1.30072 c-0.51239,0.20587-1.09479-0.0426-1.30072-0.55511C42.72382,17.52869,37.99768,14,32,14c-8.2843,0-15,6.7157-15,15 c0,3.21582,1.01331,6.27618,2.86572,8.82007c0.23486,0.32251,0.25336,0.74951,0.05811,1.08813l-0.07312,0.10931L16.02698,44H22 c0.51282,0,0.93549,0.38599,0.99329,0.88342L23,45z M62.83209,60.44531l-0.07031-0.09332 c-0.32397-0.38177-0.88977-0.46851-1.31647-0.18408l-0.09332,0.07031c-0.38177,0.32397-0.46851,0.88977-0.18408,1.31647L64.13098,66 H47l-0.33069-0.00299C36.8808,65.82068,29,57.83069,29,48c0-9.9411,8.0589-18,18-18s18,8.0589,18,18 c0,2.81952-0.64807,5.54437-1.87659,8.01172c-0.24622,0.49438-0.04498,1.09467,0.4494,1.34088s1.09479,0.04492,1.34088-0.4494 C66.27942,54.1604,67,51.13062,67,48c0-11.04572-8.95428-20-20-20s-20,8.95428-20,20s8.95428,20,20,20h19l0.11182-0.00592 c0.73016-0.07837,1.14221-0.91589,0.72028-1.54877L62.83209,60.44531z M56,20c0.55139,0,1-0.44861,1-1s-0.44861-1-1-1 s-1,0.44861-1,1S55.44861,20,56,20z M60,20c0.55139,0,1-0.44861,1-1s-0.44861-1-1-1s-1,0.44861-1,1S59.44861,20,60,20z M64,20 c0.55139,0,1-0.44861,1-1s-0.44861-1-1-1s-1,0.44861-1,1S63.44861,20,64,20z M69,15v8c0,0.55231-0.44769,1-1,1h-3v3 c0,0.85217-0.98547,1.29742-1.6225,0.7832l-0.08459-0.07611L59.58502,24H52c-0.51282,0-0.93549-0.38599-0.99329-0.88342L51,23v-8 c0-0.55231,0.44769-1,1-1h16C68.55231,14,69,14.44769,69,15z M67,16H53v6h7c0.22101,0,0.43451,0.07318,0.60803,0.20612 l0.09906,0.08679L63,24.58502V23c0-0.51282,0.38599-0.93549,0.88342-0.99329L64,22h3V16z M16,58h-4l-0.11658,0.00671 C11.38599,58.06451,11,58.48718,11,59c0,0.55231,0.44769,1,1,1h4l0.11658-0.00671C16.61401,59.93549,17,59.51282,17,59 C17,58.44769,16.55231,58,16,58z M20,58c-0.55139,0-1,0.44861-1,1s0.44861,1,1,1s1-0.44861,1-1S20.55139,58,20,58z M24,58 c-0.55139,0-1,0.44861-1,1s0.44861,1,1,1s1-0.44861,1-1S24.55139,58,24,58z"/></g>
+              </svg>
+            </span>
+          </span>
+        </span>
+        <h3 class="fr-card__title">{{theme.titre}}</h3>
+        <p class="fr-badge etiquette">{{c.offres[theme.key].length}} offre{{c.offres[theme.key].length > 1 ? 's' : ''}}</p>
+        <ul class="fr-card__liste">
+                             <li ng-repeat="offre in c.offres[theme.key]">
+            <span class="fr-card__libelle">{{offre.nom}}</span>
+            <button type="button" class="fr-link" ng-if="offre.cle"
+                    ng-disabled="c.chargement"
+                    ng-click="c.voirOffre(offre, $event)">Voir l'offre</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Combinaison absente de la matrice -->
+    <div class="fr-alert" ng-if="!c.offres">
+      <h3 class="fr-alert__title">Combinaison non renseignée</h3>
+      <p>Les offres pour ce trajet ne sont pas encore disponibles. Rapprochez-vous de votre gestionnaire mobilité.</p>
+    </div>
+
+    <ul class="fr-btns-group">
+      <li><button type="button" class="fr-btn fr-btn--secondary" ng-click="c.retour(2)">Modifier le site d'arrivée</button></li>
+      <li><button type="button" class="fr-btn" ng-click="c.recommencer()">Nouvelle simulation</button></li>
+    </ul>
+
+  </section>
+    <!-- ===================== MODALE : FICHE D'UNE OFFRE ===================== -->
+  <div class="fr-modal" ng-if="c.fiche" ng-click="c.clicFond($event)">
+    <div class="fr-modal__body" role="dialog" aria-modal="true"
+         aria-labelledby="fiche-titre" tabindex="-1" ng-keydown="c.touche($event)">
+
+      <div class="fr-modal__header">
+        <button type="button" class="fr-btn--close" ng-click="c.fermer()">Fermer</button>
+      </div>
+
+      <div class="fr-modal__content">
+        <p class="fr-badge etiquette">{{c.fiche.theme}}</p>
+        <h1 class="fr-modal__title" id="fiche-titre">{{c.fiche.titre}}</h1>
+
+        <div class="fr-tabs">
+          <ul class="fr-tabs__list" role="tablist">
+            <li ng-repeat="o in c.onglets" role="presentation">
+              <button type="button" class="fr-tabs__tab" role="tab"
+                      aria-selected="{{c.onglet === o.key}}"
+                      ng-click="c.choisirOnglet(o.key)">{{o.label}}</button>
+            </li>
+          </ul>
+
+          <div class="fr-tabs__panel" role="tabpanel">
+
+            <div ng-if="c.onglet === 'presentation'">
+              <p ng-repeat="p in c.fiche.presentation">{{p}}</p>
+            </div>
+
+            <ul class="fr-card__liste" ng-if="c.onglet === 'conditions'">
+              <li ng-repeat="x in c.fiche.conditions"><span class="fr-card__libelle">{{x}}</span></li>
+            </ul>
+
+            <ol class="cimob__demarches" ng-if="c.onglet === 'demarches'">
+              <li ng-repeat="x in c.fiche.demarches">{{x}}</li>
+            </ol>
+
+            <dl class="cimob__contact" ng-if="c.onglet === 'contact'">
+              <dt>Service</dt><dd>{{c.fiche.contact.service}}</dd>
+              <dt>Téléphone</dt><dd>{{c.fiche.contact.telephone}}</dd>
+              <dt>Courriel</dt><dd><a ng-href="mailto:{{c.fiche.contact.courriel}}">{{c.fiche.contact.courriel}}</a></dd>
+            </dl>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="fr-modal__footer">
+        <ul class="fr-btns-group fr-btns-group--right">
+          <li><button type="button" class="fr-btn fr-btn--secondary" ng-click="c.fermer()">Fermer</button></li>
+           <li>
+            <a class="fr-btn" ng-if="c.fiche.lien" ng-href="{{c.fiche.lien}}">Faire la demande</a>
+            <button type="button" class="fr-btn" ng-if="!c.fiche.lien" disabled>Faire la demande</button>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
 
 </div>]]></template>
     </sp_widget>

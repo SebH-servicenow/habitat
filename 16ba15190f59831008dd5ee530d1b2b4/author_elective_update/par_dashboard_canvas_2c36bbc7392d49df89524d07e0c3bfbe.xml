@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="par_dashboard_canvas">
+  <par_dashboard_canvas action="DELETE">
+    <sys_id>2c36bbc7392d49df89524d07e0c3bfbe</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>par_dashboard_canvas_2c36bbc7392d49df89524d07e0c3bfbe</sys_update_name>
+    <dashboard>2a138e258dca45ecbaeab9af30e47f47</dashboard>
+    <dashboard_tab>cc346bd7ac8f4f0b91cac33b197b8e88</dashboard_tab>
+  </par_dashboard_canvas>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>par_dashboard_canvas_2c36bbc7392d49df89524d07e0c3bfbe</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="par_dashboard_canvas">
+  <par_dashboard_canvas action="INSERT_OR_UPDATE">
+    <sys_id>2c36bbc7392d49df89524d07e0c3bfbe</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>par_dashboard_canvas_2c36bbc7392d49df89524d07e0c3bfbe</sys_update_name>
+    <dashboard>2a138e258dca45ecbaeab9af30e47f47</dashboard>
+    <dashboard_tab>cc346bd7ac8f4f0b91cac33b197b8e88</dashboard_tab>
+  </par_dashboard_canvas>
+</record_update>]]></payload>
+        <payload_hash>1081909608</payload_hash>
+        <record_name/>
+        <reverted_from/>
+        <source>f82bdfb90f15871008dd5ee530d1b26b</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-06 18:57:40</sys_created_on>
+        <sys_id>522bd3f90f15871008dd5ee530d1b2f8</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19e9e4c4b590000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-06 18:57:40</sys_updated_on>
+        <type>PAR Dashboard Page Canvas</type>
+        <update_guid>122bd3f9331587106b71ececc22373f8</update_guid>
+        <update_guid_history>122bd3f9331587106b71ececc22373f8:1081909608</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="">03e5880d2b9b0310eedef9ffbe91bf3b</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 05:36:10</sys_created_on>
+        <sys_db_object display_value="" name="par_dashboard_canvas">par_dashboard_canvas</sys_db_object>
+        <sys_id>08ac6da0389d4f0693482d0fc1325541</sys_id>
+        <sys_metadata>2c36bbc7392d49df89524d07e0c3bfbe</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>par_dashboard_canvas_2c36bbc7392d49df89524d07e0c3bfbe</sys_update_name>
+        <sys_update_version display_value="par_dashboard_canvas_2c36bbc7392d49df89524d07e0c3bfbe">522bd3f90f15871008dd5ee530d1b2f8</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 05:36:10</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

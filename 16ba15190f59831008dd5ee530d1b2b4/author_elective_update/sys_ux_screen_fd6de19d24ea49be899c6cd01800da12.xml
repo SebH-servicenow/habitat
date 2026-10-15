@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_ux_screen">
+    <sys_ux_screen action="DELETE">
+        <active>true</active>
+        <app_config/>
+        <description/>
+        <disable_auto_reflow>false</disable_auto_reflow>
+        <disable_interoperable>false</disable_interoperable>
+        <event_mappings/>
+        <macroponent display_value="Simple List">8515f3e853031010ffa5ddeeff7b1297</macroponent>
+        <macroponent_config>{"bare":{"type":"JSON_LITERAL","value":true},"headerLevel":{"type":"JSON_LITERAL","value":"1"},"headingOnlyVisibleToScreenReaders":{"type":"JSON_LITERAL","value":false},"interceptNotifications":{"type":"JSON_LITERAL","value":false},"label":{"type":"TRANSLATION_LITERAL","value":{"code":null,"comment":"","message":""}},"propagateNotifications":{"type":"JSON_LITERAL","value":false},"scrollable":{"type":"JSON_LITERAL","value":"y"}}</macroponent_config>
+        <name>Simple List</name>
+        <order>0</order>
+        <parent_macroponent display_value="Workspace App Shell">c276387cc331101080d6d3658940ddd2</parent_macroponent>
+        <required_translations/>
+        <rollback_screen/>
+        <screen_condition/>
+        <screen_type display_value="Simple List">ac66a10103dc4bacb610984996e545cb</screen_type>
+        <sys_class_name>sys_ux_screen</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:44</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>fd6de19d24ea49be899c6cd01800da12</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Simple List</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sys_ux_screen_fd6de19d24ea49be899c6cd01800da12</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:44</sys_updated_on>
+    </sys_ux_screen>
+    <sys_translated_text action="DELETE" query="documentkey=fd6de19d24ea49be899c6cd01800da12"/>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_ux_screen_fd6de19d24ea49be899c6cd01800da12</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_ux_screen"><sys_ux_screen action="INSERT_OR_UPDATE"><active>true</active><app_config/><description/><disable_auto_reflow>false</disable_auto_reflow><disable_interoperable>false</disable_interoperable><event_mappings/><macroponent display_value="Simple List">8515f3e853031010ffa5ddeeff7b1297</macroponent><macroponent_config>{"bare":{"type":"JSON_LITERAL","value":true},"headerLevel":{"type":"JSON_LITERAL","value":"1"},"headingOnlyVisibleToScreenReaders":{"type":"JSON_LITERAL","value":false},"interceptNotifications":{"type":"JSON_LITERAL","value":false},"label":{"type":"TRANSLATION_LITERAL","value":{"code":null,"comment":"","message":""}},"propagateNotifications":{"type":"JSON_LITERAL","value":false},"scrollable":{"type":"JSON_LITERAL","value":"y"}}</macroponent_config><name>Simple List</name><order>0</order><parent_macroponent display_value="Workspace App Shell">c276387cc331101080d6d3658940ddd2</parent_macroponent><required_translations/><rollback_screen/><screen_condition/><screen_type display_value="Simple List">ac66a10103dc4bacb610984996e545cb</screen_type><sys_class_name>sys_ux_screen</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-06-04 21:06:44</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>fd6de19d24ea49be899c6cd01800da12</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Simple List</sys_name><sys_overrides/><sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package><sys_policy/><sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope><sys_update_name>sys_ux_screen_fd6de19d24ea49be899c6cd01800da12</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-06-04 21:06:44</sys_updated_on></sys_ux_screen><sys_translated_text action="delete_multiple" query="documentkey=fd6de19d24ea49be899c6cd01800da12"/></record_update>]]></payload>
+        <payload_hash>-918114551</payload_hash>
+        <record_name>Simple List</record_name>
+        <reverted_from/>
+        <source>b6174e9c0f4fc31008dd5ee530d1b2ff</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 05:36:12</sys_created_on>
+        <sys_id>7be5c80d2b9b0310eedef9ffbe91bfe0</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a08ef7638c0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 05:36:12</sys_updated_on>
+        <type>UX Screen</type>
+        <update_guid>b3e5c80d8c9b03100e665fe1f316efe0</update_guid>
+        <update_guid_history>b3e5c80d8c9b03100e665fe1f316efe0:0,118569596b9983101c5e55c8f8526051:-1474177625</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-21 08:34:46</sys_created_on>
+        <sys_db_object display_value="" name="sys_ux_screen">sys_ux_screen</sys_db_object>
+        <sys_id>0c39c6f3b5df4619919b8032ed583679</sys_id>
+        <sys_metadata>fd6de19d24ea49be899c6cd01800da12</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Simple List</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_ux_screen_fd6de19d24ea49be899c6cd01800da12</sys_update_name>
+        <sys_update_version display_value="sys_ux_screen_fd6de19d24ea49be899c6cd01800da12">7be5c80d2b9b0310eedef9ffbe91bfe0</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-21 08:34:46</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

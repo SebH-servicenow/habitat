@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_page_property">
+  <sys_ux_page_property action="DELETE">
+    <sys_id>f5d8ae1c2b750310d2bef8c76e91bf48</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_page_property_f5d8ae1c2b750310d2bef8c76e91bf48</sys_update_name>
+    <name>featureRoutes</name>
+    <page>595b014037f74518a5251cc1a011eee8</page>
+    <required_translations>[ ]</required_translations>
+    <sys_domain>global</sys_domain>
+    <sys_domain_path>global</sys_domain_path>
+    <type>json</type>
+    <unique_name>x_snc_habitat.595b014037f74518a5251cc1a011eee8.root.global.featureRoutes</unique_name>
+    <value>{"list":{"_default":{"routeInfo":{"route":"list","fields":[],"params":[{"name":"listId","mapping":{"address":"listId"}}]}}}}</value>
+  </sys_ux_page_property>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_ux_page_property_f5d8ae1c2b750310d2bef8c76e91bf48</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_page_property">
+  <sys_ux_page_property action="INSERT_OR_UPDATE">
+    <sys_id>f5d8ae1c2b750310d2bef8c76e91bf48</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_page_property_f5d8ae1c2b750310d2bef8c76e91bf48</sys_update_name>
+    <name>featureRoutes</name>
+    <page>595b014037f74518a5251cc1a011eee8</page>
+    <required_translations>[ ]</required_translations>
+    <sys_domain>global</sys_domain>
+    <sys_domain_path>global</sys_domain_path>
+    <type>json</type>
+    <unique_name>x_snc_habitat.595b014037f74518a5251cc1a011eee8.root.global.featureRoutes</unique_name>
+    <value>{"list":{"_default":{"routeInfo":{"route":"list","fields":[],"params":[{"name":"listId","mapping":{"address":"listId"}}]}}}}</value>
+  </sys_ux_page_property>
+</record_update>]]></payload>
+        <payload_hash>-351496002</payload_hash>
+        <record_name>featureRoutes</record_name>
+        <reverted_from/>
+        <source>08de2fd22b070350d2bef8c76e91bf41</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-03 09:31:18</sys_created_on>
+        <sys_id>690fef562b070350d2bef8c76e91bf3e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0669bc1a50000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-03 09:31:18</sys_updated_on>
+        <type>UX Page Property</type>
+        <update_guid>a10fef564a070350e80b95ec652eb03e</update_guid>
+        <update_guid_history>a10fef564a070350e80b95ec652eb03e:0,b5d8ae1c08750310af0ba585e2dfbb4a:-1724910142</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>system</sys_created_by>
+        <sys_created_on>2026-09-11 05:36:13</sys_created_on>
+        <sys_db_object display_value="" name="sys_ux_page_property">sys_ux_page_property</sys_db_object>
+        <sys_id>02cecfb3b1074b3080467334b9c1fc40</sys_id>
+        <sys_metadata>f5d8ae1c2b750310d2bef8c76e91bf48</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>featureRoutes</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_ux_page_property_f5d8ae1c2b750310d2bef8c76e91bf48</sys_update_name>
+        <sys_update_version display_value="sys_ux_page_property_f5d8ae1c2b750310d2bef8c76e91bf48">690fef562b070350d2bef8c76e91bf3e</sys_update_version>
+        <sys_updated_by>system</sys_updated_by>
+        <sys_updated_on>2026-09-11 05:36:13</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

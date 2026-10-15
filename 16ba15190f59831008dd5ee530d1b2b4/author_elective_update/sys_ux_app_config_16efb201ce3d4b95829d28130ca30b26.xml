@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_app_config">
+  <sys_ux_app_config action="DELETE">
+    <sys_id>16efb201ce3d4b95829d28130ca30b26</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_app_config_16efb201ce3d4b95829d28130ca30b26</sys_update_name>
+    <active>true</active>
+    <custom_icon/>
+    <description>Workspace created by Fluent</description>
+    <disable_auto_reflow>false</disable_auto_reflow>
+    <encode_query_string>false</encode_query_string>
+    <icon/>
+    <landing_path>home</landing_path>
+    <name>Habitat - PFMD</name>
+  </sys_ux_app_config>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_ux_app_config_16efb201ce3d4b95829d28130ca30b26</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_app_config">
+  <sys_ux_app_config action="INSERT_OR_UPDATE">
+    <sys_id>16efb201ce3d4b95829d28130ca30b26</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_app_config_16efb201ce3d4b95829d28130ca30b26</sys_update_name>
+    <active>true</active>
+    <custom_icon/>
+    <description>Workspace created by Fluent</description>
+    <disable_auto_reflow>false</disable_auto_reflow>
+    <encode_query_string>false</encode_query_string>
+    <icon/>
+    <landing_path>home</landing_path>
+    <name>Habitat - PFMD</name>
+  </sys_ux_app_config>
+</record_update>]]></payload>
+        <payload_hash>-1027653297</payload_hash>
+        <record_name>Habitat - PFMD</record_name>
+        <reverted_from/>
+        <source>0675e9190f99831008dd5ee530d1b221</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:41</sys_created_on>
+        <sys_id>a485a5590f99831008dd5ee530d1b266</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19e9475b11f0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:41</sys_updated_on>
+        <type>UX App Configuration</type>
+        <update_guid>6485a559b49983109df5c450bf3b0266</update_guid>
+        <update_guid_history>6485a559b49983109df5c450bf3b0266:-1027653297</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 05:36:12</sys_created_on>
+        <sys_db_object display_value="" name="sys_ux_app_config">sys_ux_app_config</sys_db_object>
+        <sys_id>4fdd79bb89724af4a99c94c56a6f1410</sys_id>
+        <sys_metadata>16efb201ce3d4b95829d28130ca30b26</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Habitat - PFMD</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_ux_app_config_16efb201ce3d4b95829d28130ca30b26</sys_update_name>
+        <sys_update_version display_value="sys_ux_app_config_16efb201ce3d4b95829d28130ca30b26">a485a5590f99831008dd5ee530d1b266</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 05:36:12</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

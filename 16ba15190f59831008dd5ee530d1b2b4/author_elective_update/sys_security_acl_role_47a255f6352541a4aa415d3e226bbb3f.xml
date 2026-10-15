@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl_role">
+  <sys_security_acl_role action="DELETE">
+    <sys_id>47a255f6352541a4aa415d3e226bbb3f</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_security_acl_role_47a255f6352541a4aa415d3e226bbb3f</sys_update_name>
+    <sys_security_acl>1fbe25860aef4ec4b1a34704f53ac09c</sys_security_acl>
+    <sys_user_role name="admin">2e5c74bf3cd3441dac246ece6af15d52</sys_user_role>
+  </sys_security_acl_role>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_security_acl_role_47a255f6352541a4aa415d3e226bbb3f</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl_role">
+  <sys_security_acl_role action="INSERT_OR_UPDATE">
+    <sys_id>47a255f6352541a4aa415d3e226bbb3f</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_security_acl_role_47a255f6352541a4aa415d3e226bbb3f</sys_update_name>
+    <sys_security_acl>1fbe25860aef4ec4b1a34704f53ac09c</sys_security_acl>
+    <sys_user_role name="admin">2e5c74bf3cd3441dac246ece6af15d52</sys_user_role>
+  </sys_security_acl_role>
+</record_update>]]></payload>
+        <payload_hash>396305476</payload_hash>
+        <record_name/>
+        <reverted_from/>
+        <source>95a9b3962b870350d2bef8c76e91bf77</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-03 10:18:20</sys_created_on>
+        <sys_id>26c97fd62b870350d2bef8c76e91bf28</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a066c6cf310000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-03 10:18:20</sys_updated_on>
+        <type>Access Roles</type>
+        <update_guid>6ec97fd653870350109f9a6feeed0627</update_guid>
+        <update_guid_history>6ec97fd653870350109f9a6feeed0627:0,51d7f352d48703509a4ccf6e9798988e:0,3335375a604703507e560af8af20397e:0,7e307b1e150703509a726d05e23aba46:0,dfafa35a460703500b70c01c4486427b:0,96fea756e7070350cc6102dfd8fffb49:0,9e6e913a1f15835019a805343b7c8886:0,b75a9072691d43504e8fac9061fb5f7b:0,398974ee6b118b102a41674649b2a3b3:0,f898b4eae8118b102c05aecb01f3aa3e:0,8ec778e69d118b1077a56837613e1141:0,eae3b8eebcdd4b108296ebb8043a91aa:0,0282fcaa0fdd4b1048d5372d2e5bd3bf:0,66ccff1a35994b10c5075ee92d7ffbe2:0,2f63eb9677d54b104cdb207a6d5dc6b5:0,3c044316b1154b10bf9facb58e4ced1f:0,88b1439e63d14b107767025d5f2b1968:0,248bf6de06914b10e45f0d804bffc289:0,e129365a58914b109ac282e451b9d80c:0,44673616c0914b106485094f09a01ce9:0,5906fede27514b10298b131df1a0af99:0,f123b65a3e514b10d100ebbb8cf16c6d:0,0af176561e514b103548b27877e11276:0,1a407a12aa514b10ce0476c96ae82818:0,5df7285a94150b10cfdec406733c35a3:0,3f9d928e67d5c710d22b004353bffced:0,92aab731c959871026f894c46cef7a88:0,0957f739cb198710ff2836d67bc6be9f:0,5665b3f1d9198710006bc3790996a346:0,e44ba371d4d5871095ab6149e77ffa83:0,bb4f9bb9df5587108bcc33b067ccc088:0,0f5edfb5f65587103e4d7ab5551baabc:0,a78ddbb1735587100f60e27dfaadbab7:0,fc3b9ff932158710b8ad79e075ac60ff:0,eac4c6757e9d4710fac87f38c6dba300:0,410474f12f954710b08f412cb8c56699:0,2032b4bd5b5547107708e2a55d6e6438:0,dc113cb974554710aebc49815e847aae:0,2fef60f55c55471036089b3eb69745a4:0,473a683d5b15471003f1ba926042813b:0,5c48ec7564154710f49fd71d7724c907:0,fb71e0b99ad14710347ccd3bc0def255:0,173068b594d14710cf2018a897eedb35:0,397d543162d14710974d180c6c716c25:0,a37a5c7912914710b7970c983cbfd321:0,d5413565b7d10710155463c85e487cc0:0,9c171315f755c3100b556fee793f75f3:0,10a35f1d7e15c310665785624f159072:0,277213597915c310fc6d1685a22d4034:-640377675</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="now.habitat-atrium.*.admin">4deda1222b230b10eedef9ffbe91bf42</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-28 15:16:59</sys_created_on>
+        <sys_db_object display_value="" name="sys_security_acl_role">sys_security_acl_role</sys_db_object>
+        <sys_id>475b0b18222849709502d67c203d7a79</sys_id>
+        <sys_metadata>47a255f6352541a4aa415d3e226bbb3f</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>now.habitat-atrium.*.admin</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_security_acl_role_47a255f6352541a4aa415d3e226bbb3f</sys_update_name>
+        <sys_update_version display_value="sys_security_acl_role_47a255f6352541a4aa415d3e226bbb3f">26c97fd62b870350d2bef8c76e91bf28</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-28 15:16:59</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

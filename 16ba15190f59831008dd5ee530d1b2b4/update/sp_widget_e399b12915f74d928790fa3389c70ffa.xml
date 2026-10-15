@@ -1,1461 +1,994 @@
 <?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
     <sp_widget action="INSERT_OR_UPDATE">
         <category>custom</category>
-        <client_script><![CDATA[api.controller = function($scope, $timeout, $element) {
-  var c = this;
+        <client_script><![CDATA[api.controller = function() {};
 
-  // Attendre qu'Angular ait insere le template dans la page
-  $timeout(function() {
+function demarrerVehicule(piste) {
 
-    var faq = $element[0].querySelector('.faq');
-    if (!faq) {
+  var vehicule    = piste.querySelector('.vehicule');
+  var icones      = vehicule.querySelectorAll('svg');
+  var etapes      = piste.querySelectorAll('.piste__etapes li');
+  var progression = piste.querySelector('.piste__progression');
+  var actif       = true;
+
+  // Durées, en millisecondes
+  var DUREE_TRONCON  = 2400;   // d'un cercle au suivant
+  var PAUSE_CACHE    = 700;    // caché derrière le cercle, le temps de changer de forme
+  var PAUSE_ARRIVEE  = 1500;   // au bout de la ligne, avant la remise à zéro
+  var DUREE_FONDU    = 500;
+
+  // Si l'usager a demandé moins d'animations : état final, sans mouvement
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    etapes.forEach(function (e) { e.classList.add('est-atteinte'); });
+    progression.style.left  = centre(etapes[0]) + 'px';
+    progression.style.width = (centre(etapes[etapes.length - 1]) - centre(etapes[0])) + 'px';
+    return function () {};
+  }
+
+  // ---------- Petits outils ----------
+
+  // Position horizontale du centre d'un cercle, dans la piste
+  function centre(etape) {
+    return etape.offsetLeft + etape.offsetWidth / 2;
+  }
+
+  // Le véhicule est centré sur cette position
+  function deplacement(x) {
+    return 'translateX(' + (x - vehicule.offsetWidth / 2) + 'px)';
+  }
+
+  function attendre(ms) {
+    return new Promise(function (resolve) { setTimeout(resolve, ms); });
+  }
+
+  // Joue une animation, fige son état final, puis libère l'animation
+  function animer(element, images, duree, courbe) {
+    var animation = element.animate(images, { duration: duree, easing: courbe || 'ease-in-out', fill: 'forwards' });
+    return animation.finished.then(function () {
+      animation.commitStyles();
+      animation.cancel();
+    });
+  }
+
+  // Affiche une seule icône (0 voiture, 1 train, 2 avion)
+  function montrerIcone(numero) {
+    icones.forEach(function (svg, i) { svg.style.opacity = i === numero ? 1 : 0; });
+    vehicule.classList.toggle('vole', numero === 2);
+  }
+
+  // ---------- Un tour complet ----------
+  function cycle() {
+    if (!actif) { return; }
+
+    // État de départ
+    etapes.forEach(function (e) { e.classList.remove('est-atteinte'); });
+    progression.style.left  = centre(etapes[0]) + 'px';
+    progression.style.width = '0px';
+    vehicule.style.transform = deplacement(centre(etapes[0]));
+    montrerIcone(0);
+
+    var suite = attendre(600).then(function () {
+      etapes[0].classList.add('est-atteinte');
+    });
+
+    // Un tronçon par icône : le véhicule sort du cercle, roule, entre dans le suivant
+    etapes.forEach(function (etape, i) {
+      if (i === etapes.length - 1) { return; }
+
+      suite = suite.then(function () {
+        if (!actif) { return; }
+        var depart  = centre(etapes[i]);
+        var arrivee = centre(etapes[i + 1]);
+
+        montrerIcone(i);
+        vehicule.classList.add('roule');
+
+        var origine = centre(etapes[0]);
+        return Promise.all([
+          animer(vehicule,    [{ transform: deplacement(depart) },       { transform: deplacement(arrivee) }],       DUREE_TRONCON),
+          animer(progression, [{ width: (depart - origine) + 'px' },     { width: (arrivee - origine) + 'px' }],     DUREE_TRONCON)
+        ]).then(function () {
+          vehicule.classList.remove('roule');
+          etapes[i + 1].classList.add('est-atteinte');
+          return attendre(PAUSE_CACHE);   // caché derrière le cercle, l'icône change ensuite
+        });
+      });
+    });
+
+    // Arrivée : pause, fondu, remise à zéro, et on repart
+    suite.then(function () { return attendre(PAUSE_ARRIVEE); })
+         .then(function () { return animer(piste, [{ opacity: 1 }, { opacity: 0 }], DUREE_FONDU); })
+         .then(function () { return attendre(300); })
+         .then(function () {
+           if (!actif) { return; }
+           cycle();
+           animer(piste, [{ opacity: 0 }, { opacity: 1 }], DUREE_FONDU);
+         });
+  }
+
+  cycle();
+
+  return function arreter() { actif = false; };
+}
+
+
+/* ============================================================
+   CONTRÔLEUR DU WIDGET
+   On attend qu'Angular ait inséré le template, puis on lance
+   le véhicule sur la piste.
+   ============================================================ */
+api.controller = function($scope, $timeout, $element) {
+
+  $timeout(function () {
+    var piste = $element[0].querySelector('.piste');
+    if (!piste) {
       return;
     }
 
-    // Ajouter la classe is-visible quand la FAQ entre dans l'ecran
-    var observateur = new IntersectionObserver(function(entrees) {
-      for (var i = 0; i < entrees.length; i++) {
-        if (entrees[i].isIntersecting) {
-          entrees[i].target.className += ' is-visible';
-          observateur.unobserve(entrees[i].target);
-        }
-      }
-    }, { threshold: 0.2 });
+    var arreter = demarrerVehicule(piste);
 
-    observateur.observe(faq);
-
-    // Arreter l'observation si le widget est retire de la page
-    $scope.$on('$destroy', function() {
-      observateur.disconnect();
-    });
-
+    // Arrêter la boucle si le widget est retiré de la page
+    $scope.$on('$destroy', arreter);
   }, 0);
+
 };]]></client_script>
         <controller_as>c</controller_as>
-        <css>/* ============================================================&#13;
-   PORTAIL HABITAT — PAGE D'ACCUEIL&#13;
-   Sommaire :&#13;
-     1. Conteneur&#13;
-     2. Fil d'Ariane&#13;
-     3. Hero&#13;
-     4. Bloc simulateur&#13;
-     5. Actualités&#13;
-     6. FAQ&#13;
-     7. Informations pratiques&#13;
-     8. Divers&#13;
-   ============================================================ */&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   1. CONTENEUR&#13;
-   ============================================================ */&#13;
-   .accueil-familles {&#13;
-    font-family: 'Marianne', Arial, sans-serif;&#13;
-    color: #161616;&#13;
-    max-width: 1200px;&#13;
-    margin: 0 auto;&#13;
-    padding: 24px 16px 0;&#13;
-    background-color: #ffffff;&#13;
-  }&#13;
-  &#13;
-  /* On ne cible jamais * ni body : tout reste dans le widget */&#13;
-  .accueil-familles * {&#13;
-    box-sizing: border-box;&#13;
-  }&#13;
-  &#13;
-  &#13;
-  /* ============================================================&#13;
-     2. FIL D'ARIANE&#13;
-     ============================================================ */&#13;
-  .breadcrumb {&#13;
-    margin: 0 0 24px;&#13;
-    padding: 12px 16px;&#13;
-    background-color: #F6F6F6;&#13;
-    font-size: 14px;&#13;
-  }&#13;
-  &#13;
-  .breadcrumb ol {&#13;
-    list-style: none;&#13;
-    display: flex;&#13;
-    align-items: center;&#13;
-    padding: 0;&#13;
-    margin: 0;&#13;
-    font-size: 14px;&#13;
-  }&#13;
-  &#13;
-  .breadcrumb ol li {&#13;
-    display: flex;&#13;
-    align-items: center;&#13;
-  }&#13;
-  &#13;
-  .breadcrumb ol li + li::before {&#13;
-    content: '›';&#13;
-    margin: 0 8px;&#13;
-    color: #666666;&#13;
-  }&#13;
-  &#13;
-  .breadcrumb ol li a {&#13;
-    color: #000091;&#13;
-    text-decoration: none;&#13;
-  }&#13;
-  &#13;
-  .breadcrumb ol li a:hover {&#13;
-    text-decoration: underline;&#13;
-  }&#13;
-  &#13;
-  .breadcrumb ol li[aria-current="page"] {&#13;
-    color: #666666;&#13;
-  }&#13;
-  &#13;
-  &#13;
-  /* ============================================================&#13;
-     3. HERO&#13;
-     Une bande photo, puis une carte blanche qui remonte dessus.&#13;
-     ============================================================ */&#13;
-  .hero {&#13;
-    margin-bottom: 40px;&#13;
-  }&#13;
-  &#13;
-  /* ---------- La bande photo ---------- */&#13;
-  .hero__image {&#13;
-    height: 300px;&#13;
-    background-image:&#13;
-      /* voile bleu pour garder la photo lisible */&#13;
-      linear-gradient(180deg, rgba(0, 0, 145, 0.55) 0%, rgba(0, 0, 145, 0.25) 100%),&#13;
-      url("/demenagement.jpg");&#13;
-    background-size: cover;&#13;
-    background-position: center 35%;&#13;
-  }&#13;
-  &#13;
-  /* ---------- La carte blanche ---------- */&#13;
-  .hero__card {&#13;
-    position: relative;             /* passe au-dessus de la photo */&#13;
-    margin: -120px 40px 0;          /* la remontée sur la photo */&#13;
-    background-color: #ffffff;&#13;
-    border-top: 4px solid #E1000F;  /* liseré Marianne */&#13;
-    border-radius: 16px;&#13;
-    padding: 32px 36px 30px;&#13;
-    box-shadow: 0 12px 40px rgba(10, 10, 60, 0.16);&#13;
-    animation: hero-apparition 0.6s ease both;&#13;
-  }&#13;
-  &#13;
-  @keyframes hero-apparition {&#13;
-    from { opacity: 0; transform: translateY(20px); }&#13;
-    to   { opacity: 1; transform: translateY(0); }&#13;
-  }&#13;
-  &#13;
-  /* ---------- Textes du hero ---------- */&#13;
-  .hero__label {&#13;
-    font-size: 12px;&#13;
-    font-weight: 700;&#13;
-    letter-spacing: 0.05em;&#13;
-    text-transform: uppercase;&#13;
-    color: #000091;&#13;
-    margin: 0 0 14px;&#13;
-  }&#13;
-  &#13;
-  .hero__title {&#13;
-    font-size: 32px;&#13;
-    font-weight: 700;&#13;
-    line-height: 1.2;&#13;
-    color: #161616;&#13;
-    margin: 0 0 14px;&#13;
-  }&#13;
-  &#13;
-  /* Mots surlignés au marqueur bleu clair */&#13;
-  .hero__title span {&#13;
-    color: #000091;&#13;
-    background: linear-gradient(transparent 62%, #CACAFB 62%);&#13;
-    padding: 0 4px;&#13;
-  }&#13;
-  &#13;
-  .hero__text {&#13;
-    font-size: 16px;&#13;
-    line-height: 1.65;&#13;
-    color: #666666;&#13;
-    max-width: 680px;&#13;
-    margin: 0 0 28px;&#13;
-  }&#13;
-  &#13;
-  .hero__text strong {&#13;
-    font-weight: 700;&#13;
-    color: #161616;&#13;
-  }&#13;
-  &#13;
-  /* ---------- Boutons du hero ---------- */&#13;
-  .hero__actions {&#13;
-    display: flex;&#13;
-    flex-wrap: wrap;&#13;
-    gap: 14px;&#13;
-    align-items: center;&#13;
-  }&#13;
-  &#13;
-  .btn-primary {&#13;
-    display: inline-flex;&#13;
-    align-items: center;&#13;
-    gap: 10px;&#13;
-    background-color: #000091;&#13;
-    color: #ffffff;&#13;
-    border: none;&#13;
-    border-radius: 8px;&#13;
-    padding: 13px 24px;&#13;
-    font-family: 'Marianne', Arial, sans-serif;&#13;
-    font-size: 16px;&#13;
-    font-weight: 700;&#13;
-    text-decoration: none;&#13;
-    cursor: pointer;&#13;
-    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;&#13;
-  }&#13;
-  &#13;
-  .btn-primary:hover {&#13;
-    background-color: #1212FF;&#13;
-    color: #ffffff;&#13;
-    text-decoration: none;&#13;
-    transform: translateY(-2px);&#13;
-    box-shadow: 0 10px 22px rgba(0, 0, 145, 0.26);&#13;
-  }&#13;
-  &#13;
-  .btn-primary svg {&#13;
-    width: 15px;&#13;
-    height: 15px;&#13;
-    fill: none;&#13;
-    stroke: currentColor;&#13;
-    stroke-width: 2;&#13;
-    stroke-linecap: round;&#13;
-    stroke-linejoin: round;&#13;
-    transition: transform 0.2s ease;&#13;
-  }&#13;
-  &#13;
-  /* La flèche avance au survol */&#13;
-  .btn-primary:hover svg {&#13;
-    transform: translateX(4px);&#13;
-  }&#13;
-  &#13;
-  .btn-secondary {&#13;
-    display: inline-flex;&#13;
-    align-items: center;&#13;
-    background-color: #ffffff;&#13;
-    color: #000091;&#13;
-    border: 1px solid #000091;&#13;
-    border-radius: 8px;&#13;
-    padding: 13px 24px;&#13;
-    font-family: 'Marianne', Arial, sans-serif;&#13;
-    font-size: 16px;&#13;
-    font-weight: 600;&#13;
-    text-decoration: none;&#13;
-    cursor: pointer;&#13;
-    transition: background-color 0.2s ease, transform 0.2s ease;&#13;
-  }&#13;
-  &#13;
-  .btn-secondary:hover {&#13;
-    background-color: #F5F5FE;&#13;
-    color: #000091;&#13;
-    text-decoration: none;&#13;
-    transform: translateY(-2px);&#13;
-  }&#13;
-  &#13;
-  &#13;
-  /* ============================================================&#13;
-     4. BLOC SIMULATEUR&#13;
-     Carte d'appel vers le simulateur CIMob.&#13;
-     ============================================================ */&#13;
-  .sim-intro {&#13;
-    background-color: #ffffff;&#13;
-    border-radius: 20px;&#13;
-    box-shadow: 0 2px 18px rgba(10, 10, 60, 0.06);&#13;
-    max-width: 800px;&#13;
-    margin: 0 auto 48px;&#13;
-    padding: 48px 40px 40px;&#13;
-    text-align: center;&#13;
-  }&#13;
-  &#13;
-  /* ---------- Le trajet avec l'avion ---------- */&#13;
-  .sim-route {&#13;
-    position: relative;&#13;
-    display: flex;&#13;
-    align-items: center;&#13;
-    justify-content: space-between;&#13;
-    max-width: 340px;&#13;
-    height: 30px;&#13;
-    margin: 0 auto 32px;&#13;
-  }&#13;
-  &#13;
-  .sim-route__dot {&#13;
-    width: 12px;&#13;
-    height: 12px;&#13;
-    border-radius: 50%;&#13;
-    background-color: #000091;&#13;
-    flex-shrink: 0;&#13;
-  }&#13;
-  &#13;
-  .sim-route__dot--end {&#13;
-    background-color: #ffffff;&#13;
-    border: 2px solid #000091;&#13;
-  }&#13;
-  &#13;
-  .sim-route__line {&#13;
-    position: absolute;&#13;
-    left: 18px;&#13;
-    right: 18px;&#13;
-    top: 50%;&#13;
-    border-top: 2px dashed #DDDDDD;&#13;
-  }&#13;
-  &#13;
-  /* L'avion traverse la ligne en boucle */&#13;
-  .sim-route__plane {&#13;
-    position: absolute;&#13;
-    top: 50%;&#13;
-    left: 0;&#13;
-    width: 24px;&#13;
-    height: 24px;&#13;
-    color: #000091;&#13;
-    /* rotate(90deg) : le dessin pointe vers le haut, on le met à plat */&#13;
-    transform: translate(-50%, -50%) rotate(90deg);&#13;
-    animation: sim-vol 7s ease-in-out infinite;&#13;
-  }&#13;
-  &#13;
-  .sim-route__plane svg {&#13;
-    width: 100%;&#13;
-    height: 100%;&#13;
-    fill: currentColor;&#13;
-  }&#13;
-  &#13;
-  @keyframes sim-vol {&#13;
-    0%   { left: 6%;  opacity: 0; }&#13;
-    8%   { opacity: 1; }&#13;
-    86%  { left: 94%; opacity: 1; }&#13;
-    95%  { left: 94%; opacity: 0; }&#13;
-    100% { left: 6%;  opacity: 0; }&#13;
-  }&#13;
-  &#13;
-  /* ---------- Textes du bloc simulateur ---------- */&#13;
-  .sim-kicker {&#13;
-    font-size: 12px;&#13;
-    font-weight: 700;&#13;
-    letter-spacing: 2px;&#13;
-    text-transform: uppercase;&#13;
-    color: #000091;&#13;
-    margin: 0 0 12px;&#13;
-  }&#13;
-  &#13;
-  .sim-title {&#13;
-    font-size: 32px;&#13;
-    font-weight: 700;&#13;
-    line-height: 1.2;&#13;
-    color: #161616;&#13;
-    margin: 0 0 16px;&#13;
-  }&#13;
-  &#13;
-  .sim-title span {&#13;
-    color: #000091;&#13;
-    background: linear-gradient(transparent 62%, #CACAFB 62%);&#13;
-    padding: 0 4px;&#13;
-  }&#13;
-  &#13;
-  .sim-text {&#13;
-    font-size: 16px;&#13;
-    line-height: 1.6;&#13;
-    color: #666666;&#13;
-    max-width: 520px;&#13;
-    margin: 0 auto 32px;&#13;
-  }&#13;
-  &#13;
-  /* ---------- Les 3 familles d'offres ---------- */&#13;
-  .sim-cards {&#13;
-    display: grid;&#13;
-    grid-template-columns: repeat(3, 1fr);&#13;
-    gap: 16px;&#13;
-    margin: 0 0 32px;&#13;
-  }&#13;
-  &#13;
-  .sim-card {&#13;
-    background-color: #FAFAFA;&#13;
-    border: 1px solid #EEEEEE;&#13;
-    border-radius: 12px;&#13;
-    padding: 20px 16px;&#13;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;&#13;
-  }&#13;
-  &#13;
-  .sim-card:hover {&#13;
-    transform: translateY(-4px);&#13;
-    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);&#13;
-  }&#13;
-  &#13;
-  .sim-card__icon {&#13;
-    display: inline-flex;&#13;
-    align-items: center;&#13;
-    justify-content: center;&#13;
-    width: 44px;&#13;
-    height: 44px;&#13;
-    border-radius: 10px;&#13;
-    margin-bottom: 12px;&#13;
-  }&#13;
-  &#13;
-  .sim-card__icon svg {&#13;
-    width: 22px;&#13;
-    height: 22px;&#13;
-    fill: none;&#13;
-    stroke: currentColor;&#13;
-    stroke-width: 1.6;&#13;
-    stroke-linecap: round;&#13;
-    stroke-linejoin: round;&#13;
-  }&#13;
-  &#13;
-  /* Une couleur par famille */&#13;
-  .sim-card__icon--vert { background-color: #DFFDF0; color: #00A95F; }&#13;
-  .sim-card__icon--bleu { background-color: #E8EDFF; color: #0063CB; }&#13;
-  .sim-card__icon--rose { background-color: #FEE7FC; color: #6E445A; }&#13;
-  &#13;
-  .sim-card__title {&#13;
-    font-size: 16px;&#13;
-    font-weight: 700;&#13;
-    color: #161616;&#13;
-    margin: 0 0 4px;&#13;
-  }&#13;
-  &#13;
-  .sim-card__text {&#13;
-    font-size: 14px;&#13;
-    line-height: 1.45;&#13;
-    color: #666666;&#13;
-    margin: 0;&#13;
-  }&#13;
-  &#13;
-  /* ---------- Bouton du simulateur ---------- */&#13;
-  .sim-button {&#13;
-    font-family: 'Marianne', Arial, sans-serif;&#13;
-    font-size: 16px;&#13;
-    font-weight: 700;&#13;
-    color: #ffffff;&#13;
-    background-color: #000091;&#13;
-    border: none;&#13;
-    border-radius: 8px;&#13;
-    padding: 14px 32px;&#13;
-    cursor: pointer;&#13;
-    display: inline-flex;&#13;
-    align-items: center;&#13;
-    gap: 10px;&#13;
-    transition: background-color 0.2s ease, transform 0.2s ease;&#13;
-  }&#13;
-  &#13;
-  .sim-button:hover {&#13;
-    background-color: #1212FF;&#13;
-    transform: translateY(-2px);&#13;
-  }&#13;
-  &#13;
-  .sim-button svg {&#13;
-    width: 16px;&#13;
-    height: 16px;&#13;
-    fill: none;&#13;
-    stroke: #ffffff;&#13;
-    stroke-width: 2;&#13;
-    stroke-linecap: round;&#13;
-    stroke-linejoin: round;&#13;
-    transition: transform 0.2s ease;&#13;
-  }&#13;
-  &#13;
-  .sim-button:hover svg {&#13;
-    transform: translateX(4px);&#13;
-  }&#13;
-  &#13;
-  .sim-hint {&#13;
-    font-size: 13px;&#13;
-    color: #666666;&#13;
-    margin: 16px 0 0;&#13;
-  }&#13;
-  &#13;
-  &#13;
-  /* ============================================================&#13;
-     5. ACTUALITÉS&#13;
-     Une actualité à la une à gauche, trois brèves à droite.&#13;
-     ============================================================ */&#13;
-  .news {&#13;
-    padding: 0 0 48px;&#13;
-  }&#13;
-  &#13;
-  /* ---------- Titre de section ---------- */&#13;
-  .news__head {&#13;
-    display: flex;&#13;
-    align-items: flex-end;&#13;
-    justify-content: space-between;&#13;
-    gap: 20px;&#13;
-    flex-wrap: wrap;&#13;
-    margin-bottom: 28px;&#13;
-  }&#13;
-  &#13;
-  .news__label {&#13;
-    font-size: 12px;&#13;
-    font-weight: 700;&#13;
-    letter-spacing: 0.05em;&#13;
-    text-transform: uppercase;&#13;
-    color: #000091;&#13;
-    margin: 0 0 8px;&#13;
-  }&#13;
-  &#13;
-  .news__title {&#13;
-    font-size: 26px;&#13;
-    font-weight: 700;&#13;
-    color: #161616;&#13;
-    margin: 0;&#13;
-  }&#13;
-  &#13;
-  .news__title span {&#13;
-    color: #000091;&#13;
-    background: linear-gradient(transparent 62%, #CACAFB 62%);&#13;
-    padding: 0 4px;&#13;
-  }&#13;
-  &#13;
-  /* Lien "Voir tout" */&#13;
-  .news__all {&#13;
-    display: inline-flex;&#13;
-    align-items: center;&#13;
-    gap: 8px;&#13;
-    font-size: 14px;&#13;
-    font-weight: 700;&#13;
-    color: #000091;&#13;
-    text-decoration: none;&#13;
-    white-space: nowrap;&#13;
-    transition: gap 0.2s ease;&#13;
-  }&#13;
-  &#13;
-  .news__all:hover {&#13;
-    gap: 13px;&#13;
-    color: #000091;&#13;
-    text-decoration: underline;&#13;
-  }&#13;
-  &#13;
-  .news__all svg {&#13;
-    width: 17px;&#13;
-    height: 17px;&#13;
-    fill: none;&#13;
-    stroke: currentColor;&#13;
-    stroke-width: 2;&#13;
-    stroke-linecap: round;&#13;
-    stroke-linejoin: round;&#13;
-  }&#13;
-  &#13;
-  /* ---------- Disposition ---------- */&#13;
-  .news__grid {&#13;
-    display: grid;&#13;
-    grid-template-columns: 1.25fr 1fr;&#13;
-    gap: 24px;&#13;
-  }&#13;
-  &#13;
-  .news__side {&#13;
-    display: flex;&#13;
-    flex-direction: column;&#13;
-    gap: 12px;&#13;
-  }&#13;
-  &#13;
-  /* ---------- Actualité à la une ---------- */&#13;
-  .news-main {&#13;
-    display: block;&#13;
-    border: 1px solid #E5E5E5;&#13;
-    border-radius: 14px;&#13;
-    overflow: hidden;&#13;
-    text-decoration: none;&#13;
-    color: inherit;&#13;
-    transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1),&#13;
-                box-shadow 0.3s ease;&#13;
-  }&#13;
-  &#13;
-  .news-main:hover {&#13;
-    transform: translateY(-3px);&#13;
-    box-shadow: 0 12px 30px rgba(10, 10, 60, 0.12);&#13;
-    color: inherit;&#13;
-    text-decoration: none;&#13;
-  }&#13;
-  &#13;
-  .news-main__image {&#13;
-    height: 220px;&#13;
-    background-image: url("/x_snc_habitat.logement.png");&#13;
-    background-size: cover;&#13;
-    background-position: center;&#13;
-    transition: transform 0.5s cubic-bezier(0.33, 1, 0.68, 1);&#13;
-  }&#13;
-  &#13;
-  /* L'image zoome légèrement au survol */&#13;
-  .news-main:hover .news-main__image {&#13;
-    transform: scale(1.05);&#13;
-  }&#13;
-  &#13;
-  .news-main__body {&#13;
-    padding: 20px 22px 22px;&#13;
-  }&#13;
-  &#13;
-  .news-main__headline {&#13;
-    font-size: 19px;&#13;
-    font-weight: 700;&#13;
-    line-height: 1.35;&#13;
-    color: #161616;&#13;
-    margin: 12px 0 8px;&#13;
-  }&#13;
-  &#13;
-  .news-main__text {&#13;
-    font-size: 14px;&#13;
-    line-height: 1.6;&#13;
-    color: #666666;&#13;
-    margin: 0 0 12px;&#13;
-  }&#13;
-  &#13;
-  /* ---------- Brèves ---------- */&#13;
-  .news-item {&#13;
-    display: flex;&#13;
-    gap: 14px;&#13;
-    align-items: center;&#13;
-    background-color: #FAFAFA;&#13;
-    border: 1px solid #EEEEEE;&#13;
-    border-radius: 12px;&#13;
-    padding: 12px;&#13;
-    text-decoration: none;&#13;
-    color: inherit;&#13;
-    transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1),&#13;
-                background-color 0.3s ease,&#13;
-                border-color 0.3s ease,&#13;
-                box-shadow 0.3s ease;&#13;
-  }&#13;
-  &#13;
-  .news-item:hover {&#13;
-    transform: translateX(3px);&#13;
-    background-color: #ffffff;&#13;
-    border-color: #CACAFB;&#13;
-    box-shadow: 0 4px 16px rgba(10, 10, 60, 0.06);&#13;
-    color: inherit;&#13;
-    text-decoration: none;&#13;
-  }&#13;
-  &#13;
-  .news-item__image {&#13;
-    width: 88px;&#13;
-    height: 88px;&#13;
-    flex-shrink: 0;&#13;
-    border-radius: 10px;&#13;
-    background-image: url("/x_snc_habitat.demarche.png");&#13;
-    background-size: cover;&#13;
-    background-position: center;&#13;
-  }&#13;
-  &#13;
-  .news-item__body {&#13;
-    min-width: 0;&#13;
-  }&#13;
-  &#13;
-  .news-item__headline {&#13;
-    font-size: 14.5px;&#13;
-    font-weight: 700;&#13;
-    line-height: 1.4;&#13;
-    color: #161616;&#13;
-    margin: 6px 0;&#13;
-  }&#13;
-  &#13;
-  /* ---------- Éléments communs ---------- */&#13;
-  .news-tag {&#13;
-    display: inline-block;&#13;
-    background-color: #F5F5FE;&#13;
-    color: #000091;&#13;
-    font-size: 11px;&#13;
-    font-weight: 700;&#13;
-    padding: 4px 10px;&#13;
-    border-radius: 999px;&#13;
-  }&#13;
-  &#13;
-  .news-date {&#13;
-    font-size: 12px;&#13;
-    color: #666666;&#13;
-  }&#13;
-  &#13;
-  &#13;
-  /* ============================================================&#13;
-     6. FAQ&#13;
-     Les questions s'accrochent en alternance à une courbe rouge.&#13;
-     L'accordéon utilise &lt;details&gt; : aucun JavaScript nécessaire.&#13;
-     ============================================================ */&#13;
-  .faq {&#13;
-    padding: 0 0 48px;&#13;
-  }&#13;
-  &#13;
-  /* ---------- Titre de section ---------- */&#13;
-  .faq__head {&#13;
-    text-align: center;&#13;
-    margin-bottom: 44px;&#13;
-  }&#13;
-  &#13;
-  .faq__label {&#13;
-    font-size: 12px;&#13;
-    font-weight: 700;&#13;
-    letter-spacing: 0.05em;&#13;
-    text-transform: uppercase;&#13;
-    color: #000091;&#13;
-    margin: 0 0 10px;&#13;
-  }&#13;
-  &#13;
-  .faq__title {&#13;
-    font-size: 28px;&#13;
-    font-weight: 700;&#13;
-    color: #161616;&#13;
-    margin: 0 0 10px;&#13;
-  }&#13;
-  &#13;
-  .faq__title span {&#13;
-    color: #000091;&#13;
-    background: linear-gradient(transparent 62%, #CACAFB 62%);&#13;
-    padding: 0 4px;&#13;
-  }&#13;
-  &#13;
-  .faq__text {&#13;
-    font-size: 15px;&#13;
-    color: #666666;&#13;
-    max-width: 520px;&#13;
-    margin: 0 auto;&#13;
-  }&#13;
-  &#13;
-  /* ---------- La zone du chemin ---------- */&#13;
-  .faq__path-wrap {&#13;
-    position: relative;&#13;
-  }&#13;
-  &#13;
-  /* Le chemin rouge : il se dessine au chargement */&#13;
-  .faq__path {&#13;
-    position: absolute;&#13;
-    left: 50%;&#13;
-    top: 0;&#13;
-    /* il s'étire sur toute la hauteur du bloc de questions, donc il&#13;
-       s'arrête net avant le bouton "Voir toutes les questions" */&#13;
-    height: 100%;&#13;
-    width: 420px;&#13;
-    transform: translateX(-50%);&#13;
-    z-index: 0;&#13;
-    pointer-events: none;&#13;
-  }&#13;
-  &#13;
-    .faq__path-trait {&#13;
-    stroke: #E1000F;&#13;
-    stroke-width: 3;&#13;
-    fill: none;&#13;
-    stroke-dasharray: 8 10;&#13;
-    stroke-linecap: round;&#13;
-  }&#13;
-&#13;
-  .faq__path-masque {&#13;
-    stroke-dasharray: 810;&#13;
-    stroke-dashoffset: 810;&#13;
-  }&#13;
-&#13;
-  .faq.is-visible .faq__path-masque {&#13;
-    animation: faq-trace 4.5s cubic-bezier(0.33, 0, 0.15, 1) 0.3s forwards;&#13;
-  }&#13;
-  &#13;
-  @keyframes faq-trace {&#13;
-    to { stroke-dashoffset: 0; }&#13;
-  }&#13;
-  &#13;
-  /* ---------- Les illustrations ---------- */&#13;
-  .faq__illu {&#13;
-    position: absolute;&#13;
-    z-index: 0;&#13;
-    opacity: 0.9;&#13;
-  }&#13;
-  &#13;
-  .faq__illu svg {&#13;
-    width: 150px;&#13;
-    height: auto;&#13;
-  }&#13;
-  &#13;
-  .faq__illu--1 { right: 2%; top: 20px; }&#13;
-  .faq__illu--2 { left: 1%; top: 330px; }&#13;
-  &#13;
-  /* ---------- Une question ---------- */&#13;
-  .faq__item {&#13;
-    position: relative;&#13;
-    z-index: 1;&#13;
-    width: 62%;&#13;
-    margin-bottom: 26px;&#13;
-    /* invisible tant que la section n'est pas repérée par le JS */&#13;
-    opacity: 0;&#13;
-  }&#13;
-  &#13;
-  /* Les questions paires sont décalées vers la droite */&#13;
-  .faq__item:nth-child(even) {&#13;
-    margin-left: 38%;&#13;
-  }&#13;
-  &#13;
-  /* L'apparition en cascade ne démarre que lorsque .faq porte la classe&#13;
-     "is-visible" (ajoutée par le JS au moment où la section entre dans&#13;
-     l'écran). Les questions impaires entrent par la gauche, les paires&#13;
-     par la droite. Les 2 illustrations occupant les 2 premières positions,&#13;
-     les questions commencent au 4e enfant. */&#13;
-  .faq.is-visible .faq__item:nth-child(odd)  { animation: faq-entree-gauche 0.7s cubic-bezier(0.22, 0.7, 0.3, 1) forwards; }&#13;
-  .faq.is-visible .faq__item:nth-child(even) { animation: faq-entree-droite 0.7s cubic-bezier(0.22, 0.7, 0.3, 1) forwards; }&#13;
-  &#13;
-  .faq__item:nth-child(4) { animation-delay: 0.30s; }&#13;
-  .faq__item:nth-child(5) { animation-delay: 0.55s; }&#13;
-  .faq__item:nth-child(6) { animation-delay: 0.80s; }&#13;
-  .faq__item:nth-child(7) { animation-delay: 1.05s; }&#13;
-  .faq__item:nth-child(8) { animation-delay: 1.30s; }&#13;
-  &#13;
-  @keyframes faq-entree-gauche {&#13;
-    from { opacity: 0; transform: translateX(-34px); }&#13;
-    to   { opacity: 1; transform: translateX(0); }&#13;
-  }&#13;
-  &#13;
-  @keyframes faq-entree-droite {&#13;
-    from { opacity: 0; transform: translateX(34px); }&#13;
-    to   { opacity: 1; transform: translateX(0); }&#13;
-  }&#13;
-  &#13;
-  /* ---------- La carte ---------- */&#13;
-  .faq-q {&#13;
-    background-color: #ffffff;&#13;
-    border: 1px solid #E5E5E5;&#13;
-    border-radius: 14px;&#13;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;&#13;
-  }&#13;
-  &#13;
-  .faq-q:hover {&#13;
-    border-color: #CACAFB;&#13;
-    box-shadow: 0 4px 16px rgba(10, 10, 60, 0.06);&#13;
-  }&#13;
-  &#13;
-  .faq-q[open] {&#13;
-    border-color: #CACAFB;&#13;
-    box-shadow: 0 8px 24px rgba(10, 10, 60, 0.09);&#13;
-  }&#13;
-  &#13;
-  /* ---------- La ligne cliquable ---------- */&#13;
-  .faq-q__btn {&#13;
-    display: flex;&#13;
-    align-items: center;&#13;
-    gap: 14px;&#13;
-    padding: 18px 20px;&#13;
-    font-size: 15.5px;&#13;
-    font-weight: 700;&#13;
-    color: #161616;&#13;
-    cursor: pointer;&#13;
-    /* on masque la flèche par défaut de &lt;details&gt; */&#13;
-    list-style: none;&#13;
-  }&#13;
-  &#13;
-  .faq-q__btn::-webkit-details-marker {&#13;
-    display: none;&#13;
-  }&#13;
-  &#13;
-  /* Le numéro de la question */&#13;
-  .faq-q__num {&#13;
-    flex-shrink: 0;&#13;
-    width: 30px;&#13;
-    height: 30px;&#13;
-    border-radius: 9px;&#13;
-    background-color: #F5F5FE;&#13;
-    color: #000091;&#13;
-    font-size: 13px;&#13;
-    display: flex;&#13;
-    align-items: center;&#13;
-    justify-content: center;&#13;
-    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;&#13;
-  }&#13;
-  &#13;
-  .faq-q[open] .faq-q__num {&#13;
-    background-color: #000091;&#13;
-    color: #ffffff;&#13;
-    transform: scale(1.06);&#13;
-  }&#13;
-  &#13;
-  .faq-q__txt {&#13;
-    flex: 1;&#13;
-  }&#13;
-  &#13;
-  /* ---------- Le + qui devient − ---------- */&#13;
-  .faq-q__sign {&#13;
-    flex-shrink: 0;&#13;
-    position: relative;&#13;
-    width: 18px;&#13;
-    height: 18px;&#13;
-  }&#13;
-  &#13;
-  .faq-q__sign::before,&#13;
-  .faq-q__sign::after {&#13;
-    content: "";&#13;
-    position: absolute;&#13;
-    background-color: #000091;&#13;
-    border-radius: 2px;&#13;
-    transition: transform 0.35s cubic-bezier(0.22, 0.7, 0.3, 1), opacity 0.35s ease;&#13;
-  }&#13;
-  &#13;
-  /* La barre horizontale */&#13;
-  .faq-q__sign::before {&#13;
-    top: 8px;&#13;
-    left: 0;&#13;
-    width: 18px;&#13;
-    height: 2px;&#13;
-  }&#13;
-  &#13;
-  /* La barre verticale : elle pivote et disparaît à l'ouverture */&#13;
-  .faq-q__sign::after {&#13;
-    left: 8px;&#13;
-    top: 0;&#13;
-    width: 2px;&#13;
-    height: 18px;&#13;
-  }&#13;
-  &#13;
-  .faq-q[open] .faq-q__sign::after {&#13;
-    transform: rotate(90deg);&#13;
-    opacity: 0;&#13;
-  }&#13;
-  &#13;
-  /* ---------- La réponse ---------- */&#13;
-  .faq-q__answer {&#13;
-    padding: 0 20px 20px 64px;&#13;
-    font-size: 14.5px;&#13;
-    line-height: 1.7;&#13;
-    color: #666666;&#13;
-  }&#13;
-  &#13;
-  /* Le texte monte en fondu à l'ouverture */&#13;
-  .faq-q[open] .faq-q__answer {&#13;
-    animation: faq-ouverture 0.4s ease both;&#13;
-  }&#13;
-  &#13;
-  @keyframes faq-ouverture {&#13;
-    from { opacity: 0; transform: translateY(-8px); }&#13;
-    to   { opacity: 1; transform: translateY(0); }&#13;
-  }&#13;
-  &#13;
-  /* ---------- Voir toutes les questions ---------- */&#13;
-  .faq__more {&#13;
-    /* passe au-dessus du chemin, dont le tracé se termine juste derrière */&#13;
-    position: relative;&#13;
-    z-index: 1;&#13;
-    display: flex;&#13;
-    justify-content: center;&#13;
-    margin-top: 36px;&#13;
-  }&#13;
-  &#13;
-  .faq__more-link {&#13;
-    display: inline-flex;&#13;
-    align-items: center;&#13;
-    gap: 10px;&#13;
-    background-color: #ffffff;&#13;
-    color: #000091;&#13;
-    border: 1px solid #000091;&#13;
-    border-radius: 8px;&#13;
-    padding: 13px 26px;&#13;
-    font-family: 'Marianne', Arial, sans-serif;&#13;
-    font-size: 15px;&#13;
-    font-weight: 700;&#13;
-    text-decoration: none;&#13;
-    transition: background-color 0.2s ease, transform 0.2s ease;&#13;
-  }&#13;
-  &#13;
-  .faq__more-link:hover {&#13;
-    background-color: #F5F5FE;&#13;
-    color: #000091;&#13;
-    text-decoration: none;&#13;
-    transform: translateY(-2px);&#13;
-  }&#13;
-  &#13;
-  .faq__more-link svg {&#13;
-    width: 16px;&#13;
-    height: 16px;&#13;
-    fill: none;&#13;
-    stroke: currentColor;&#13;
-    stroke-width: 2;&#13;
-    stroke-linecap: round;&#13;
-    stroke-linejoin: round;&#13;
-    transition: transform 0.2s ease;&#13;
-  }&#13;
-  &#13;
-  .faq__more-link:hover svg {&#13;
-    transform: translateX(4px);&#13;
-  }&#13;
-  &#13;
-  &#13;
-  /* ============================================================&#13;
-     7. INFORMATIONS PRATIQUES&#13;
-     Version provisoire : le front sera revu.&#13;
-     ============================================================ */&#13;
-  .infos {&#13;
-    padding: 0 0 56px;&#13;
-  }&#13;
-  &#13;
-  .infos__head {&#13;
-    margin-bottom: 24px;&#13;
-  }&#13;
-  &#13;
-  .infos__title {&#13;
-    font-size: 26px;&#13;
-    font-weight: 700;&#13;
-    color: #161616;&#13;
-    margin: 0;&#13;
-  }&#13;
-  &#13;
-  .infos__title span {&#13;
-    color: #000091;&#13;
-    background: linear-gradient(transparent 62%, #CACAFB 62%);&#13;
-    padding: 0 4px;&#13;
-  }&#13;
-  &#13;
-  .infos__grid {&#13;
-    display: grid;&#13;
-    grid-template-columns: repeat(2, 1fr);&#13;
-    gap: 12px;&#13;
-  }&#13;
-  &#13;
-  .infos-tile {&#13;
-    display: flex;&#13;
-    align-items: center;&#13;
-    gap: 12px;&#13;
-    background-color: #FAFAFA;&#13;
-    border: 1px solid #EEEEEE;&#13;
-    border-radius: 12px;&#13;
-    padding: 14px 16px;&#13;
-    text-decoration: none;&#13;
-    color: #161616;&#13;
-    font-size: 14px;&#13;
-    font-weight: 600;&#13;
-    line-height: 1.4;&#13;
-    transition: border-color 0.2s ease, background-color 0.2s ease,&#13;
-                transform 0.2s ease, box-shadow 0.2s ease;&#13;
-  }&#13;
-  &#13;
-  .infos-tile:hover {&#13;
-    border-color: #CACAFB;&#13;
-    background-color: #ffffff;&#13;
-    color: #000091;&#13;
-    text-decoration: none;&#13;
-    transform: translateX(3px);&#13;
-    box-shadow: 0 4px 12px rgba(10, 10, 60, 0.06);&#13;
-  }&#13;
-  &#13;
-  .infos-tile svg {&#13;
-    width: 20px;&#13;
-    height: 20px;&#13;
-    fill: none;&#13;
-    stroke: #000091;&#13;
-    stroke-width: 1.9;&#13;
-    stroke-linecap: round;&#13;
-    stroke-linejoin: round;&#13;
-    flex-shrink: 0;&#13;
-  }&#13;
-  &#13;
-  .infos-tile__arrow {&#13;
-    margin-left: auto;&#13;
-    width: 16px;&#13;
-    height: 16px;&#13;
-    stroke-width: 2;&#13;
-    transition: transform 0.2s ease;&#13;
-  }&#13;
-  &#13;
-  .infos-tile:hover .infos-tile__arrow {&#13;
-    transform: translateX(4px);&#13;
-  }&#13;
-  &#13;
-  &#13;
-  /* ============================================================&#13;
-     8. DIVERS&#13;
-     ============================================================ */&#13;
-  .separator {&#13;
-    border: none;&#13;
-    border-top: 1px solid #E5E5E5;&#13;
-    margin: 0 0 40px;&#13;
-  }&#13;
-  &#13;
-  &#13;
-  /* ============================================================&#13;
-     MOBILE&#13;
-     ============================================================ */&#13;
-  @media (max-width: 768px) {&#13;
-  &#13;
-    /* Hero */&#13;
-    .hero__image { height: 200px; }&#13;
-    .hero__card  { margin: -80px 16px 0; padding: 24px 20px; }&#13;
-    .hero__title { font-size: 24px; }&#13;
-  &#13;
-    .btn-primary,&#13;
-    .btn-secondary {&#13;
-      width: 100%;&#13;
-      justify-content: center;&#13;
-    }&#13;
-  &#13;
-    /* Simulateur */&#13;
-    .sim-intro { padding: 32px 20px 28px; }&#13;
-    .sim-title { font-size: 24px; }&#13;
-    .sim-cards { grid-template-columns: 1fr; }&#13;
-  &#13;
-    /* Actualités */&#13;
-    .news__grid        { grid-template-columns: 1fr; }&#13;
-    .news-main__image  { height: 180px; }&#13;
-    .news-item__image  { width: 72px; height: 72px; }&#13;
-  &#13;
-    /* FAQ : le chemin et les illustrations n'ont plus de place */&#13;
-    .faq__path,&#13;
-    .faq__illu { display: none; }&#13;
-  &#13;
-    .faq__item,&#13;
-    .faq__item:nth-child(even) {&#13;
-      width: 100%;&#13;
-      margin-left: 0;&#13;
-    }&#13;
-  &#13;
-    /* Arrivée par le bas plutôt que par les côtés */&#13;
-    .faq.is-visible .faq__item:nth-child(odd),&#13;
-    .faq.is-visible .faq__item:nth-child(even) {&#13;
-      animation-name: faq-entree-bas;&#13;
-    }&#13;
-  &#13;
-    .faq-q__answer { padding-left: 20px; }&#13;
-  &#13;
-    /* Informations pratiques */&#13;
-    .infos__grid { grid-template-columns: 1fr; }&#13;
-  }&#13;
-  &#13;
-  &#13;
-  /* Arrivée verticale, utilisée sur mobile */&#13;
-  @keyframes faq-entree-bas {&#13;
-    from { opacity: 0; transform: translateY(24px); }&#13;
-    to   { opacity: 1; transform: translateY(0); }&#13;
-  }&#13;
-  &#13;
-  &#13;
-  /* ============================================================&#13;
-     ACCESSIBILITÉ&#13;
-     Animations coupées si l'utilisateur le demande (RGAA).&#13;
-     Limité au widget : on ne cible jamais * seul.&#13;
-     ============================================================ */&#13;
-  @media (prefers-reduced-motion: reduce) {&#13;
-    .accueil-familles *,&#13;
-    .accueil-familles *::before,&#13;
-    .accueil-familles *::after {&#13;
-      animation: none !important;&#13;
-      transition: none !important;&#13;
-    }&#13;
-  &#13;
-    /* les questions doivent rester visibles sans leur animation */&#13;
-    .faq__item { opacity: 1; }&#13;
-  &#13;
-    /* le chemin s'affiche tracé d'emblée */&#13;
-    .faq__path-masque { stroke-dashoffset: 0; }&#13;
-   &#13;
-  }&#13;
-&#13;
-/* ============================================================&#13;
-   INFORMATIONS PRATIQUES&#13;
-   1. Titre de section&#13;
-   2. Carte de recherche du bureau logement&#13;
-   3. Liste des rubriques&#13;
-   4. Mobile&#13;
-   5. Accessibilite&#13;
-   ============================================================ */&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   1. TITRE DE SECTION&#13;
-   ============================================================ */&#13;
-.infos {&#13;
-  padding: 0 0 56px;&#13;
-}&#13;
-&#13;
-.infos__title {&#13;
-  font-size: 26px;&#13;
-  font-weight: 700;&#13;
-  color: #161616;&#13;
-  margin: 0 0 26px;&#13;
-}&#13;
-&#13;
-/* Le mot surligne au marqueur bleu */&#13;
-.infos__title span {&#13;
-  color: #000091;&#13;
-  background: linear-gradient(transparent 62%, #CACAFB 62%);&#13;
-  padding: 0 4px;&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   2. CARTE DE RECHERCHE&#13;
-   Le texte a gauche, l'image a droite.&#13;
-   ============================================================ */&#13;
-.infos-recherche {&#13;
-  display: grid;&#13;
-  grid-template-columns: 1fr 330px;&#13;
-  border: 1px solid #E5E5E5;&#13;
-  border-radius: 16px;&#13;
-  overflow: hidden;&#13;
-  background-color: #ffffff;&#13;
-  margin-bottom: 20px;&#13;
-}&#13;
-&#13;
-.infos-recherche__body {&#13;
-  padding: 32px 34px;&#13;
-}&#13;
-&#13;
-.infos-recherche__titre {&#13;
-  font-size: 18px;&#13;
-  font-weight: 700;&#13;
-  color: #161616;&#13;
-  margin: 0 0 8px;&#13;
-}&#13;
-&#13;
-.infos-recherche__texte {&#13;
-  font-size: 14px;&#13;
-  line-height: 1.6;&#13;
-  color: #666666;&#13;
-  margin: 0;&#13;
-}&#13;
-&#13;
-/* ---------- L'image ---------- */&#13;
-.infos-recherche__image {&#13;
-  min-height: 200px;&#13;
-  background-image: url("/rechercheBase.png");&#13;
-  background-size: cover;&#13;
-  background-position: center;&#13;
-}&#13;
-&#13;
-/* ---------- Le formulaire ---------- */&#13;
-.infos-recherche__form {&#13;
-  display: flex;&#13;
-  align-items: center;&#13;
-  gap: 10px;&#13;
-  flex-wrap: wrap;&#13;
-  margin-top: 20px;&#13;
-}&#13;
-&#13;
-/* Le label est masque a l'ecran mais lu par les lecteurs d'ecran */&#13;
-.infos-recherche__label {&#13;
-  position: absolute;&#13;
-  width: 1px;&#13;
-  height: 1px;&#13;
-  overflow: hidden;&#13;
-  clip: rect(0 0 0 0);&#13;
-}&#13;
-&#13;
-.infos-recherche__select {&#13;
-  font-family: 'Marianne', Arial, sans-serif;&#13;
-  font-size: 14px;&#13;
-  font-weight: 600;&#13;
-  color: #161616;&#13;
-  background-color: #ffffff;&#13;
-  border: 1px solid #E5E5E5;&#13;
-  border-radius: 10px;&#13;
-  padding: 11px 16px;&#13;
-  min-width: 230px;&#13;
-  cursor: pointer;&#13;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;&#13;
-}&#13;
-&#13;
-.infos-recherche__select:hover {&#13;
-  border-color: #CACAFB;&#13;
-  box-shadow: 0 4px 14px rgba(10, 10, 60, 0.06);&#13;
-}&#13;
-&#13;
-.infos-recherche__bouton {&#13;
-  font-family: 'Marianne', Arial, sans-serif;&#13;
-  font-size: 14px;&#13;
-  font-weight: 700;&#13;
-  color: #ffffff;&#13;
-  background-color: #000091;&#13;
-  border: none;&#13;
-  border-radius: 10px;&#13;
-  padding: 11px 22px;&#13;
-  cursor: pointer;&#13;
-  display: inline-flex;&#13;
-  align-items: center;&#13;
-  gap: 8px;&#13;
-  transition: background-color 0.2s ease, transform 0.2s ease;&#13;
-}&#13;
-&#13;
-.infos-recherche__bouton:hover {&#13;
-  background-color: #1212FF;&#13;
-  transform: translateY(-2px);&#13;
-}&#13;
-&#13;
-.infos-recherche__bouton svg {&#13;
-  width: 15px;&#13;
-  height: 15px;&#13;
-  fill: none;&#13;
-  stroke: #ffffff;&#13;
-  stroke-width: 2;&#13;
-  stroke-linecap: round;&#13;
-  stroke-linejoin: round;&#13;
-  transition: transform 0.2s ease;&#13;
-}&#13;
-&#13;
-/* La fleche avance au survol */&#13;
-.infos-recherche__bouton:hover svg {&#13;
-  transform: translateX(3px);&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   3. LISTE DES RUBRIQUES&#13;
-   Pas de cartes : de simples lignes separees par un filet.&#13;
-   ============================================================ */&#13;
-.infos-liste {&#13;
-  border-top: 1px solid #EDEDF2;&#13;
-}&#13;
-&#13;
-.infos-ligne {&#13;
-  position: relative;&#13;
-  display: flex;&#13;
-  align-items: center;&#13;
-  gap: 24px;&#13;
-  padding: 24px 16px;&#13;
-  border-bottom: 1px solid #EDEDF2;&#13;
-  text-decoration: none;&#13;
-  color: inherit;&#13;
-  transition: padding-left 0.35s cubic-bezier(0.33, 1, 0.68, 1),&#13;
-              background-color 0.35s ease;&#13;
-}&#13;
-&#13;
-/* Un liseré bleu se deploie a gauche au survol */&#13;
-.infos-ligne::before {&#13;
-  content: "";&#13;
-  position: absolute;&#13;
-  left: 0;&#13;
-  top: 0;&#13;
-  bottom: 0;&#13;
-  width: 3px;&#13;
-  background-color: #000091;&#13;
-  transform: scaleY(0);&#13;
-  transition: transform 0.35s cubic-bezier(0.33, 1, 0.68, 1);&#13;
-}&#13;
-&#13;
-.infos-ligne:hover {&#13;
-  background-color: #FBFBFE;&#13;
-  padding-left: 26px;&#13;
-  color: inherit;&#13;
-  text-decoration: none;&#13;
-}&#13;
-&#13;
-.infos-ligne:hover::before {&#13;
-  transform: scaleY(1);&#13;
-}&#13;
-&#13;
-/* ---------- L'illustration ---------- */&#13;
-.infos-ligne__illu {&#13;
-  flex-shrink: 0;&#13;
-  width: 64px;&#13;
-  height: 64px;&#13;
-  transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);&#13;
-}&#13;
-&#13;
-.infos-ligne:hover .infos-ligne__illu {&#13;
-  transform: scale(1.1) rotate(-3deg);&#13;
-}&#13;
-&#13;
-.infos-ligne__illu svg {&#13;
-  width: 100%;&#13;
-  height: 100%;&#13;
-}&#13;
-&#13;
-/* ---------- Les textes ---------- */&#13;
-.infos-ligne__body {&#13;
-  flex: 1;&#13;
-  min-width: 0;&#13;
-}&#13;
-&#13;
-.infos-ligne__titre {&#13;
-  display: block;&#13;
-  font-size: 16.5px;&#13;
-  font-weight: 700;&#13;
-  color: #161616;&#13;
-  line-height: 1.3;&#13;
-  margin-bottom: 6px;&#13;
-}&#13;
-&#13;
-.infos-ligne__texte {&#13;
-  display: block;&#13;
-  font-size: 13.5px;&#13;
-  line-height: 1.6;&#13;
-  color: #666666;&#13;
-}&#13;
-&#13;
-/* ---------- Le lien, revele au survol ---------- */&#13;
-.infos-ligne__lien {&#13;
-  flex-shrink: 0;&#13;
-  display: inline-flex;&#13;
-  align-items: center;&#13;
-  gap: 8px;&#13;
-  font-size: 13.5px;&#13;
-  font-weight: 700;&#13;
-  color: #000091;&#13;
-  opacity: 0;&#13;
-  transform: translateX(-8px);&#13;
-  transition: opacity 0.35s ease, transform 0.35s ease;&#13;
-}&#13;
-&#13;
-.infos-ligne:hover .infos-ligne__lien {&#13;
-  opacity: 1;&#13;
-  transform: translateX(0);&#13;
-}&#13;
-&#13;
-.infos-ligne__lien svg {&#13;
-  width: 15px;&#13;
-  height: 15px;&#13;
-  fill: none;&#13;
-  stroke: currentColor;&#13;
-  stroke-width: 2;&#13;
-  stroke-linecap: round;&#13;
-  stroke-linejoin: round;&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   4. MOBILE&#13;
-   ============================================================ */&#13;
-@media (max-width: 768px) {&#13;
-&#13;
-  .infos-recherche {&#13;
-    grid-template-columns: 1fr;&#13;
-  }&#13;
-&#13;
-  /* L'image passe au-dessus du texte */&#13;
-  .infos-recherche__image {&#13;
-    order: -1;&#13;
-    min-height: 150px;&#13;
-  }&#13;
-&#13;
-  .infos-recherche__body {&#13;
-    padding: 24px 20px;&#13;
-  }&#13;
-&#13;
-  .infos-recherche__select,&#13;
-  .infos-recherche__bouton {&#13;
-    width: 100%;&#13;
-    justify-content: center;&#13;
-  }&#13;
-&#13;
-  /* Le lien reste toujours visible, faute de survol au doigt */&#13;
-  .infos-ligne__lien {&#13;
-    display: none;&#13;
-  }&#13;
-&#13;
-  .infos-ligne {&#13;
-    gap: 16px;&#13;
-    padding: 20px 12px;&#13;
-  }&#13;
-&#13;
-  .infos-ligne__illu {&#13;
-    width: 52px;&#13;
-    height: 52px;&#13;
-  }&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   5. ACCESSIBILITE&#13;
-   Animations coupees si l'utilisateur le demande.&#13;
-   ============================================================ */&#13;
-@media (prefers-reduced-motion: reduce) {&#13;
-&#13;
-  .infos-ligne,&#13;
-  .infos-ligne__illu,&#13;
-  .infos-ligne__lien,&#13;
-  .infos-recherche__bouton,&#13;
-  .infos-recherche__select {&#13;
-    transition: none;&#13;
-  }&#13;
-&#13;
-  /* Le lien reste visible sans son animation */&#13;
-  .infos-ligne__lien {&#13;
-    opacity: 1;&#13;
-    transform: none;&#13;
-  }&#13;
+        <css>/* ============================================================
+   PORTAIL HABITAT — PAGE D'ACCUEIL
+   Le DSFR n'est pas chargé dans le portail : ses composants sont
+   reproduits ici à l'identique (mêmes noms de classes, mêmes
+   couleurs). Les espacements sont ceux mesurés sur la maquette
+   Figma. La page occupe toute la largeur de l'écran.
+
+   Sommaire :
+     1. Base (police, couleurs, remise à zéro de Bootstrap)
+     2. Conteneur et grille
+     3. Titres et liens
+     4. Boutons
+     5. Badges
+     6. Tuiles
+     7. Cartes
+     8. Accordéon
+     9. Hero
+    10. Simulateur
+    11. Bandeau photo
+    12. Mobile
+   ============================================================ */
+
+
+/* ===================== 1. BASE ===================== */
+.accueil-habitat {
+  font-family: 'Marianne', Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #161616;                 /* text-default-grey */
+  background-color: #ffffff;
+}
+
+.accueil-habitat *,
+.accueil-habitat *::before,
+.accueil-habitat *::after {
+  box-sizing: border-box;
+}
+
+/* Bootstrap (ServiceNow) impose ses marges et couleurs : on les neutralise */
+.accueil-habitat h1,
+.accueil-habitat h2,
+.accueil-habitat h3,
+.accueil-habitat p,
+.accueil-habitat ul {
+  margin: 0;
+  padding: 0;
+}
+
+.accueil-habitat a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Le focus DSFR : contour bleu de 2px */
+.accueil-habitat a:focus-visible,
+.accueil-habitat button:focus-visible {
+  outline: 2px solid #0a76f6;
+  outline-offset: 2px;
+}
+
+/* Petites icônes SVG des liens et de l'accordéon */
+.accueil-habitat .fleche,
+.accueil-habitat .chevron {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+/* Flèche bleue en bas à droite des tuiles et cartes cliquables (comme le DSFR) */
+.accueil-habitat .fr-enlarge-link::after {
+  content: "";
+  position: absolute;
+  right: 2rem;
+  bottom: 2rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000091' d='M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z'/%3E%3C/svg%3E") center / contain no-repeat;
+  pointer-events: none;
+}
+
+
+/* ===================== 2. CONTENEUR ET GRILLE ===================== */
+/* Pleine largeur : pas de largeur maximale, seulement une marge latérale de 40 px */
+.accueil-habitat .fr-container {
+  width: 100%;
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+/* Sections : espace au-dessus et en dessous */
+.accueil-habitat .fr-py-6w {
+  padding-top: 4.5rem;
+  padding-bottom: 3.5rem;
+}
+
+/* 3 colonnes égales, larges gouttières (120 px pour les tuiles, 88 px pour les cartes) */
+.accueil-habitat .grille-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 7.5rem;
+}
+
+.accueil-habitat .fr-mb-4w { margin-bottom: 3rem; }
+.accueil-habitat .fr-mb-1w { margin-bottom: 0.75rem; }
+
+
+/* ===================== 3. TITRES ET LIENS ===================== */
+/* Titres de section : 40 px sur la maquette */
+.accueil-habitat .fr-h3 {
+  font-size: 2.5rem;
+  line-height: 3rem;
+  font-weight: 700;
+  color: #161616;                 /* text-title-grey */
+}
+
+.accueil-habitat .fr-text--sm { font-size: 0.875rem; line-height: 1.5rem; }
+
+.accueil-habitat .titre {
+  margin-bottom: 6rem;            /* 96 px entre le titre et les tuiles */
+}
+
+.accueil-habitat .titre--centre {
+  text-align: center;
+}
+
+/* Le mot surligné au marqueur bleu clair */
+.accueil-habitat .titre span {
+  background: linear-gradient(transparent 60%, #E3E3FD 60%);
+  padding: 0 0.25rem;
+}
+
+/* Lien DSFR : bleu France, en gras, icône avant ou après */
+.accueil-habitat .fr-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  font-weight: 700;
+  color: #000091;                 /* text-action-high-blue-france */
+}
+
+.accueil-habitat .fr-link:hover {
+  text-decoration: underline;
+}
+
+
+/* ===================== 4. BOUTONS ===================== */
+.accueil-habitat .fr-btns-group {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6.75rem;                   /* 108 px entre les deux boutons du hero */
+}
+
+.accueil-habitat .fr-btns-group--center {
+  justify-content: center;
+}
+
+.accueil-habitat .fr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.5rem;             /* 56 px sur la maquette */
+  padding: 0.5rem 2rem;
+  font-family: inherit;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 500;
+  color: #f5f5fe;                 /* text-inverted-blue-france */
+  background-color: #000091;      /* background-action-high-blue-france */
+  border: none;
+  cursor: pointer;
+}
+
+.accueil-habitat .fr-btn:hover  { background-color: #1212ff; }
+.accueil-habitat .fr-btn:active { background-color: #2323ff; }
+
+.accueil-habitat .fr-btn--secondary {
+  color: #000091;
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px #000091;
+}
+
+.accueil-habitat .fr-btn--secondary:hover  { background-color: #f6f6f6; }
+.accueil-habitat .fr-btn--secondary:active { background-color: #ededed; }
+
+
+/* ===================== 5. BADGES ===================== */
+.accueil-habitat .fr-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 0.25rem;
+  color: #3a3a3a;
+  background-color: #eeeeee;
+}
+
+.accueil-habitat .fr-badge--sm {
+  min-height: 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+
+/* Glycine : "Plus proche", "Plus efficace", "Plus humain" */
+.accueil-habitat .fr-badge--purple-glycine {
+  color: #6e445a;
+  background-color: #fee7fc;
+}
+
+/* Bleu France plein : étiquettes des actualités */
+.accueil-habitat .etiquette {
+  color: #f5f5fe;
+  background-color: #000091;
+}
+
+
+/* ===================== 6. TUILES ===================== */
+.accueil-habitat .fr-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 24.75rem;           /* 396 px */
+  padding: 3rem 2rem 3.5rem;
+  text-align: center;
+  background-color: #ffffff;
+  /* bordure grise + liseré bleu France en bas */
+  box-shadow: inset 0 -4px 0 0 #000091, inset 0 0 0 1px #dddddd;
+}
+
+.accueil-habitat .fr-tile__header {
+  order: -1;                      /* le pictogramme passe au-dessus du texte */
+  margin-bottom: 1.75rem;
+}
+
+.accueil-habitat .fr-tile__pictogram {
+  display: flex;
+  justify-content: center;
+}
+
+.accueil-habitat .fr-artwork {
+  width: 5rem;
+  height: 5rem;
+}
+
+/* Couleurs officielles des pictogrammes DSFR */
+.accueil-habitat .fr-artwork-decorative { fill: #ececff; }
+.accueil-habitat .fr-artwork-minor      { fill: #e1000f; }
+.accueil-habitat .fr-artwork-major      { fill: #000091; }
+
+.accueil-habitat .fr-tile__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.accueil-habitat .fr-tile__title {
+  font-size: 1.375rem;
+  line-height: 1.75rem;
+  font-weight: 700;
+  color: #000091;
+  margin-bottom: 0.75rem;
+}
+
+.accueil-habitat .fr-tile__desc {
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  color: #3a3a3a;
+  margin-bottom: 0.75rem;
+}
+
+.accueil-habitat .fr-tile__detail {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #666666;                 /* text-mention-grey */
+}
+
+/* Toute la tuile / carte est cliquable : le lien du titre s'étend dessus */
+.accueil-habitat .fr-enlarge-link .fr-tile__title a::before,
+.accueil-habitat .fr-enlarge-link .fr-card__title a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.accueil-habitat .fr-enlarge-link:hover {
+  background-color: #f6f6f6;      /* background-default-grey-hover */
+}
+
+
+/* ===================== 7. CARTES ===================== */
+.accueil-habitat .fr-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #ffffff;
+  box-shadow: inset 0 0 0 1px #dddddd;
+}
+
+.accueil-habitat .fr-card__header {
+  order: -1;                      /* l'image passe au-dessus du texte */
+}
+
+.accueil-habitat .fr-card__img img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.accueil-habitat .fr-card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.5rem 3.5rem;    /* place réservée en bas pour la flèche */
+}
+
+.accueil-habitat .fr-card__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ordre DSFR : badge, titre, description, date */
+.accueil-habitat .fr-card__start {
+  order: -1;
+  margin-bottom: 1rem;
+}
+
+.accueil-habitat .fr-card__title {
+  font-size: 1.375rem;
+  line-height: 1.875rem;
+  font-weight: 700;
+  color: #000091;
+  margin-bottom: 0.75rem;
+}
+
+.accueil-habitat .fr-card__desc {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: #3a3a3a;
+}
+
+.accueil-habitat .fr-card__end {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.accueil-habitat .fr-card__detail {
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  color: #666666;
+}
+
+/* Carte horizontale (à la une) : image à gauche, texte à droite */
+.accueil-habitat .fr-card--horizontal {
+  flex-direction: row;
+  min-height: 14.5rem;            /* 232 px */
+}
+
+.accueil-habitat .fr-card--horizontal .fr-card__header {
+  flex: 0 0 28.5%;
+}
+
+.accueil-habitat .fr-card--horizontal .fr-card__img,
+.accueil-habitat .fr-card--horizontal .fr-card__img img {
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.accueil-habitat .fr-card--horizontal .fr-card__body {
+  flex: 1;
+  padding: 2rem 2rem 2rem 2rem;
+}
+
+.accueil-habitat .fr-card--horizontal .fr-card__title {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.accueil-habitat .fr-card--horizontal .fr-card__desc {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.accueil-habitat .fr-card--horizontal::after {
+  bottom: 2.5rem;
+}
+
+/* Titre + lien "Toute l'actualité" */
+.accueil-habitat .actualites__lien {
+  margin: -4.5rem 0 1.5rem;       /* le lien remonte sous le titre */
+  text-align: right;
+}
+
+/* Les trois brèves : gouttière de 88 px */
+.accueil-habitat .fr-container &gt; .grille-3:last-child {
+  column-gap: 5.5rem;
+}
+
+
+/* ===================== 8. ACCORDÉON ===================== */
+.accueil-habitat .fr-accordions-group {
+  border-bottom: 1px solid #dddddd;
+}
+
+.accueil-habitat .fr-accordion {
+  border-top: 1px solid #dddddd;
+}
+
+.accueil-habitat .fr-accordion__btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 1.25rem 1rem;
+  font-family: inherit;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 700;
+  text-align: left;
+  color: #000091;
+  background: none;
+  border: none;
+  cursor: pointer;
+  /* on masque la flèche par défaut de &lt;summary&gt; */
+  list-style: none;
+}
+
+.accueil-habitat .fr-accordion__btn::-webkit-details-marker {
+  display: none;
+}
+
+.accueil-habitat .fr-accordion__btn:hover {
+  background-color: #f6f6f6;
+}
+
+/* Le chevron se retourne à l'ouverture */
+.accueil-habitat .fr-accordion__btn .chevron {
+  transition: transform 0.3s ease;
+}
+
+.accueil-habitat .fr-accordion[open] .chevron {
+  transform: rotate(180deg);
+}
+
+/* La réponse : affichée par &lt;details&gt;, aucun JavaScript nécessaire */
+.accueil-habitat .fr-collapse {
+  padding: 0 1rem 1.75rem;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  color: #3a3a3a;
+}
+
+.accueil-habitat .faq .titre {
+  margin-bottom: 2rem;
+}
+
+.accueil-habitat .faq__lien {
+  margin-top: 1.5rem;
+  text-align: right;
+}
+
+
+/* ===================== 9. HERO ===================== */
+.accueil-habitat .hero__photo {
+  display: block;
+  width: 100%;
+  height: 28.5rem;                /* 456 px */
+  object-fit: cover;
+  object-position: center 25%;    /* garde le visage de la militaire visible */
+}
+
+/* La carte blanche : même largeur que les sections, elle remonte de 125 px sur la photo */
+.accueil-habitat .hero__carte {
+  position: relative;
+  width: calc(100% - 5rem);
+  margin: -7.75rem auto 0;
+  padding: 3rem 2.5rem 3rem;
+  background-color: #ffffff;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  text-align: center;
+}
+
+.accueil-habitat .hero__carte .titre {
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.accueil-habitat .hero__carte p {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  max-width: 56rem;
+  margin: 0 auto 3.25rem;
+}
+
+
+/* ===================== 10. SIMULATEUR ===================== */
+.accueil-habitat .simulateur {
+  background-color: #f5f5fe;      /* background-alt-blue-france */
+  padding-top: 3rem;
+  padding-bottom: 6rem;
+}
+
+.accueil-habitat .simulateur .titre {
+  margin-bottom: 3.5rem;
+}
+
+/* ---------- Les 4 étapes et le véhicule (animé par le Client Script) ---------- */
+.accueil-habitat .piste {
+  position: relative;
+  height: 2rem;
+  max-width: 50rem;
+  margin: 0 auto 4.5rem;
+}
+
+/* Ligne grise de fond */
+.accueil-habitat .piste__ligne {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 2px solid #e5e5e5;
+}
+
+/* Ligne bleue qui suit le véhicule (position et largeur posées par le JS) */
+.accueil-habitat .piste__progression {
+  position: absolute;
+  top: 50%;
+  width: 0;
+  border-top: 2px solid #000091;
+}
+
+/* ---------- Les étapes ---------- */
+.accueil-habitat .piste__etapes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 2;                         /* au-dessus du véhicule : il passe derrière */
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
+  align-items: center;
+}
+
+.accueil-habitat .piste__etapes li {
+  position: relative;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #000091;
+  background: #ffffff;
+  border: 2px solid #e5e5e5;
+  transition: background-color 0.3s, border-color 0.3s, color 0.3s, transform 0.3s;
+}
+
+/* La coche, invisible tant que l'étape n'est pas atteinte */
+.accueil-habitat .piste__etapes li::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M10 15.17l9.19-9.19 1.41 1.41L10 18 4.4 12.4l1.41-1.41z'/%3E%3C/svg%3E") center / 1rem no-repeat;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Étape atteinte : cercle bleu, coche blanche, petit rebond */
+.accueil-habitat .piste__etapes li.est-atteinte {
+  background: #000091;
+  border-color: #000091;
+  color: transparent;
+  animation: rebond 0.4s ease-out;
+}
+
+.accueil-habitat .piste__etapes li.est-atteinte::after {
+  opacity: 1;
+}
+
+@keyframes rebond {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- Le véhicule ---------- */
+.accueil-habitat .vehicule {
+  position: absolute;
+  z-index: 1;                         /* sous les cercles */
+  top: 50%;
+  left: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: -1.4rem;               /* les roues posées sur la ligne */
+  will-change: transform;
+}
+
+.accueil-habitat .vehicule svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: #e1000f;                      /* rouge Marianne */
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+/* Le tangage, seulement quand le véhicule roule */
+.accueil-habitat .vehicule.roule svg {
+  animation: tangage 0.5s ease-in-out infinite;
+}
+
+@keyframes tangage {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1.5px); }
+}
+
+/* L'avion vole : il monte et s'incline */
+.accueil-habitat .vehicule.vole svg {
+  animation: vol 0.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes vol {
+  0%, 100% { transform: translateY(-0.4rem) rotate(-8deg); }
+  50%      { transform: translateY(-0.55rem) rotate(-8deg); }
+}
+
+.accueil-habitat .simulateur__texte {
+  max-width: 54rem;
+  margin: 0 auto 2.5rem;
+  font-size: 1.375rem;
+  line-height: 2rem;
+  color: #666666;
+  text-align: center;
+}
+
+/* Le schéma : bouton au centre, deux familles sur les côtés, une en bas */
+.accueil-habitat .simulateur__schema {
+  position: relative;
+  max-width: 57.25rem;            /* 916 px */
+  height: 20.5rem;                /* 328 px, libellé du bas compris */
+  margin: 0 auto;
+}
+
+.accueil-habitat .simulateur__liens {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.accueil-habitat .simulateur__liens path {
+  stroke: #e1000f;                /* rouge Marianne */
+  stroke-width: 5;
+  stroke-dasharray: 26 16;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.accueil-habitat .simulateur__bouton {
+  position: absolute;
+  top: 1.125rem;
+  left: 50%;
+  transform: translateX(-50%);
+  min-height: 2.875rem;
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+}
+
+.accueil-habitat .simulateur__famille {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  width: 8rem;
+  text-align: center;
+}
+
+.accueil-habitat .simulateur__famille--gauche { left: 0;   top: 0; }
+.accueil-habitat .simulateur__famille--droite { right: 0;  top: 0; }
+.accueil-habitat .simulateur__famille--bas    { left: 50%; top: 9.75rem; transform: translateX(-50%); }
+
+/* Le rond blanc qui porte le pictogramme : 116 px */
+.accueil-habitat .simulateur__rond {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 7.25rem;
+  height: 7.25rem;
+  padding: 1.75rem;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 6px 18px rgba(0, 0, 18, 0.12);
+}
+
+.accueil-habitat .simulateur__rond .fr-artwork {
+  width: 100%;
+  height: 100%;
+}
+
+.accueil-habitat .simulateur__nom {
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  font-weight: 700;
+  color: #000091;
+}
+
+
+/* ===================== 11. BANDEAU PHOTO ===================== */
+.accueil-habitat .bandeau__photo {
+  display: block;
+  width: 100%;
+  height: 26rem;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+
+/* ===================== 12. MOBILE ===================== */
+@media (max-width: 47.99em) {
+
+  .accueil-habitat .fr-h3 {
+    font-size: 1.75rem;
+    line-height: 2.25rem;
+  }
+
+  .accueil-habitat .titre {
+    margin-bottom: 2.5rem;
+  }
+
+  .accueil-habitat .fr-py-6w {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  /* Une seule colonne, gouttière verticale */
+  .accueil-habitat .grille-3,
+  .accueil-habitat .fr-container &gt; .grille-3:last-child {
+    grid-template-columns: 1fr;
+    row-gap: 1.5rem;
+  }
+
+  .accueil-habitat .fr-btns-group {
+    gap: 1rem;
+  }
+
+  .accueil-habitat .fr-btns-group li,
+  .accueil-habitat .fr-btns-group .fr-btn {
+    width: 100%;
+  }
+
+  .accueil-habitat .fr-tile {
+    min-height: 0;
+    padding: 2rem 1.5rem 3.5rem;
+  }
+
+  /* Actualités et FAQ : un cran en dessous du bureau */
+  .accueil-habitat .fr-card__title,
+  .accueil-habitat .fr-card--horizontal .fr-card__title {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .accueil-habitat .fr-card--horizontal .fr-card__desc,
+  .accueil-habitat .fr-accordion__btn,
+  .accueil-habitat .fr-collapse {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  /* La carte horizontale repasse en vertical */
+  .accueil-habitat .fr-card--horizontal {
+    flex-direction: column;
+  }
+
+  .accueil-habitat .fr-card--horizontal .fr-card__img img {
+    aspect-ratio: 16 / 9;
+  }
+
+  .accueil-habitat .actualites__lien {
+    margin: -1.5rem 0 1.5rem;
+  }
+
+  .accueil-habitat .hero__photo {
+    height: 14rem;
+  }
+
+  .accueil-habitat .fr-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .accueil-habitat .hero__carte {
+    width: calc(100% - 2rem);
+    margin: -3.75rem auto 0;
+    padding: 1.5rem 1.25rem;
+  }
+
+  .accueil-habitat .hero__carte .titre {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .accueil-habitat .hero__carte p {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Simulateur : schéma en colonne */
+
+  .accueil-habitat .simulateur__texte {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  .accueil-habitat .simulateur__liens {
+    display: none;
+  }
+
+  .accueil-habitat .simulateur__schema {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    height: auto;
+  }
+
+  .accueil-habitat .simulateur__bouton,
+  .accueil-habitat .simulateur__famille {
+    position: static;
+    transform: none;
+  }
+
+  .accueil-habitat .bandeau__photo {
+    height: 15rem;
+  }
 }</css>
         <data_table>sp_instance</data_table>
         <demo_data/>
@@ -1471,435 +1004,422 @@
         <option_schema/>
         <public>false</public>
         <roles/>
-        <script/>
+        <script><![CDATA[(function() {
+  /* Aucun traitement serveur : page statique. */
+})();
+]]></script>
         <servicenow>false</servicenow>
         <sys_class_name>sp_widget</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2026-06-05 16:36:26</sys_created_on>
         <sys_id>e399b12915f74d928790fa3389c70ffa</sys_id>
-        <sys_mod_count>52</sys_mod_count>
+        <sys_mod_count>65</sys_mod_count>
         <sys_name>Habitat - Accueil Familles</sys_name>
         <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
         <sys_policy/>
         <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
         <sys_update_name>sp_widget_e399b12915f74d928790fa3389c70ffa</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2026-08-27 07:56:32</sys_updated_on>
-        <template><![CDATA[<div class="accueil-familles">
+        <sys_updated_on>2026-09-22 07:07:11</sys_updated_on>
+        <template><![CDATA[<div class="accueil-habitat">
 
-  <!-- Fil d'Ariane -->
-  <nav class="breadcrumb" aria-label="Fil d'Ariane">
-    <ol>
-      <li><a href="?id=x_snc_habitat_familles_home">Accueil</a></li>
-      <li aria-current="page">Tableau de bord</li>
-    </ol>
-  </nav>
-
-
-  <!-- Hero -->
+  <!-- ===================== HERO ===================== -->
   <section class="hero">
 
-    <div class="hero__image" aria-hidden="true"></div>
+    <!-- Photo de fond -->
+    <img class="hero__photo" src="/x_snc_habitat.header_famille.png" alt="">
 
-    <div class="hero__card">
-      <p class="hero__label">Espace usager &middot; Portail internet</p>
-
-      <h1 class="hero__title">
-        Préparez votre mobilité en <span>une seule démarche</span>
+    <!-- Carte blanche par-dessus la photo -->
+    <div class="hero__carte">
+      <h1 class="fr-h3 titre">
+        Préparez votre mobilité en <span>une seule démarche.</span>
       </h1>
-
-      <p class="hero__text">
+      <p class="fr-text--sm">
         Le Portail Habitat regroupe l'ensemble de vos démarches de déménagement,
-        de logement et d'accompagnement lors d'une mutation. Vous renseignez un
-        <strong>formulaire unique</strong> ; les services compétents du ministère
-        sont automatiquement saisis.
+        de logement et d'accompagnement lors d'une mutation.
+      </p>
+      <ul class="fr-btns-group fr-btns-group--inline fr-btns-group--center">
+        <li>
+          <a class="fr-btn" href="?id=x_snc_habitat_familles_mobilite">
+            Démarrer ma démarche de mobilité
+          </a>
+        </li>
+        <li>
+          <a class="fr-btn fr-btn--secondary" href="?id=x_snc_habitat_familles_suivi">
+            Suivre mes dossiers
+          </a>
+        </li>
+      </ul>
+    </div>
+
+  </section>
+
+
+  <!-- ===================== NOS SERVICES ===================== -->
+  <section class="fr-container fr-py-6w">
+
+    <h2 class="fr-h3 titre titre--centre">Nos <span>services</span></h2>
+
+    <div class="grille-3">
+
+      <!-- Tuile : Logement -->
+      <div>
+        <div class="fr-tile fr-tile--vertical fr-enlarge-link">
+          <div class="fr-tile__body">
+            <div class="fr-tile__content">
+              <p class="fr-badge fr-badge--sm fr-badge--purple-glycine fr-badge--no-icon fr-mb-1w">Plus proche</p>
+              <h3 class="fr-tile__title">
+                <a href="?id=x_snc_habitat_familles_logement">Logement</a>
+              </h3>
+              <p class="fr-tile__desc">Parc domanial, DTIE, BCC, DICOM…</p>
+              <p class="fr-tile__detail">Détail</p>
+            </div>
+          </div>
+          <div class="fr-tile__header">
+            <div class="fr-tile__pictogram">
+              <svg class="fr-artwork" viewBox="0 0 80 80" width="80" height="80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M68 13c-.5514 0-1-.4486-1-1s.4486-1 1-1 1 .4486 1 1-.4486 1-1 1ZM41 76c-.5514 0-1-.4486-1-1s.4486-1 1-1 1 .4486 1 1-.4486 1-1 1ZM15 10c-.5514 0-1-.4486-1-1s.4486-1 1-1 1 .4486 1 1-.4486 1-1 1Z" /></g>
+                <g class="fr-artwork-minor"><path d="M53 44c.5523 0 1 .4477 1 1v10c0 .5523-.4477 1-1 1H43c-.5523 0-1-.4477-1-1V45c0-.5523.4477-1 1-1Zm-6 7h-3v3h3v-3Zm5 0h-3v3h3v-3Zm-5-5h-3v3h3v-3Zm5 0h-3v3h3v-3Zm-7-14c.5523 0 1 .4477 1 1s-.4477 1-1 1H35c-.5523 0-1-.4477-1-1s.4477-1 1-1h10Z" /></g>
+                <g class="fr-artwork-major"><path d="M29 18c.5523 0 1 .4477 1 1s-.4477 1-1 1h-7v2h3c.5128 0 .9355.386.9933.8834L26 23c0 .5523-.4477 1-1 1h-1v2.722l15.5601-7.62.1077-.0453a.9899.9899 0 0 1 .332-.057.9936.9936 0 0 1 .2976.0454l.0136.0045.0212.007.1077.0453 24.5 12a1 1 0 0 1 .4705 1.3119l-2.5 5.5c-.2375.5225-.865.7383-1.3737.4724L60 37.583v4.8876c0 .5523-.4477 1-1 1s-1-.4477-1-1V36.649l-18-9.518-18 9.517V60h4V45c0-.5523.4477-1 1-1h10c.5523 0 1 .4477 1 1v15h11c.5523 0 1 .4477 1 1s-.4477 1-1 1H9c-.5523 0-1-.4477-1-1s.4477-1 1-1h3l.0003-2.0629C9.4143 57.5952 8 55.8685 8 53c0-2.8613 1.3748-6.9856 4.1056-12.4472l.0134-.0268.027-.047.036-.0545a.9497.9497 0 0 1 .0741-.0932.9717.9717 0 0 1 .1207-.1136l.0478-.0358.0534-.0359.0748-.0404.0118-.0058a.9768.9768 0 0 1 .0656-.029l.0203-.0078.0206-.0075a1.1595 1.1595 0 0 1 .1145-.0325l.0197-.004a.9768.9768 0 0 1 .1863-.0192h.0168a.9939.9939 0 0 1 .111.007l.0753.0123.0198.0041a.878.878 0 0 1 .0663.0169l.0239.0074.0237.008a1.0318 1.0318 0 0 1 .1072.0443l.0116.0058.0728.0404.0555.036a.9497.9497 0 0 1 .0932.0741.9717.9717 0 0 1 .1136.1207l.0358.0478.0349.0534.027.048.0144.0268C16.6252 46.0144 18 50.1388 18 53c0 2.8682-1.414 4.5948-3.9993 4.937L14 60h6V37.583l-1.5367.8032c-.5087.2659-1.1362.05-1.3737-.4724l-2.5-5.5a1 1 0 0 1 .4705-1.3119l7.1421-3.4988A.9956.9956 0 0 1 22 27v-3h-1c-.5523 0-1-.4477-1-1v-4c0-.5523.4477-1 1-1h8Zm36.059 28.0017a.9962.9962 0 0 1 .6481.2912C67.2487 47.8345 68 50.0884 68 53c0 2.5869-.6252 4.2985-1.999 4.8266L66 60h3c.5523 0 1 .4477 1 1s-.4477 1-1 1H55c-.5523 0-1-.4477-1-1s.4477-1 1-1h3V49c0-.5523.4477-1 1-1s1 .4477 1 1v11h4v-2.173c-1.3745-.5277-2-2.2395-2-4.827 0-2.9116.7513-5.1655 2.2929-6.7071a.9962.9962 0 0 1 .648-.2912h.1181ZM36 46h-8v14h8V46Zm29.0007 2.6123-.035.056C64.3274 49.7474 64 51.1836 64 53c0 2.1012.3766 2.9353.9325 2.9964L65 56l.0675-.0036C65.6234 55.9353 66 55.1012 66 53c0-1.8478-.3389-3.3023-.9993-4.3877ZM13 43.2933l-.1982.428C10.93 47.7945 10 50.9025 10 53c0 2.1144.8856 3 3 3l.2074-.003C15.1724 55.9396 16 55.044 16 53c0-2.1704-.9958-5.4226-3.0001-9.7067ZM33 50c.5523 0 1 .4477 1 1v2c0 .5523-.4477 1-1 1s-1-.4477-1-1v-2c0-.5523.4477-1 1-1Zm6.999-28.887L16.812 32.47l1.66 3.653 21.0647-11.0092.038-.019.0163-.0078.0128-.0052.0102-.0048.058-.0218a1.1536 1.1536 0 0 1 .0802-.0242l.0339-.0079a1.0048 1.0048 0 0 1 .0865-.0152l.0233-.0026a1.0007 1.0007 0 0 1 .0461-.0038l.016-.0008.0684-.0006.0236.001c.019.001.0381.0025.057.0045.004.0006.0086.001.0132.0016a.7857.7857 0 0 1 .0454.0063l.0272.0052.018.0035.014.0031c.0044.0013.0094.0025.0143.0037a.8034.8034 0 0 1 .0369.0096l.023.0072.029.0094.0682.0266.0178.0082.0173.0077.032.016L61.528 36.123l1.66-3.653-23.189-11.357Z" /></g>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tuile : Déménagement -->
+      <div>
+        <div class="fr-tile fr-tile--vertical fr-enlarge-link">
+          <div class="fr-tile__body">
+            <div class="fr-tile__content">
+              <p class="fr-badge fr-badge--sm fr-badge--purple-glycine fr-badge--no-icon fr-mb-1w">Plus efficace</p>
+              <h3 class="fr-tile__title">
+                <a href="?id=x_snc_habitat_familles_demenagement">Déménagement</a>
+              </h3>
+              <p class="fr-tile__desc">PFMD, mon déménageur, gardiennage…</p>
+              <p class="fr-tile__detail">Détail</p>
+            </div>
+          </div>
+          <div class="fr-tile__header">
+            <div class="fr-tile__pictogram">
+              <svg class="fr-artwork" viewBox="0 0 80 80" width="80" height="80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M21,76c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S21.5514,76,21,76z M77,24c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S77.5514,24,77,24z M47,2c-0.5514,0-1-0.4486-1-1c0-0.55145,0.4486-1,1-1s1,0.44855,1,1 C48,1.5514,47.5514,2,47,2z"/></g>
+                <g class="fr-artwork-minor"><path d="M17,28c0.5128,0,0.9355,0.386,0.9933,0.8834L18,29v4c0,0.5523-0.4477,1-1,1 c-0.5128,0-0.9355-0.386-0.9933-0.8834L16,33v-4C16,28.4477,16.4477,28,17,28z M17,46c0.5128,0,0.9355,0.386,0.9933,0.8834L18,47v10 c0,0.5523-0.4477,1-1,1c-0.5128,0-0.9355-0.386-0.9933-0.8834L16,57V47C16,46.4477,16.4477,46,17,46z M23.9933,28.8834 C23.9355,28.386,23.5128,28,23,28c-0.5523,0-1,0.4477-1,1v28l0.0067,0.1166C22.0645,57.614,22.4872,58,23,58c0.5523,0,1-0.4477,1-1 V29L23.9933,28.8834z M29,28c0.5128,0,0.9355,0.386,0.9933,0.8834L30,29v2c0,0.5523-0.4477,1-1,1 c-0.5128,0-0.9355-0.386-0.9933-0.8834L28,31v-2C28,28.4477,28.4477,28,29,28z M35.9933,28.8834C35.9355,28.386,35.5128,28,35,28 c-0.5523,0-1,0.4477-1,1v2l0.0067,0.1166C34.0645,31.614,34.4872,32,35,32c0.5523,0,1-0.4477,1-1v-2L35.9933,28.8834z"/></g>
+                <g class="fr-artwork-major"><path d="M50.4472,46.10559l-8-4c-0.5722-0.28607-1.26221,0.03119-1.4173,0.65192l-2,8 c-0.19788,0.79138,0.58411,1.47388,1.34149,1.17102l10-4C51.17249,47.60797,51.21899,46.49152,50.4472,46.10559z M41.44403,49.34399 l1.224-4.89197L47.56,46.89801L41.44403,49.34399z M56,48c-2.76141,0-5,2.23859-5,5s2.23859,5,5,5s5-2.23859,5-5S58.76141,48,56,48z M56,56c-1.65692,0-3-1.34308-3-3s1.34308-3,3-3c1.6568,0,3,1.34308,3,3S57.6568,56,56,56z M67,34h-7v-5l-0.00513-0.17633 C59.90369,27.2489,58.59772,26,57,26H45l-0.17627,0.00513C43.2489,26.09631,42,27.40228,42,29v5h-9c-2.76141,0-5,2.23859-5,5v20 c0,2.76141,2.23859,5,5,5h1.17072C34.06018,64.31281,34,64.64941,34,65c0,1.65692,1.34308,3,3,3s3-1.34308,3-3 c0-0.35059-0.06018-0.68719-0.17072-1h20.34143C60.06018,64.31281,60,64.64941,60,65c0,1.65692,1.34308,3,3,3 c1.6568,0,3-1.34308,3-3c0-0.35059-0.06018-0.68719-0.17072-1H67c2.76141,0,5-2.23859,5-5V39C72,36.23859,69.76141,34,67,34z M44,29 l0.00671-0.11658C44.06451,28.38599,44.48718,28,45,28h12l0.11658,0.00671C57.61401,28.06451,58,28.48718,58,29v5h-2v-3 l-0.00671-0.11658C55.93549,30.38599,55.51282,30,55,30h-8l-0.11658,0.00671C46.38599,30.06451,46,30.48718,46,31v3h-2V29z M54,32v2 h-6v-2H54z M30,39c0-1.65692,1.34308-3,3-3h1v4h-4V39z M34,62h-1c-1.65692,0-3-1.34308-3-3v-1h4V62z M37,66 c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S37.55231,66,37,66z M63,66c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1 s1,0.44769,1,1S63.55231,66,63,66z M70,59c0,1.65692-1.3432,3-3,3h-1v-4h4V59z M70,56h-5l-0.11658,0.00671 C64.38599,56.06451,64,56.48718,64,57v5H36v-5l-0.00671-0.11658C35.93549,56.38599,35.51282,56,35,56h-5V42h5l0.11658-0.00671 C35.61401,41.93549,36,41.51282,36,41v-5h28v5l0.00671,0.11658C64.06451,41.61401,64.48718,42,65,42h5V56z M70,40h-4v-4h1 c1.6568,0,3,1.34308,3,3V40z M23,62h-8l-0.17627-0.00513C13.2489,61.90369,12,60.59772,12,59V44.69299l7.35107-2.75671 l0.10712-0.0473c0.48022-0.24646,0.68402-0.84058,0.43622-1.33618l-2-4l-0.06152-0.10638 c-0.2467-0.37183-0.71637-0.53931-1.14911-0.39514L12,37.61261V27l0.00513-0.17633C12.09631,25.2489,13.40228,24,15,24h24 l0.11658-0.00671C39.61401,23.93549,40,23.51282,40,23c0-0.55231-0.44769-1-1-1h-9v-6h1c1.65692,0,3-1.34308,3-3s-1.34308-3-3-3H19 c-1.65692,0-3,1.34308-3,3s1.34308,3,3,3h1v6h-5l-0.21692,0.00458C12.12231,22.11823,10,24.31122,10,27v11.97668 c-0.00037,0.01544-0.00037,0.03088,0,0.04639v4.95392c-0.00037,0.01538-0.00037,0.03088,0,0.04633V59l0.00458,0.21692 c0.10205,2.3894,1.88092,4.34448,4.18982,4.71851C14.06879,64.2663,14,64.62512,14,65c0,1.65692,1.34308,3,3,3s3-1.34308,3-3 c0-0.35059-0.06018-0.68719-0.17072-1H23l0.11658-0.00671C23.61401,63.93549,24,63.51282,24,63C24,62.44769,23.55231,62,23,62z M28,22h-6v-6h6V22z M19,14c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1h12c0.55231,0,1,0.44769,1,1s-0.44769,1-1,1H19z M12,39.72058 l4.49298-1.4986l1.11499,2.23102L12,42.55682V39.72058z M17,66c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1 S17.55231,66,17,66z"/></g>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tuile : Prestations familles -->
+      <div>
+        <div class="fr-tile fr-tile--vertical fr-enlarge-link">
+          <div class="fr-tile__body">
+            <div class="fr-tile__content">
+              <p class="fr-badge fr-badge--sm fr-badge--purple-glycine fr-badge--no-icon fr-mb-1w">Plus humain</p>
+              <h3 class="fr-tile__title">
+                <a href="?id=x_snc_habitat_familles_prestations">Prestations familles</a>
+              </h3>
+              <p class="fr-tile__desc">Défense mobilité, administratif, visas…</p>
+              <p class="fr-tile__detail">Détail</p>
+            </div>
+          </div>
+          <div class="fr-tile__header">
+            <div class="fr-tile__pictogram">
+              <svg class="fr-artwork" viewBox="0 0 80 80" width="80" height="80" aria-hidden="true">
+                <g class="fr-artwork-decorative"><path d="M59,76c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S59.5514,76,59,76z M67,12c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S67.5514,12,67,12z M9,16c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S9.5514,16,9,16z"/></g>
+                <g class="fr-artwork-minor"><path d="M37,23c0,0.51282-0.38599,0.93549-0.88342,0.99329L36,24H24c-0.55231,0-1-0.44769-1-1 c0-0.51282,0.38599-0.93549,0.88342-0.99329L24,22h12C36.55231,22,37,22.44769,37,23z M40,46c0.55231,0,1-0.44769,1-1 s-0.44769-1-1-1l-0.09412-0.00342c-0.11938-0.00879-0.22668-0.0354-0.32196-0.08319C40.40363,43.66357,41,42.90149,41,42 c0-1.10461-0.89539-2-2-2s-2,0.89539-2,2C37,44.487,38.00861,46,40,46z M46,46c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1 l-0.09412-0.00342c-0.11938-0.00879-0.22668-0.0354-0.32196-0.08319C46.40363,43.66357,47,42.90149,47,42c0-1.10461-0.89539-2-2-2 s-2,0.89539-2,2C43,44.487,44.00861,46,46,46z M34,26H24l-0.11658,0.00671C23.38599,26.06451,23,26.48718,23,27 c0,0.55231,0.44769,1,1,1h10l0.11658-0.00671C34.61401,27.93549,35,27.51282,35,27C35,26.44769,34.55231,26,34,26z M30,30h-6 l-0.11658,0.00671C23.38599,30.06451,23,30.48718,23,31c0,0.55231,0.44769,1,1,1h6l0.11658-0.00671 C30.61401,31.93549,31,31.51282,31,31C31,30.44769,30.55231,30,30,30z M56,50H38l-0.11658,0.00671 C37.38599,50.06451,37,50.48718,37,51c0,0.55231,0.44769,1,1,1h18l0.11658-0.00671C56.61401,51.93549,57,51.51282,57,51 C57,50.44769,56.55231,50,56,50z M52,54H38l-0.11658,0.00671C37.38599,54.06451,37,54.48718,37,55c0,0.55231,0.44769,1,1,1h14 l0.11658-0.00671C52.61401,55.93549,53,55.51282,53,55C53,54.44769,52.55231,54,52,54z"/></g>
+                <g class="fr-artwork-major"><path d="M23,45c0,0.51282-0.38599,0.93549-0.88342,0.99329L22,46h-8c-0.79138,0-1.2547-0.86652-0.8562-1.51727 l0.06281-0.09143l4.6134-6.01331l-0.05652-0.08362c-1.71271-2.61768-2.67731-5.66528-2.758-8.85809L15,29 c0-9.38879,7.61121-17,17-17c6.85413,0,12.2879,4.05713,14.92792,10.6272c0.20587,0.51239-0.0426,1.09479-0.55511,1.30072 c-0.51239,0.20587-1.09479-0.0426-1.30072-0.55511C42.72382,17.52869,37.99768,14,32,14c-8.2843,0-15,6.7157-15,15 c0,3.21582,1.01331,6.27618,2.86572,8.82007c0.23486,0.32251,0.25336,0.74951,0.05811,1.08813l-0.07312,0.10931L16.02698,44H22 c0.51282,0,0.93549,0.38599,0.99329,0.88342L23,45z M62.83209,60.44531l-0.07031-0.09332 c-0.32397-0.38177-0.88977-0.46851-1.31647-0.18408l-0.09332,0.07031c-0.38177,0.32397-0.46851,0.88977-0.18408,1.31647L64.13098,66 H47l-0.33069-0.00299C36.8808,65.82068,29,57.83069,29,48c0-9.9411,8.0589-18,18-18s18,8.0589,18,18 c0,2.81952-0.64807,5.54437-1.87659,8.01172c-0.24622,0.49438-0.04498,1.09467,0.4494,1.34088s1.09479,0.04492,1.34088-0.4494 C66.27942,54.1604,67,51.13062,67,48c0-11.04572-8.95428-20-20-20s-20,8.95428-20,20s8.95428,20,20,20h19l0.11182-0.00592 c0.73016-0.07837,1.14221-0.91589,0.72028-1.54877L62.83209,60.44531z M56,20c0.55139,0,1-0.44861,1-1s-0.44861-1-1-1 s-1,0.44861-1,1S55.44861,20,56,20z M60,20c0.55139,0,1-0.44861,1-1s-0.44861-1-1-1s-1,0.44861-1,1S59.44861,20,60,20z M64,20 c0.55139,0,1-0.44861,1-1s-0.44861-1-1-1s-1,0.44861-1,1S63.44861,20,64,20z M69,15v8c0,0.55231-0.44769,1-1,1h-3v3 c0,0.85217-0.98547,1.29742-1.6225,0.7832l-0.08459-0.07611L59.58502,24H52c-0.51282,0-0.93549-0.38599-0.99329-0.88342L51,23v-8 c0-0.55231,0.44769-1,1-1h16C68.55231,14,69,14.44769,69,15z M67,16H53v6h7c0.22101,0,0.43451,0.07318,0.60803,0.20612 l0.09906,0.08679L63,24.58502V23c0-0.51282,0.38599-0.93549,0.88342-0.99329L64,22h3V16z M16,58h-4l-0.11658,0.00671 C11.38599,58.06451,11,58.48718,11,59c0,0.55231,0.44769,1,1,1h4l0.11658-0.00671C16.61401,59.93549,17,59.51282,17,59 C17,58.44769,16.55231,58,16,58z M20,58c-0.55139,0-1,0.44861-1,1s0.44861,1,1,1s1-0.44861,1-1S20.55139,58,20,58z M24,58 c-0.55139,0-1,0.44861-1,1s0.44861,1,1,1s1-0.44861,1-1S24.55139,58,24,58z"/></g>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ===================== SIMULATEUR CIMOB ===================== -->
+  <section class="simulateur fr-py-6w">
+    <div class="fr-container">
+
+      <h2 class="fr-h3 titre titre--centre">Votre mutation se prépare <span>ici</span></h2>
+
+      <!-- Les 4 étapes de la simulation : le véhicule est animé par le Client Script -->
+      <div class="piste">
+
+        <div class="piste__ligne" aria-hidden="true"></div>
+        <div class="piste__progression" aria-hidden="true"></div>
+
+        <ol class="piste__etapes" aria-hidden="true">
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+          <li>4</li>
+        </ol>
+
+        <div class="vehicule" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M10 30v6h5a4 4 0 0 0 8 0h6a4 4 0 0 0 8 0h5v-8l-5-2-4-8H17l-5 8-2 4zm9-10h7v6h-9zm9 0h6l3 6h-9z"/></svg>
+          <svg viewBox="0 0 48 48"><path d="M8 34h32v-3h-2l-3-6V17a6 6 0 0 0-6-6H14a6 6 0 0 0-6 6v14zm4-16a2 2 0 0 1 2-2h7v7h-9zm12-2h5a3 3 0 0 1 3 3v4h-8zM12 27h24v2H12zM10 40l3-4h22l3 4z"/></svg>
+          <svg viewBox="0 0 48 48"><path d="M42 25c-1-2-4-2-7-1l-7 2-13-9-4 1 9 10-8 2-5-3-3 1 5 6 5 3 26-8c2-1 3-2 2-4zM8 38h30v3H8z"/></svg>
+        </div>
+
+      </div>
+
+      <p class="simulateur__texte">
+        En deux clics, découvrez toutes les offres de service auxquelles
+        vous êtes éligible pour votre prochaine affectation.
       </p>
 
-      <div class="hero__actions">
-        <a href="?id=x_snc_habitat_familles_mobilite" class="btn-primary">
-          + Démarrer ma démarche de mobilité
-          <svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
-        </a>
-        <a href="?id=x_snc_habitat_familles_suivi" class="btn-secondary">
-          Suivre mes dossiers
-        </a>
-      </div>
-    </div>
+      <!-- Les 3 familles d'offres reliées au bouton central -->
+      <div class="simulateur__schema">
 
+        <!-- Traits pointillés (décoratifs) -->
+        <svg class="simulateur__liens" viewBox="0 0 916 328" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+          <path d="M172 60 L356 144"/>
+          <path d="M744 60 L560 144"/>
+        </svg>
+
+        <div class="simulateur__famille simulateur__famille--gauche">
+          <span class="simulateur__rond">
+            <svg class="fr-artwork" viewBox="0 0 80 80" width="80" height="80" aria-hidden="true">
+              <g class="fr-artwork-decorative"><path d="M59,76c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S59.5514,76,59,76z M67,12c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S67.5514,12,67,12z M9,16c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S9.5514,16,9,16z"/></g>
+              <g class="fr-artwork-minor"><path d="M37,23c0,0.51282-0.38599,0.93549-0.88342,0.99329L36,24H24c-0.55231,0-1-0.44769-1-1 c0-0.51282,0.38599-0.93549,0.88342-0.99329L24,22h12C36.55231,22,37,22.44769,37,23z M40,46c0.55231,0,1-0.44769,1-1 s-0.44769-1-1-1l-0.09412-0.00342c-0.11938-0.00879-0.22668-0.0354-0.32196-0.08319C40.40363,43.66357,41,42.90149,41,42 c0-1.10461-0.89539-2-2-2s-2,0.89539-2,2C37,44.487,38.00861,46,40,46z M46,46c0.55231,0,1-0.44769,1-1s-0.44769-1-1-1 l-0.09412-0.00342c-0.11938-0.00879-0.22668-0.0354-0.32196-0.08319C46.40363,43.66357,47,42.90149,47,42c0-1.10461-0.89539-2-2-2 s-2,0.89539-2,2C43,44.487,44.00861,46,46,46z M34,26H24l-0.11658,0.00671C23.38599,26.06451,23,26.48718,23,27 c0,0.55231,0.44769,1,1,1h10l0.11658-0.00671C34.61401,27.93549,35,27.51282,35,27C35,26.44769,34.55231,26,34,26z M30,30h-6 l-0.11658,0.00671C23.38599,30.06451,23,30.48718,23,31c0,0.55231,0.44769,1,1,1h6l0.11658-0.00671 C30.61401,31.93549,31,31.51282,31,31C31,30.44769,30.55231,30,30,30z M56,50H38l-0.11658,0.00671 C37.38599,50.06451,37,50.48718,37,51c0,0.55231,0.44769,1,1,1h18l0.11658-0.00671C56.61401,51.93549,57,51.51282,57,51 C57,50.44769,56.55231,50,56,50z M52,54H38l-0.11658,0.00671C37.38599,54.06451,37,54.48718,37,55c0,0.55231,0.44769,1,1,1h14 l0.11658-0.00671C52.61401,55.93549,53,55.51282,53,55C53,54.44769,52.55231,54,52,54z"/></g>
+              <g class="fr-artwork-major"><path d="M23,45c0,0.51282-0.38599,0.93549-0.88342,0.99329L22,46h-8c-0.79138,0-1.2547-0.86652-0.8562-1.51727 l0.06281-0.09143l4.6134-6.01331l-0.05652-0.08362c-1.71271-2.61768-2.67731-5.66528-2.758-8.85809L15,29 c0-9.38879,7.61121-17,17-17c6.85413,0,12.2879,4.05713,14.92792,10.6272c0.20587,0.51239-0.0426,1.09479-0.55511,1.30072 c-0.51239,0.20587-1.09479-0.0426-1.30072-0.55511C42.72382,17.52869,37.99768,14,32,14c-8.2843,0-15,6.7157-15,15 c0,3.21582,1.01331,6.27618,2.86572,8.82007c0.23486,0.32251,0.25336,0.74951,0.05811,1.08813l-0.07312,0.10931L16.02698,44H22 c0.51282,0,0.93549,0.38599,0.99329,0.88342L23,45z M62.83209,60.44531l-0.07031-0.09332 c-0.32397-0.38177-0.88977-0.46851-1.31647-0.18408l-0.09332,0.07031c-0.38177,0.32397-0.46851,0.88977-0.18408,1.31647L64.13098,66 H47l-0.33069-0.00299C36.8808,65.82068,29,57.83069,29,48c0-9.9411,8.0589-18,18-18s18,8.0589,18,18 c0,2.81952-0.64807,5.54437-1.87659,8.01172c-0.24622,0.49438-0.04498,1.09467,0.4494,1.34088s1.09479,0.04492,1.34088-0.4494 C66.27942,54.1604,67,51.13062,67,48c0-11.04572-8.95428-20-20-20s-20,8.95428-20,20s8.95428,20,20,20h19l0.11182-0.00592 c0.73016-0.07837,1.14221-0.91589,0.72028-1.54877L62.83209,60.44531z M56,20c0.55139,0,1-0.44861,1-1s-0.44861-1-1-1 s-1,0.44861-1,1S55.44861,20,56,20z M60,20c0.55139,0,1-0.44861,1-1s-0.44861-1-1-1s-1,0.44861-1,1S59.44861,20,60,20z M64,20 c0.55139,0,1-0.44861,1-1s-0.44861-1-1-1s-1,0.44861-1,1S63.44861,20,64,20z M69,15v8c0,0.55231-0.44769,1-1,1h-3v3 c0,0.85217-0.98547,1.29742-1.6225,0.7832l-0.08459-0.07611L59.58502,24H52c-0.51282,0-0.93549-0.38599-0.99329-0.88342L51,23v-8 c0-0.55231,0.44769-1,1-1h16C68.55231,14,69,14.44769,69,15z M67,16H53v6h7c0.22101,0,0.43451,0.07318,0.60803,0.20612 l0.09906,0.08679L63,24.58502V23c0-0.51282,0.38599-0.93549,0.88342-0.99329L64,22h3V16z M16,58h-4l-0.11658,0.00671 C11.38599,58.06451,11,58.48718,11,59c0,0.55231,0.44769,1,1,1h4l0.11658-0.00671C16.61401,59.93549,17,59.51282,17,59 C17,58.44769,16.55231,58,16,58z M20,58c-0.55139,0-1,0.44861-1,1s0.44861,1,1,1s1-0.44861,1-1S20.55139,58,20,58z M24,58 c-0.55139,0-1,0.44861-1,1s0.44861,1,1,1s1-0.44861,1-1S24.55139,58,24,58z"/></g>
+            </svg>
+          </span>
+          <span class="simulateur__nom">Prestation famille</span>
+        </div>
+
+        <button type="button" class="fr-btn simulateur__bouton"
+                onclick="window.location.href='?id=x_snc_habitat_familles_simulateur'">
+          Lancer la simulation
+        </button>
+
+        <div class="simulateur__famille simulateur__famille--droite">
+          <span class="simulateur__rond">
+            <svg class="fr-artwork" viewBox="0 0 80 80" width="80" height="80" aria-hidden="true">
+              <g class="fr-artwork-decorative"><path d="M68 13c-.5514 0-1-.4486-1-1s.4486-1 1-1 1 .4486 1 1-.4486 1-1 1ZM41 76c-.5514 0-1-.4486-1-1s.4486-1 1-1 1 .4486 1 1-.4486 1-1 1ZM15 10c-.5514 0-1-.4486-1-1s.4486-1 1-1 1 .4486 1 1-.4486 1-1 1Z" /></g>
+              <g class="fr-artwork-minor"><path d="M53 44c.5523 0 1 .4477 1 1v10c0 .5523-.4477 1-1 1H43c-.5523 0-1-.4477-1-1V45c0-.5523.4477-1 1-1Zm-6 7h-3v3h3v-3Zm5 0h-3v3h3v-3Zm-5-5h-3v3h3v-3Zm5 0h-3v3h3v-3Zm-7-14c.5523 0 1 .4477 1 1s-.4477 1-1 1H35c-.5523 0-1-.4477-1-1s.4477-1 1-1h10Z" /></g>
+              <g class="fr-artwork-major"><path d="M29 18c.5523 0 1 .4477 1 1s-.4477 1-1 1h-7v2h3c.5128 0 .9355.386.9933.8834L26 23c0 .5523-.4477 1-1 1h-1v2.722l15.5601-7.62.1077-.0453a.9899.9899 0 0 1 .332-.057.9936.9936 0 0 1 .2976.0454l.0136.0045.0212.007.1077.0453 24.5 12a1 1 0 0 1 .4705 1.3119l-2.5 5.5c-.2375.5225-.865.7383-1.3737.4724L60 37.583v4.8876c0 .5523-.4477 1-1 1s-1-.4477-1-1V36.649l-18-9.518-18 9.517V60h4V45c0-.5523.4477-1 1-1h10c.5523 0 1 .4477 1 1v15h11c.5523 0 1 .4477 1 1s-.4477 1-1 1H9c-.5523 0-1-.4477-1-1s.4477-1 1-1h3l.0003-2.0629C9.4143 57.5952 8 55.8685 8 53c0-2.8613 1.3748-6.9856 4.1056-12.4472l.0134-.0268.027-.047.036-.0545a.9497.9497 0 0 1 .0741-.0932.9717.9717 0 0 1 .1207-.1136l.0478-.0358.0534-.0359.0748-.0404.0118-.0058a.9768.9768 0 0 1 .0656-.029l.0203-.0078.0206-.0075a1.1595 1.1595 0 0 1 .1145-.0325l.0197-.004a.9768.9768 0 0 1 .1863-.0192h.0168a.9939.9939 0 0 1 .111.007l.0753.0123.0198.0041a.878.878 0 0 1 .0663.0169l.0239.0074.0237.008a1.0318 1.0318 0 0 1 .1072.0443l.0116.0058.0728.0404.0555.036a.9497.9497 0 0 1 .0932.0741.9717.9717 0 0 1 .1136.1207l.0358.0478.0349.0534.027.048.0144.0268C16.6252 46.0144 18 50.1388 18 53c0 2.8682-1.414 4.5948-3.9993 4.937L14 60h6V37.583l-1.5367.8032c-.5087.2659-1.1362.05-1.3737-.4724l-2.5-5.5a1 1 0 0 1 .4705-1.3119l7.1421-3.4988A.9956.9956 0 0 1 22 27v-3h-1c-.5523 0-1-.4477-1-1v-4c0-.5523.4477-1 1-1h8Zm36.059 28.0017a.9962.9962 0 0 1 .6481.2912C67.2487 47.8345 68 50.0884 68 53c0 2.5869-.6252 4.2985-1.999 4.8266L66 60h3c.5523 0 1 .4477 1 1s-.4477 1-1 1H55c-.5523 0-1-.4477-1-1s.4477-1 1-1h3V49c0-.5523.4477-1 1-1s1 .4477 1 1v11h4v-2.173c-1.3745-.5277-2-2.2395-2-4.827 0-2.9116.7513-5.1655 2.2929-6.7071a.9962.9962 0 0 1 .648-.2912h.1181ZM36 46h-8v14h8V46Zm29.0007 2.6123-.035.056C64.3274 49.7474 64 51.1836 64 53c0 2.1012.3766 2.9353.9325 2.9964L65 56l.0675-.0036C65.6234 55.9353 66 55.1012 66 53c0-1.8478-.3389-3.3023-.9993-4.3877ZM13 43.2933l-.1982.428C10.93 47.7945 10 50.9025 10 53c0 2.1144.8856 3 3 3l.2074-.003C15.1724 55.9396 16 55.044 16 53c0-2.1704-.9958-5.4226-3.0001-9.7067ZM33 50c.5523 0 1 .4477 1 1v2c0 .5523-.4477 1-1 1s-1-.4477-1-1v-2c0-.5523.4477-1 1-1Zm6.999-28.887L16.812 32.47l1.66 3.653 21.0647-11.0092.038-.019.0163-.0078.0128-.0052.0102-.0048.058-.0218a1.1536 1.1536 0 0 1 .0802-.0242l.0339-.0079a1.0048 1.0048 0 0 1 .0865-.0152l.0233-.0026a1.0007 1.0007 0 0 1 .0461-.0038l.016-.0008.0684-.0006.0236.001c.019.001.0381.0025.057.0045.004.0006.0086.001.0132.0016a.7857.7857 0 0 1 .0454.0063l.0272.0052.018.0035.014.0031c.0044.0013.0094.0025.0143.0037a.8034.8034 0 0 1 .0369.0096l.023.0072.029.0094.0682.0266.0178.0082.0173.0077.032.016L61.528 36.123l1.66-3.653-23.189-11.357Z" /></g>
+            </svg>
+          </span>
+          <span class="simulateur__nom">Habitat</span>
+        </div>
+
+        <div class="simulateur__famille simulateur__famille--bas">
+          <span class="simulateur__rond">
+            <svg class="fr-artwork" viewBox="0 0 80 80" width="80" height="80" aria-hidden="true">
+              <g class="fr-artwork-decorative"><path d="M21,76c-0.5514,0-1-0.4486-1-1s0.4486-1,1-1s1,0.4486,1,1S21.5514,76,21,76z M77,24c-0.5514,0-1-0.4486-1-1 s0.4486-1,1-1s1,0.4486,1,1S77.5514,24,77,24z M47,2c-0.5514,0-1-0.4486-1-1c0-0.55145,0.4486-1,1-1s1,0.44855,1,1 C48,1.5514,47.5514,2,47,2z"/></g>
+              <g class="fr-artwork-minor"><path d="M17,28c0.5128,0,0.9355,0.386,0.9933,0.8834L18,29v4c0,0.5523-0.4477,1-1,1 c-0.5128,0-0.9355-0.386-0.9933-0.8834L16,33v-4C16,28.4477,16.4477,28,17,28z M17,46c0.5128,0,0.9355,0.386,0.9933,0.8834L18,47v10 c0,0.5523-0.4477,1-1,1c-0.5128,0-0.9355-0.386-0.9933-0.8834L16,57V47C16,46.4477,16.4477,46,17,46z M23.9933,28.8834 C23.9355,28.386,23.5128,28,23,28c-0.5523,0-1,0.4477-1,1v28l0.0067,0.1166C22.0645,57.614,22.4872,58,23,58c0.5523,0,1-0.4477,1-1 V29L23.9933,28.8834z M29,28c0.5128,0,0.9355,0.386,0.9933,0.8834L30,29v2c0,0.5523-0.4477,1-1,1 c-0.5128,0-0.9355-0.386-0.9933-0.8834L28,31v-2C28,28.4477,28.4477,28,29,28z M35.9933,28.8834C35.9355,28.386,35.5128,28,35,28 c-0.5523,0-1,0.4477-1,1v2l0.0067,0.1166C34.0645,31.614,34.4872,32,35,32c0.5523,0,1-0.4477,1-1v-2L35.9933,28.8834z"/></g>
+              <g class="fr-artwork-major"><path d="M50.4472,46.10559l-8-4c-0.5722-0.28607-1.26221,0.03119-1.4173,0.65192l-2,8 c-0.19788,0.79138,0.58411,1.47388,1.34149,1.17102l10-4C51.17249,47.60797,51.21899,46.49152,50.4472,46.10559z M41.44403,49.34399 l1.224-4.89197L47.56,46.89801L41.44403,49.34399z M56,48c-2.76141,0-5,2.23859-5,5s2.23859,5,5,5s5-2.23859,5-5S58.76141,48,56,48z M56,56c-1.65692,0-3-1.34308-3-3s1.34308-3,3-3c1.6568,0,3,1.34308,3,3S57.6568,56,56,56z M67,34h-7v-5l-0.00513-0.17633 C59.90369,27.2489,58.59772,26,57,26H45l-0.17627,0.00513C43.2489,26.09631,42,27.40228,42,29v5h-9c-2.76141,0-5,2.23859-5,5v20 c0,2.76141,2.23859,5,5,5h1.17072C34.06018,64.31281,34,64.64941,34,65c0,1.65692,1.34308,3,3,3s3-1.34308,3-3 c0-0.35059-0.06018-0.68719-0.17072-1h20.34143C60.06018,64.31281,60,64.64941,60,65c0,1.65692,1.34308,3,3,3 c1.6568,0,3-1.34308,3-3c0-0.35059-0.06018-0.68719-0.17072-1H67c2.76141,0,5-2.23859,5-5V39C72,36.23859,69.76141,34,67,34z M44,29 l0.00671-0.11658C44.06451,28.38599,44.48718,28,45,28h12l0.11658,0.00671C57.61401,28.06451,58,28.48718,58,29v5h-2v-3 l-0.00671-0.11658C55.93549,30.38599,55.51282,30,55,30h-8l-0.11658,0.00671C46.38599,30.06451,46,30.48718,46,31v3h-2V29z M54,32v2 h-6v-2H54z M30,39c0-1.65692,1.34308-3,3-3h1v4h-4V39z M34,62h-1c-1.65692,0-3-1.34308-3-3v-1h4V62z M37,66 c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1S37.55231,66,37,66z M63,66c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1 s1,0.44769,1,1S63.55231,66,63,66z M70,59c0,1.65692-1.3432,3-3,3h-1v-4h4V59z M70,56h-5l-0.11658,0.00671 C64.38599,56.06451,64,56.48718,64,57v5H36v-5l-0.00671-0.11658C35.93549,56.38599,35.51282,56,35,56h-5V42h5l0.11658-0.00671 C35.61401,41.93549,36,41.51282,36,41v-5h28v5l0.00671,0.11658C64.06451,41.61401,64.48718,42,65,42h5V56z M70,40h-4v-4h1 c1.6568,0,3,1.34308,3,3V40z M23,62h-8l-0.17627-0.00513C13.2489,61.90369,12,60.59772,12,59V44.69299l7.35107-2.75671 l0.10712-0.0473c0.48022-0.24646,0.68402-0.84058,0.43622-1.33618l-2-4l-0.06152-0.10638 c-0.2467-0.37183-0.71637-0.53931-1.14911-0.39514L12,37.61261V27l0.00513-0.17633C12.09631,25.2489,13.40228,24,15,24h24 l0.11658-0.00671C39.61401,23.93549,40,23.51282,40,23c0-0.55231-0.44769-1-1-1h-9v-6h1c1.65692,0,3-1.34308,3-3s-1.34308-3-3-3H19 c-1.65692,0-3,1.34308-3,3s1.34308,3,3,3h1v6h-5l-0.21692,0.00458C12.12231,22.11823,10,24.31122,10,27v11.97668 c-0.00037,0.01544-0.00037,0.03088,0,0.04639v4.95392c-0.00037,0.01538-0.00037,0.03088,0,0.04633V59l0.00458,0.21692 c0.10205,2.3894,1.88092,4.34448,4.18982,4.71851C14.06879,64.2663,14,64.62512,14,65c0,1.65692,1.34308,3,3,3s3-1.34308,3-3 c0-0.35059-0.06018-0.68719-0.17072-1H23l0.11658-0.00671C23.61401,63.93549,24,63.51282,24,63C24,62.44769,23.55231,62,23,62z M28,22h-6v-6h6V22z M19,14c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1h12c0.55231,0,1,0.44769,1,1s-0.44769,1-1,1H19z M12,39.72058 l4.49298-1.4986l1.11499,2.23102L12,42.55682V39.72058z M17,66c-0.55231,0-1-0.44769-1-1s0.44769-1,1-1s1,0.44769,1,1 S17.55231,66,17,66z"/></g>
+            </svg>
+          </span>
+          <span class="simulateur__nom">Déménagement</span>
+        </div>
+
+      </div>
+
+    </div>
   </section>
 
 
-  <!-- Simulateur CIMob -->
-  <section class="sim-intro">
+  <!-- ===================== ACTUALITÉS ===================== -->
+  <section class="fr-container fr-py-6w">
 
-    <!-- Trajet animé -->
-    <div class="sim-route" aria-hidden="true">
-      <span class="sim-route__dot"></span>
-      <span class="sim-route__line"></span>
-      <span class="sim-route__plane">
-        <svg viewBox="0 0 24 24">
-          <path d="M12 2 L14 9 L21 11.5 L21 13 L14 12 L13.5 18 L16 20 L16 21.5 L12 20.5 L8 21.5 L8 20 L10.5 18 L10 12 L3 13 L3 11.5 L10 9 Z"/>
-        </svg>
-      </span>
-      <span class="sim-route__dot sim-route__dot--end"></span>
-    </div>
+    <h2 class="fr-h3 titre titre--centre">Découvrez les <span>actualités</span></h2>
 
-    <p class="sim-kicker">Mobilité &middot; CIMob</p>
-    <h2 class="sim-title">Votre mutation se prépare <span>ici</span></h2>
-    <p class="sim-text">
-      En deux clics, découvrez toutes les offres de service auxquelles
-      vous êtes éligible pour votre prochaine affectation.
+    <p class="actualites__lien">
+      <a class="fr-link" href="?id=x_snc_habitat_familles_actualites">
+        <svg class="fleche" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"/></svg>
+        Toute l'actualité
+      </a>
     </p>
 
-    <!-- Les 3 familles d'offres -->
-    <div class="sim-cards">
-
-      <div class="sim-card">
-        <span class="sim-card__icon sim-card__icon--vert">
-          <svg viewBox="0 0 24 24">
-            <path d="M3.5 11 12 3.5 20.5 11M6 9.5V20a.8.8 0 0 0 .8.8h10.4a.8.8 0 0 0 .8-.8V9.5M10 20.5v-6h4v6"/>
-          </svg>
-        </span>
-        <p class="sim-card__title">Logement</p>
-        <p class="sim-card__text">Parc domanial, DTIE, BCC, DICOM…</p>
-      </div>
-
-      <div class="sim-card">
-        <span class="sim-card__icon sim-card__icon--bleu">
-          <svg viewBox="0 0 24 24">
-            <path d="M2.5 6h11v10h-11zM13.5 9.5H18l3.5 3.5v3h-8"/>
-            <circle cx="7" cy="17.5" r="1.8"/>
-            <circle cx="17" cy="17.5" r="1.8"/>
-          </svg>
-        </span>
-        <p class="sim-card__title">Déménagement</p>
-        <p class="sim-card__text">PFMD, mon déménageur, gardiennage…</p>
-      </div>
-
-      <div class="sim-card">
-        <span class="sim-card__icon sim-card__icon--rose">
-          <svg viewBox="0 0 24 24">
-            <circle cx="9" cy="8.5" r="3"/>
-            <path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/>
-            <circle cx="17" cy="9.5" r="2.3"/>
-            <path d="M16.5 14.7c2.3.3 4 2 4 4.3"/>
-          </svg>
-        </span>
-        <p class="sim-card__title">Accompagnement</p>
-        <p class="sim-card__text">Défense mobilité, administratif, visas…</p>
-      </div>
-
-    </div>
-
-    <button type="button" class="sim-button"
-            onclick="window.location.href='?id=x_snc_habitat_familles_simulateur'">
-      Lancer la simulation
-      <svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
-    </button>
-
-   
-
-  </section>
-
-
-  <!-- Actualités -->  <section class="news">
-
-    <div class="news__head">
-      <div>
-        <p class="news__label">Ce qui bouge</p>
-        <h2 class="news__title">Actualités du <span>logement</span></h2>
-      </div>
-      <a href="?id=x_snc_habitat_familles_actualites" class="news__all">
-        Voir tout
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
-    </div>
-
-    <div class="news__grid">
-
-      <!-- Actualité à la une -->
-      <a href="?id=x_snc_habitat_familles_actualite" class="news-main">
-        <div class="news-main__image"></div>
-        <div class="news-main__body">
-          <span class="news-tag">Logement</span>
-          <h3 class="news-main__headline">
-            Ouverture de 120 nouveaux logements patrimoniaux en Île-de-France
+    <!-- Actualité à la une (carte horizontale) -->
+    <div class="fr-card fr-card--horizontal fr-card--horizontal-tier fr-enlarge-link fr-mb-4w">
+      <div class="fr-card__body">
+        <div class="fr-card__content">
+          <h3 class="fr-card__title">
+            <a href="?id=x_snc_habitat_familles_actualite">
+              Ouverture de 120 nouveaux logements patrimoniaux en Île-de-France
+            </a>
           </h3>
-          <p class="news-main__text">
+          <p class="fr-card__desc">
             Les demandes sont ouvertes dès à présent pour les agents mutés
             à la rentrée, avec une priorité accordée aux familles.
           </p>
-          <span class="news-date">3 juillet 2026</span>
+          <div class="fr-card__start">
+            <p class="fr-badge etiquette">Logement</p>
+          </div>
+          <div class="fr-card__end">
+            <p class="fr-card__detail">3 juillet 2026</p>
+          </div>
         </div>
-      </a>
+      </div>
+      <div class="fr-card__header">
+        <div class="fr-card__img">
+          <img class="fr-responsive-img" src="/x_snc_habitat.logement.png" alt="">
+        </div>
+      </div>
+    </div>
 
-      <!-- Actualités secondaires -->
-      <div class="news__side">
+    <!-- Trois brèves (cartes verticales) -->
+    <div class="grille-3">
 
-        <!-- Actualité -->
-        <a href="?id=x_snc_habitat_familles_actualite" class="news-item">
-          <div class="news-item__image"></div>
-          <div class="news-item__body">
-            <span class="news-tag">Démarche en ligne</span>
-            <h3 class="news-item__headline">
-              Le formulaire unique de mobilité est disponible sur mobile
-            </h3>
-            <span class="news-date">28 juin 2026</span>
+      <div>
+        <div class="fr-card fr-enlarge-link">
+          <div class="fr-card__body">
+            <div class="fr-card__content">
+              <h3 class="fr-card__title">
+                <a href="?id=x_snc_habitat_familles_actualite">
+                  Le formulaire unique de mobilité est disponible sur mobile
+                </a>
+              </h3>
+              <p class="fr-card__desc">
+                Renseignez votre demande depuis votre téléphone, où que vous soyez.
+              </p>
+              <div class="fr-card__start">
+                <p class="fr-badge etiquette">Prestation famille</p>
+              </div>
+              <div class="fr-card__end">
+                <p class="fr-card__detail">28 juin 2026</p>
+              </div>
+            </div>
           </div>
-        </a>
-
-        <!-- Actualité -->
-        <a href="?id=x_snc_habitat_familles_actualite" class="news-item">
-          <div class="news-item__image"></div>
-          <div class="news-item__body">
-            <span class="news-tag">Accompagnement</span>
-            <h3 class="news-item__headline">
-              Nouveau simulateur d'indemnités de changement de résidence
-            </h3>
-            <span class="news-date">15 juin 2026</span>
+          <div class="fr-card__header">
+            <div class="fr-card__img">
+              <img class="fr-responsive-img" src="/x_snc_habitat.demarche.png" alt="">
+            </div>
           </div>
-        </a>
+        </div>
+      </div>
 
-        <!-- Actualité -->
-        <a href="?id=x_snc_habitat_familles_actualite" class="news-item">
-          <div class="news-item__image"></div>
-          <div class="news-item__body">
-            <span class="news-tag">Logement</span>
-            <h3 class="news-item__headline">
-              Bureaux logement : nouveaux horaires d'accueil en garnison
-            </h3>
-            <span class="news-date">2 juin 2026</span>
+      <div>
+        <div class="fr-card fr-enlarge-link">
+          <div class="fr-card__body">
+            <div class="fr-card__content">
+              <h3 class="fr-card__title">
+                <a href="?id=x_snc_habitat_familles_actualite">
+                  Nouveau simulateur d'indemnités de changement de résidence
+                </a>
+              </h3>
+              <p class="fr-card__desc">
+                Estimez vos droits en quelques minutes avant de déposer votre dossier.
+              </p>
+              <div class="fr-card__start">
+                <p class="fr-badge etiquette">Accompagnement</p>
+              </div>
+              <div class="fr-card__end">
+                <p class="fr-card__detail">15 juin 2026</p>
+              </div>
+            </div>
           </div>
-        </a>
+          <div class="fr-card__header">
+            <div class="fr-card__img">
+              <img class="fr-responsive-img" src="/x_snc_habitat.demarche.png" alt="">
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <div>
+        <div class="fr-card fr-enlarge-link">
+          <div class="fr-card__body">
+            <div class="fr-card__content">
+              <h3 class="fr-card__title">
+                <a href="?id=x_snc_habitat_familles_actualite">
+                  Bureaux logement : nouveaux horaires d'accueil en garnison
+                </a>
+              </h3>
+              <p class="fr-card__desc">
+                Les bureaux logement élargissent leurs plages d'accueil dès septembre.
+              </p>
+              <div class="fr-card__start">
+                <p class="fr-badge etiquette">Logement</p>
+              </div>
+              <div class="fr-card__end">
+                <p class="fr-card__detail">2 juin 2026</p>
+              </div>
+            </div>
+          </div>
+          <div class="fr-card__header">
+            <div class="fr-card__img">
+              <img class="fr-responsive-img" src="/x_snc_habitat.demarche.png" alt="">
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
+  </section>
+
+
+  <!-- ===================== FAQ ===================== -->
+  <section class="faq fr-container fr-py-6w">
+
+    <h2 class="fr-h3 titre">Vos questions les plus <span>fréquentes</span></h2>
+
+    <div class="fr-accordions-group">
+
+      <details class="fr-accordion">
+        <summary class="fr-accordion__btn">
+          Qui peut déposer une demande ?
+          <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 13.172l4.95-4.95 1.414 1.414L12 16 5.636 9.636 7.05 8.222z"/></svg>
+        </summary>
+        <div class="fr-collapse" id="faq-1">
+          <p>Tout agent civil ou militaire du ministère faisant l'objet d'une mutation peut déposer une demande, dès réception de son ordre de mutation.</p>
+        </div>
+      </details>
+
+      <details class="fr-accordion">
+        <summary class="fr-accordion__btn">
+          Un seul formulaire pour trois prestations ?
+          <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 13.172l4.95-4.95 1.414 1.414L12 16 5.636 9.636 7.05 8.222z"/></svg>
+        </summary>
+        <div class="fr-collapse" id="faq-2">
+          <p>Oui. Un formulaire unique suffit : les services compétents pour le logement, le déménagement et l'accompagnement sont saisis automatiquement.</p>
+        </div>
+      </details>
+
+      <details class="fr-accordion">
+        <summary class="fr-accordion__btn">
+          Quelles pièces dois-je fournir ?
+          <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 13.172l4.95-4.95 1.414 1.414L12 16 5.636 9.636 7.05 8.222z"/></svg>
+        </summary>
+        <div class="fr-collapse" id="faq-3">
+          <p>Votre ordre de mutation, un justificatif de domicile et, selon votre situation, les pièces relatives à votre famille. La liste exacte s'affiche dans le formulaire.</p>
+        </div>
+      </details>
+
+      <details class="fr-accordion">
+        <summary class="fr-accordion__btn">
+          Combien de temps prend le traitement ?
+          <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 13.172l4.95-4.95 1.414 1.414L12 16 5.636 9.636 7.05 8.222z"/></svg>
+        </summary>
+        <div class="fr-collapse" id="faq-4">
+          <p>Le délai moyen est de trois semaines après réception du dossier complet. Vous suivez l'avancement depuis « Suivre mes dossiers ».</p>
+        </div>
+      </details>
+
+    </div>
+
+    <p class="faq__lien">
+      <a class="fr-link"
+         href="?id=x_snc_habitat_familles_faq">
+        Voir la foire aux questions <svg class="fleche" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"/></svg>
+      </a>
+    </p>
 
   </section>
 
 
-  <!-- FAQ -->
-  <section class="faq">
-
-    <!-- Titre de section -->
-    <div class="faq__head">
-      <p class="faq__label">Foire aux questions</p>
-      <h2 class="faq__title">Vos questions sur <span>la mobilité</span></h2>
-    </div>
-
-    <div class="faq__path-wrap">
-
-      <!-- Le chemin qui se dessine -->
-      <svg class="faq__path" viewBox="0 0 420 660" preserveAspectRatio="none" aria-hidden="true">
-      
-        <defs>
-          <mask id="faq-masque">
-            <path class="faq__path-masque"
-                  d="M210 0 C 60 90, 360 190, 210 300 C 60 410, 360 500, 210 610 C 150 638, 270 648, 210 656"
-                  stroke="#ffffff" stroke-width="14" fill="none" stroke-linecap="round"/>
-          </mask>
-        </defs>
-        <path class="faq__path-trait"
-              d="M210 0 C 60 90, 360 190, 210 300 C 60 410, 360 500, 210 610 C 150 638, 270 648, 210 656"
-              mask="url(#faq-masque)"/>
-      </svg>
-
-      <!-- Illustration -->
-      <div class="faq__illu faq__illu--1" aria-hidden="true">
-        <svg viewBox="0 0 200 200">
-          <ellipse cx="100" cy="180" rx="62" ry="10" fill="#F5F5FE"/>
-          <rect x="46" y="82" width="108" height="90" rx="7" fill="#E8EDFF"/>
-          <path d="M38 84 L100 42 L162 84 Z" fill="#000091"/>
-          <rect x="72" y="116" width="24" height="56" rx="3" fill="#ffffff"/>
-          <rect x="112" y="116" width="24" height="26" rx="3" fill="#ffffff"/>
-        </svg>
-      </div>
-
-
-      <!-- Question -->
-      <div class="faq__item">
-        <details class="faq-q">
-          <summary class="faq-q__btn">
-            <span class="faq-q__num">1</span>
-            <span class="faq-q__txt">Qui peut déposer une demande ?</span>
-            <span class="faq-q__sign"></span>
-          </summary>
-          <div class="faq-q__answer">
-            Tout agent civil ou militaire du ministère faisant l'objet d'une
-            mutation peut déposer une demande, dès réception de son ordre de mutation.
-          </div>
-        </details>
-      </div>
-
-      <!-- Question -->
-      <div class="faq__item">
-        <details class="faq-q">
-          <summary class="faq-q__btn">
-            <span class="faq-q__num">2</span>
-            <span class="faq-q__txt">Un seul formulaire pour trois prestations ?</span>
-            <span class="faq-q__sign"></span>
-          </summary>
-          <div class="faq-q__answer">
-            Oui. Un formulaire unique suffit : les services compétents pour le logement,
-            le déménagement et l'accompagnement sont saisis automatiquement.
-          </div>
-        </details>
-      </div>
-
-      <!-- Question -->
-      <div class="faq__item">
-        <details class="faq-q">
-          <summary class="faq-q__btn">
-            <span class="faq-q__num">3</span>
-            <span class="faq-q__txt">Quelles pièces dois-je fournir ?</span>
-            <span class="faq-q__sign"></span>
-          </summary>
-          <div class="faq-q__answer">
-            Votre ordre de mutation, un justificatif de domicile et, selon votre
-            situation, les pièces relatives à votre famille. La liste exacte
-            s'affiche dans le formulaire.
-          </div>
-        </details>
-      </div>
-
-      <!-- Question -->
-      <div class="faq__item">
-        <details class="faq-q">
-          <summary class="faq-q__btn">
-            <span class="faq-q__num">4</span>
-            <span class="faq-q__txt">Combien de temps prend le traitement ?</span>
-            <span class="faq-q__sign"></span>
-          </summary>
-          <div class="faq-q__answer">
-            Le délai moyen est de trois semaines après réception du dossier complet.
-            Vous suivez l'avancement depuis « Suivre mes dossiers ».
-          </div>
-        </details>
-      </div>
-
-    </div>
-
-    <!-- Voir toutes les questions -->
-    <div class="faq__more">
-      <a href="?id=x_snc_habitat_familles_faq" class="faq__more-link">
-        Voir toutes les questions
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
-    </div>
-
-  </section>
-
-    <!-- Informations pratiques -->
-<section class="infos">
-
-  <!-- Titre de section -->
-  <h2 class="infos__title">Informations <span>pratiques</span></h2>
-
-  <!-- Carte de recherche du bureau logement -->
-  <div class="infos-recherche">
-
-    <div class="infos-recherche__body">
-      <h3 class="infos-recherche__titre">Trouvez votre bureau logement</h3>
-      <p class="infos-recherche__texte">
-        Retrouvez le bureau logement dont vous dépendez ainsi que sa carte
-        des zones. Nos équipes vous aident à constituer votre dossier et
-        répondent à vos questions.
-      </p>
-
-      <div class="infos-recherche__form">
-        <label class="infos-recherche__label" for="choix-base">Votre base</label>
-        <select class="infos-recherche__select" id="choix-base">
-          <option value="">Sélectionner votre base…</option>
-          <option value="rambouillet">Base de Rambouillet</option>
-          <option value="brest">Base de Brest</option>
-          <option value="toulon">Base de Toulon</option>
-          <option value="metz">Base de Metz</option>
-        </select>
-        <button type="button" class="infos-recherche__bouton">
-          Rechercher
-          <svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- L'image est posée en fond par le CSS -->
-    <div class="infos-recherche__image" aria-hidden="true"></div>
-
-  </div>
-
-  <!-- Liste des rubriques -->
-  <div class="infos-liste">
-
-    <!-- Rubrique -->
-    <a href="?id=x_snc_habitat_familles_guide_doc" class="infos-ligne">
-      <span class="infos-ligne__illu">
-        <svg viewBox="0 0 60 60">
-          <rect x="14" y="8" width="32" height="40" rx="4" fill="#DFFDF0"/>
-          <rect x="20" y="18" width="20" height="3" rx="1.5" fill="#00A95F"/>
-          <rect x="20" y="26" width="14" height="3" rx="1.5" fill="#00A95F"/>
-          <rect x="20" y="34" width="18" height="3" rx="1.5" fill="#00A95F"/>
-          <circle cx="43" cy="43" r="10" fill="#00A95F"/>
-          <path d="M39 43 l3 3 5 -6" stroke="#ffffff" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-      <span class="infos-ligne__body">
-        <span class="infos-ligne__titre">Guides et documents à télécharger</span>
-        <span class="infos-ligne__texte">Notices, formulaires et guides pratiques, classés par prestation.</span>
-      </span>
-      <span class="infos-ligne__lien">
-        Consulter
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </span>
-    </a>
-
-    <!-- Rubrique -->
-    <a href="?id=x_snc_habitat_familles_eligibilite" class="infos-ligne">
-      <span class="infos-ligne__illu">
-        <svg viewBox="0 0 60 60">
-          <circle cx="30" cy="30" r="21" fill="#E8EDFF"/>
-          <circle cx="30" cy="30" r="21" stroke="#0063CB" stroke-width="3" fill="none"/>
-          <path d="M21 30 l6 6 12 -13" stroke="#0063CB" stroke-width="3.5" fill="none"
-                stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-      <span class="infos-ligne__body">
-        <span class="infos-ligne__titre">Conditions d'éligibilité</span>
-        <span class="infos-ligne__texte">Vérifiez vos droits selon votre statut et votre destination.</span>
-      </span>
-      <span class="infos-ligne__lien">
-        En savoir plus
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </span>
-    </a>
-
-    <!-- Rubrique -->
-    <a href="?id=x_snc_habitat_familles_contact" class="infos-ligne">
-      <span class="infos-ligne__illu">
-        <svg viewBox="0 0 60 60">
-          <path d="M11 15h38v25H26l-11 9v-9h-4z" fill="#FEE7FC"/>
-          <path d="M11 15h38v25H26l-11 9v-9h-4z" stroke="#6E445A" stroke-width="3" fill="none"
-                stroke-linejoin="round"/>
-          <circle cx="24" cy="27" r="2.6" fill="#6E445A"/>
-          <circle cx="32" cy="27" r="2.6" fill="#6E445A"/>
-          <circle cx="40" cy="27" r="2.6" fill="#6E445A"/>
-        </svg>
-      </span>
-      <span class="infos-ligne__body">
-        <span class="infos-ligne__titre">Contacter un référent</span>
-        <span class="infos-ligne__texte">Une question précise sur votre dossier ? Écrivez à votre référent mobilité.</span>
-      </span>
-      <span class="infos-ligne__lien">
-        Nous écrire
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </span>
-    </a>
-
-  </div>
-
-</section>
-
+  <!-- ===================== BANDEAU PHOTO ===================== -->
+  <section class="bandeau">
+    <img class="bandeau__photo" src="/x_snc_habitat.referente.jpg"
+         alt="Conseillère du Portail Habitat, ministère des Armées et des Anciens combattants">
   </section>
 
 </div>]]></template>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><record_update table="sp_theme">
     <sp_theme action="INSERT_OR_UPDATE">
-        <css_variables>
-/* ==========================================================================
+        <css_variables>/* ==========================================================================
    DSFR Theme - Design System de l'État français
    Conforme RGAA (accessibilité)
    ========================================================================== */
@@ -152,9 +151,8 @@ a {
 .sp-header {
   border-top: 3px solid;
   border-image: linear-gradient(to right, #000091, #FFFFFF, #E1000F) 1;
-}
-</css_variables>
-        <footer display_value="Sample Footer">feb4f763df121200ba13a4836bf26320</footer>
+}</css_variables>
+        <footer/>
         <footer_fixed>true</footer_fixed>
         <header display_value="Habitat - DSFR Header">b35cc0c874f644e4a9ecb9bb70466c2f</header>
         <icon/>
@@ -167,14 +165,14 @@ a {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2026-06-04 21:06:37</sys_created_on>
         <sys_id>be576fc0a6d84176bfbb7e9148ffb528</sys_id>
-        <sys_mod_count>0</sys_mod_count>
+        <sys_mod_count>1</sys_mod_count>
         <sys_name>DSFR - Habitat</sys_name>
         <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
         <sys_policy/>
         <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
         <sys_update_name>sp_theme_be576fc0a6d84176bfbb7e9148ffb528</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2026-06-04 21:06:37</sys_updated_on>
+        <sys_updated_on>2026-09-04 07:44:37</sys_updated_on>
         <turn_off_scss_compilation>false</turn_off_scss_compilation>
     </sp_theme>
     <sys_translated_text action="delete_multiple" query="documentkey=be576fc0a6d84176bfbb7e9148ffb528"/>

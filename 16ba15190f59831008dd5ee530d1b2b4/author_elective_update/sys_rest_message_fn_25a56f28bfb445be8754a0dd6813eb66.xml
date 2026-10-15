@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_rest_message_fn">
+  <sys_rest_message_fn action="DELETE">
+    <sys_id>25a56f28bfb445be8754a0dd6813eb66</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_rest_message_fn_25a56f28bfb445be8754a0dd6813eb66</sys_update_name>
+    <authentication_type>inherit_from_parent</authentication_type>
+    <content>{"dossier_id": "${dossier_id}", "montant": "${montant}", "beneficiaire": "${beneficiaire_id}"}</content>
+    <function_name>POST Ordre de Mission</function_name>
+    <http_method>post</http_method>
+    <rest_endpoint>https://mock.habitat.defense.gouv.fr/api/chorus-dt/ordres-mission</rest_endpoint>
+    <rest_message>d2ef9fd7fb624ff583a45f2e885cae2d</rest_message>
+  </sys_rest_message_fn>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_rest_message_fn_25a56f28bfb445be8754a0dd6813eb66</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_rest_message_fn">
+  <sys_rest_message_fn action="INSERT_OR_UPDATE">
+    <sys_id>25a56f28bfb445be8754a0dd6813eb66</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_rest_message_fn_25a56f28bfb445be8754a0dd6813eb66</sys_update_name>
+    <authentication_type>inherit_from_parent</authentication_type>
+    <content>{"dossier_id": "${dossier_id}", "montant": "${montant}", "beneficiaire": "${beneficiaire_id}"}</content>
+    <function_name>POST Ordre de Mission</function_name>
+    <http_method>post</http_method>
+    <rest_endpoint>https://mock.habitat.defense.gouv.fr/api/chorus-dt/ordres-mission</rest_endpoint>
+    <rest_message>d2ef9fd7fb624ff583a45f2e885cae2d</rest_message>
+  </sys_rest_message_fn>
+</record_update>]]></payload>
+        <payload_hash>1757919901</payload_hash>
+        <record_name>POST Ordre de Mission</record_name>
+        <reverted_from/>
+        <source>15abb8fc0f9f8f1008dd5ee530d1b223</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-10 14:52:56</sys_created_on>
+        <sys_id>51cb34700fdf8f1008dd5ee530d1b279</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a08bcebb280000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-10 14:52:56</sys_updated_on>
+        <type>HTTP Method</type>
+        <update_guid>11cb3470f0df8f10c432cec8fe009879</update_guid>
+        <update_guid_history>11cb3470f0df8f10c432cec8fe009879:1757919901</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 13:30:25</sys_created_on>
+        <sys_db_object display_value="" name="sys_rest_message_fn">sys_rest_message_fn</sys_db_object>
+        <sys_id>1545275cfa744a759c62340b686830e1</sys_id>
+        <sys_metadata>25a56f28bfb445be8754a0dd6813eb66</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>POST Ordre de Mission</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent display_value="">d2ef9fd7fb624ff583a45f2e885cae2d</sys_parent>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_rest_message_fn_25a56f28bfb445be8754a0dd6813eb66</sys_update_name>
+        <sys_update_version display_value="sys_rest_message_fn_25a56f28bfb445be8754a0dd6813eb66">51cb34700fdf8f1008dd5ee530d1b279</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 13:30:25</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

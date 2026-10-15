@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_registry_m2m_category">
+  <sys_ux_registry_m2m_category action="DELETE">
+    <sys_id>5a893d2629d948e7a54b617cc0c8bf27</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_registry_m2m_category_5a893d2629d948e7a54b617cc0c8bf27</sys_update_name>
+    <experience_category>afb4e3e173322010f0ca1e666bf6a726</experience_category>
+    <order>1000</order>
+    <page_registry>2068921b4a9f4e20967adbe1e299a881</page_registry>
+  </sys_ux_registry_m2m_category>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_ux_registry_m2m_category_5a893d2629d948e7a54b617cc0c8bf27</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ux_registry_m2m_category">
+  <sys_ux_registry_m2m_category action="INSERT_OR_UPDATE">
+    <sys_id>5a893d2629d948e7a54b617cc0c8bf27</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_ux_registry_m2m_category_5a893d2629d948e7a54b617cc0c8bf27</sys_update_name>
+    <experience_category>afb4e3e173322010f0ca1e666bf6a726</experience_category>
+    <order>1000</order>
+    <page_registry>2068921b4a9f4e20967adbe1e299a881</page_registry>
+  </sys_ux_registry_m2m_category>
+</record_update>]]></payload>
+        <payload_hash>-360280104</payload_hash>
+        <record_name/>
+        <reverted_from/>
+        <source>f82bdfb90f15871008dd5ee530d1b26b</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-06 18:57:56</sys_created_on>
+        <sys_id>463b933d0f15871008dd5ee530d1b257</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19e9e4c88360000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-06 18:57:56</sys_updated_on>
+        <type>UX Application Category M2M</type>
+        <update_guid>063b933da51587104f5cbbd2b74c8457</update_guid>
+        <update_guid_history>063b933da51587104f5cbbd2b74c8457:-360280104</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 05:36:18</sys_created_on>
+        <sys_db_object display_value="" name="sys_ux_registry_m2m_category">sys_ux_registry_m2m_category</sys_db_object>
+        <sys_id>6aaac380e5ab4f52a3f76b244f00b669</sys_id>
+        <sys_metadata>5a893d2629d948e7a54b617cc0c8bf27</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_ux_registry_m2m_category_5a893d2629d948e7a54b617cc0c8bf27</sys_update_name>
+        <sys_update_version display_value="sys_ux_registry_m2m_category_5a893d2629d948e7a54b617cc0c8bf27">463b933d0f15871008dd5ee530d1b257</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 05:36:18</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

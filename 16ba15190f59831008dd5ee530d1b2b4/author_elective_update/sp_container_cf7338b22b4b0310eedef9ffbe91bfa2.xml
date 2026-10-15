@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_container">
+    <sp_container action="DELETE">
+        <aria_label/>
+        <background_color/>
+        <background_image/>
+        <background_style>default</background_style>
+        <bootstrap_alt>false</bootstrap_alt>
+        <class_name/>
+        <container_class_name/>
+        <name>Accueil Portail Familles - Container 1</name>
+        <order>1</order>
+        <semantic_tag/>
+        <sp_page display_value="x_snc_habitat_familles_home">07fda28d42b246919815a36b265c8768</sp_page>
+        <subheader>false</subheader>
+        <sys_class_name>sp_container</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-04 09:08:53</sys_created_on>
+        <sys_id>cf7338b22b4b0310eedef9ffbe91bfa2</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Accueil Portail Familles - Container 1</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_update_name>sp_container_cf7338b22b4b0310eedef9ffbe91bfa2</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-04 09:08:53</sys_updated_on>
+        <title/>
+        <width>container</width>
+    </sp_container>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sp_container_cf7338b22b4b0310eedef9ffbe91bfa2</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_container"><sp_container action="INSERT_OR_UPDATE"><aria_label/><background_color/><background_image/><background_style>default</background_style><bootstrap_alt>false</bootstrap_alt><class_name/><container_class_name/><name>Accueil Portail Familles - Container 1</name><order>1</order><semantic_tag/><sp_page display_value="x_snc_habitat_familles_home">07fda28d42b246919815a36b265c8768</sp_page><subheader>false</subheader><sys_class_name>sp_container</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-04 09:08:53</sys_created_on><sys_id>cf7338b22b4b0310eedef9ffbe91bfa2</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Accueil Portail Familles - Container 1</sys_name><sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package><sys_policy/><sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope><sys_update_name>sp_container_cf7338b22b4b0310eedef9ffbe91bfa2</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-04 09:08:53</sys_updated_on><title/><width>container</width></sp_container></record_update>]]></payload>
+        <payload_hash>1477266958</payload_hash>
+        <record_name>Accueil Portail Familles - Container 1</record_name>
+        <reverted_from/>
+        <source>b6174e9c0f4fc31008dd5ee530d1b2ff</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-04 09:08:53</sys_created_on>
+        <sys_id>4f7338b22b4b0310eedef9ffbe91bfa8</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a06bad980f0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-04 09:08:53</sys_updated_on>
+        <type>Container</type>
+        <update_guid>0f7338b27a4b0310aa92f0b0dffa86a7</update_guid>
+        <update_guid_history>0f7338b27a4b0310aa92f0b0dffa86a7:1477266958</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Accueil Portail Familles - Container 1">d6a3bcb22b4b0310eedef9ffbe91bf27</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-04 09:09:40</sys_created_on>
+        <sys_db_object display_value="" name="sp_container">sp_container</sys_db_object>
+        <sys_id>331b7570cf7b4380a53685c0d09ca3e4</sys_id>
+        <sys_metadata>cf7338b22b4b0310eedef9ffbe91bfa2</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Accueil Portail Familles - Container 1</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sp_container_cf7338b22b4b0310eedef9ffbe91bfa2</sys_update_name>
+        <sys_update_version display_value="sp_container_cf7338b22b4b0310eedef9ffbe91bfa2">4f7338b22b4b0310eedef9ffbe91bfa8</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-04 09:09:40</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_row">
+  <sp_row action="DELETE">
+    <sys_id>0423e6e00f2f071008dd5ee530d1b22e</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sp_row_0423e6e00f2f071008dd5ee530d1b22e</sys_update_name>
+    <class_name/>
+    <order>1</order>
+    <semantic_tag/>
+    <sp_column/>
+    <sp_container>fde266240f2f071008dd5ee530d1b2e2</sp_container>
+  </sp_row>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sp_row_0423e6e00f2f071008dd5ee530d1b22e</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_row">
+  <sp_row action="INSERT_OR_UPDATE">
+    <sys_id>0423e6e00f2f071008dd5ee530d1b22e</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sp_row_0423e6e00f2f071008dd5ee530d1b22e</sys_update_name>
+    <class_name/>
+    <order>1</order>
+    <semantic_tag/>
+    <sp_column/>
+    <sp_container>fde266240f2f071008dd5ee530d1b2e2</sp_container>
+  </sp_row>
+</record_update>]]></payload>
+        <payload_hash>-813064524</payload_hash>
+        <record_name>1</record_name>
+        <reverted_from/>
+        <source>fa593eac2b630710eedef9ffbe91bfe3</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 15:39:31</sys_created_on>
+        <sys_id>20897a202ba30710eedef9ffbe91bff9</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0c9c5b0360000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 15:39:31</sys_updated_on>
+        <type>Row</type>
+        <update_guid>68897a20cea3071095c87635d9db96f8</update_guid>
+        <update_guid_history>68897a20cea3071095c87635d9db96f8:0,48236264d32f0710e1783af7656f517a:-1415643781</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="1">ff86d0652b670310eedef9ffbe91bf56</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 06:21:30</sys_created_on>
+        <sys_db_object display_value="" name="sp_row">sp_row</sys_db_object>
+        <sys_id>4e5f18d33aba4170a4301d07ab2c4390</sys_id>
+        <sys_metadata>0423e6e00f2f071008dd5ee530d1b22e</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>1</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sp_row_0423e6e00f2f071008dd5ee530d1b22e</sys_update_name>
+        <sys_update_version display_value="sp_row_0423e6e00f2f071008dd5ee530d1b22e">20897a202ba30710eedef9ffbe91bff9</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 06:21:30</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

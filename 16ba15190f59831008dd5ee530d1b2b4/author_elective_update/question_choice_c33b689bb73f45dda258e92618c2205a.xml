@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="question_choice">
+  <question_choice action="DELETE">
+    <sys_id>c33b689bb73f45dda258e92618c2205a</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>question_choice_c33b689bb73f45dda258e92618c2205a</sys_update_name>
+    <inactive>false</inactive>
+    <order>0</order>
+    <question cat_item="6f896a9848444d8bb277d2d4aaa9a3b5" name="site_arrivee" variable_set="NULL">99531504a7bb4e65bd0e928f0e217e72</question>
+    <text>PF, REU et MAY</text>
+    <value>pf_reu_may</value>
+  </question_choice>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>question_choice_c33b689bb73f45dda258e92618c2205a</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="question_choice">
+  <question_choice action="INSERT_OR_UPDATE">
+    <sys_id>c33b689bb73f45dda258e92618c2205a</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>question_choice_c33b689bb73f45dda258e92618c2205a</sys_update_name>
+    <inactive>false</inactive>
+    <order>0</order>
+    <question cat_item="6f896a9848444d8bb277d2d4aaa9a3b5" name="site_arrivee" variable_set="NULL">99531504a7bb4e65bd0e928f0e217e72</question>
+    <text>PF, REU et MAY</text>
+    <value>pf_reu_may</value>
+  </question_choice>
+</record_update>]]></payload>
+        <payload_hash>-1708752693</payload_hash>
+        <record_name>PF, REU et MAY</record_name>
+        <reverted_from/>
+        <source>0675e9190f99831008dd5ee530d1b221</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-06-04 21:06:36</sys_created_on>
+        <sys_id>d77521590f99831008dd5ee530d1b2cf</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>19e94759c450000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-06-04 21:06:36</sys_updated_on>
+        <type>Question Choice</type>
+        <update_guid>97752159369983102d85da7fa3df3acf</update_guid>
+        <update_guid_history>97752159369983102d85da7fa3df3acf:-1708752693</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="PF, REU et MAY">c4ae1c412b9f0310eedef9ffbe91bf89</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 07:24:05</sys_created_on>
+        <sys_db_object display_value="" name="question_choice">question_choice</sys_db_object>
+        <sys_id>2b10c444eede40f39687269eb6425a79</sys_id>
+        <sys_metadata>c33b689bb73f45dda258e92618c2205a</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>PF, REU et MAY</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>question_choice_c33b689bb73f45dda258e92618c2205a</sys_update_name>
+        <sys_update_version display_value="question_choice_c33b689bb73f45dda258e92618c2205a">d77521590f99831008dd5ee530d1b2cf</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 07:24:05</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

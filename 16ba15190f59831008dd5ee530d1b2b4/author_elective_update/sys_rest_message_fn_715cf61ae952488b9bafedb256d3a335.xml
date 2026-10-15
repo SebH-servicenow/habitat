@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_rest_message_fn">
+  <sys_rest_message_fn action="DELETE">
+    <sys_id>715cf61ae952488b9bafedb256d3a335</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_rest_message_fn_715cf61ae952488b9bafedb256d3a335</sys_update_name>
+    <authentication_type>inherit_from_parent</authentication_type>
+    <content>{"dossier_id": "${dossier_id}", "depart": "${site_depart}", "arrivee": "${site_arrivee}", "date_souhaitee": "${date_demenagement}", "fret_mode": "${fret_mode}", "garde_meubles": "${garde_meubles}"}</content>
+    <function_name>POST Ordre de Service</function_name>
+    <http_method>post</http_method>
+    <rest_endpoint>https://mock.habitat.defense.gouv.fr/api/prestataires-pfmd/ordres-service</rest_endpoint>
+    <rest_message>2e28cd36730745c78bc68df828d5c93b</rest_message>
+  </sys_rest_message_fn>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_rest_message_fn_715cf61ae952488b9bafedb256d3a335</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_rest_message_fn">
+  <sys_rest_message_fn action="INSERT_OR_UPDATE">
+    <sys_id>715cf61ae952488b9bafedb256d3a335</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sys_rest_message_fn_715cf61ae952488b9bafedb256d3a335</sys_update_name>
+    <authentication_type>inherit_from_parent</authentication_type>
+    <content>{"dossier_id": "${dossier_id}", "depart": "${site_depart}", "arrivee": "${site_arrivee}", "date_souhaitee": "${date_demenagement}", "fret_mode": "${fret_mode}", "garde_meubles": "${garde_meubles}"}</content>
+    <function_name>POST Ordre de Service</function_name>
+    <http_method>post</http_method>
+    <rest_endpoint>https://mock.habitat.defense.gouv.fr/api/prestataires-pfmd/ordres-service</rest_endpoint>
+    <rest_message>2e28cd36730745c78bc68df828d5c93b</rest_message>
+  </sys_rest_message_fn>
+</record_update>]]></payload>
+        <payload_hash>1599248178</payload_hash>
+        <record_name>POST Ordre de Service</record_name>
+        <reverted_from/>
+        <source>8527e00d2bdf0310eedef9ffbe91bff6</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 08:02:03</sys_created_on>
+        <sys_id>9857e48d2bdf0310eedef9ffbe91bfe2</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a08f7cebd50000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 08:02:03</sys_updated_on>
+        <type>HTTP Method</type>
+        <update_guid>d057e48d7bdf0310361375bc9a84cbe2</update_guid>
+        <update_guid_history>d057e48d7bdf0310361375bc9a84cbe2:0,1dcb3470d0df8f1034b4c4e4e136d280:-226095694</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-11 13:30:24</sys_created_on>
+        <sys_db_object display_value="" name="sys_rest_message_fn">sys_rest_message_fn</sys_db_object>
+        <sys_id>26f72fb7fc704f36a0411f2055094151</sys_id>
+        <sys_metadata>715cf61ae952488b9bafedb256d3a335</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>POST Ordre de Service</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent display_value="">2e28cd36730745c78bc68df828d5c93b</sys_parent>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_rest_message_fn_715cf61ae952488b9bafedb256d3a335</sys_update_name>
+        <sys_update_version display_value="sys_rest_message_fn_715cf61ae952488b9bafedb256d3a335">9857e48d2bdf0310eedef9ffbe91bfe2</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-11 13:30:24</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_section action="DELETE" caption="" section_id="c90d859a2b930b10d2bef8c76e91bf61" sys_domain="global" table="x_snc_habitat_x_snc_habitat_offre_mutation" version="3" view="">
+        <sys_ui_section action="DELETE">
+            <caption/>
+            <header>false</header>
+            <name>x_snc_habitat_x_snc_habitat_offre_mutation</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-15 07:59:10</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>c90d859a2b930b10d2bef8c76e91bf61</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_habitat_x_snc_habitat_offre_mutation</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+            <sys_update_name>sys_ui_section_c90d859a2b930b10d2bef8c76e91bf61</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-15 07:59:10</sys_updated_on>
+            <sys_user/>
+            <title>true</title>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sys_ui_section_c90d859a2b930b10d2bef8c76e91bf61</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_ui_section caption="" section_id="c90d859a2b930b10d2bef8c76e91bf61" sys_domain="global" table="x_snc_habitat_x_snc_habitat_offre_mutation" version="3" view=""><sys_ui_section action="INSERT_OR_UPDATE"><caption/><header>false</header><name>x_snc_habitat_x_snc_habitat_offre_mutation</name><roles/><sys_class_name>sys_ui_section</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-15 07:59:10</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>c90d859a2b930b10d2bef8c76e91bf61</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_snc_habitat_x_snc_habitat_offre_mutation</sys_name><sys_overrides/><sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package><sys_policy/><sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope><sys_update_name>sys_ui_section_c90d859a2b930b10d2bef8c76e91bf61</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-15 07:59:10</sys_updated_on><sys_user/><title>true</title><view display_value="Default view" name="NULL">Default view</view><view_name/></sys_ui_section></sys_ui_section></record_update>]]></payload>
+        <payload_hash>-1949206481</payload_hash>
+        <record_name>Offre mutation</record_name>
+        <reverted_from/>
+        <source>b6174e9c0f4fc31008dd5ee530d1b2ff</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-15 07:59:11</sys_created_on>
+        <sys_id>c10d859a2b930b10d2bef8c76e91bf69</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0a413b9040000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-15 07:59:11</sys_updated_on>
+        <type>Form Layout</type>
+        <update_guid>810d859a8c930b109fa1fa27d9619f69</update_guid>
+        <update_guid_history>810d859a8c930b109fa1fa27d9619f69:-1949206481</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-15 08:07:36</sys_created_on>
+        <sys_db_object display_value="" name="sys_ui_section">sys_ui_section</sys_db_object>
+        <sys_id>abc3798734ef404a95a6e883f6ab0029</sys_id>
+        <sys_metadata>c90d859a2b930b10d2bef8c76e91bf61</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_snc_habitat_x_snc_habitat_offre_mutation</sys_name>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent display_value="">ec0d459a2b930b10d2bef8c76e91bfd3</sys_parent>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sys_ui_section_c90d859a2b930b10d2bef8c76e91bf61</sys_update_name>
+        <sys_update_version display_value="sys_ui_section_c90d859a2b930b10d2bef8c76e91bf61">c10d859a2b930b10d2bef8c76e91bf69</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-15 08:07:36</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

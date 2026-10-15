@@ -12,10 +12,12 @@
         <change_fields>false</change_fields>
         <client_callable>false</client_callable>
         <collection>x_snc_habitat_dossier_metier</collection>
-        <condition>stateVALCHANGES^state=7</condition>
+        <condition/>
         <description/>
         <execute_function>false</execute_function>
-        <filter_condition/>
+        <filter_condition table="x_snc_habitat_dossier_metier">stateVALCHANGES^state=7<item endquery="false" field="state" goto="false" newquery="false" operator="VALCHANGES" or="false" value=""/>
+            <item display_value="Closed Skipped" endquery="false" field="state" goto="false" newquery="false" operator="=" or="false" value="7"/>
+        </filter_condition>
         <is_rest>false</is_rest>
         <message/>
         <name>Habitat - Clôture dossier</name>
@@ -43,7 +45,7 @@
         <sys_domain>global</sys_domain>
         <sys_domain_path>/</sys_domain_path>
         <sys_id>dcd6124b33cc47a6889bc5ca4991781a</sys_id>
-        <sys_mod_count>0</sys_mod_count>
+        <sys_mod_count>1</sys_mod_count>
         <sys_name>Habitat - Clôture dossier</sys_name>
         <sys_overrides/>
         <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
@@ -51,7 +53,7 @@
         <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
         <sys_update_name>sys_script_dcd6124b33cc47a6889bc5ca4991781a</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2026-06-08 06:23:19</sys_updated_on>
+        <sys_updated_on>2026-09-04 08:07:53</sys_updated_on>
         <template/>
         <when>before</when>
     </sys_script>

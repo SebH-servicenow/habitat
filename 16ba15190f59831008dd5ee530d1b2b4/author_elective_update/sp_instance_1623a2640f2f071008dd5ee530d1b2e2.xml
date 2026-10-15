@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_instance">
+  <sp_instance action="DELETE">
+    <sys_id>1623a2640f2f071008dd5ee530d1b2e2</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sp_instance_1623a2640f2f071008dd5ee530d1b2e2</sys_update_name>
+    <active>true</active>
+    <advanced_placeholder_dimensions>false</advanced_placeholder_dimensions>
+    <async_load>false</async_load>
+    <async_load_device_type>desktop,tablet,mobile</async_load_device_type>
+    <async_load_trigger>viewport</async_load_trigger>
+    <class_name/>
+    <color>default</color>
+    <css/>
+    <glyph/>
+    <id/>
+    <order>2</order>
+    <placeholder_dimensions>{
+	"mobile": {
+		"height": "250px",
+		"width": "100%"
+	},
+	"desktop": {
+		"height": "250px",
+		"width": "100%"
+	},
+	"tablet": {
+		"height": "250px",
+		"width": "100%"
+	}
+}</placeholder_dimensions>
+    <placeholder_dimensions_script>function evaluateConfig(options) { return {
+	"mobile": {
+		"height": "250px",
+		"width": "100%"
+	},
+	"desktop": {
+		"height": "250px",
+		"width": "100%"
+	},
+	"tablet": {
+		"height": "250px",
+		"width": "100%"
+	}
+}; }</placeholder_dimensions_script>
+    <placeholder_template>&lt;!--
+	AngularJS template with configurable options.
+	Use the "options" object to control dynamic behavior.
+	Example: Display an element when max row count is 10:
+	&lt;div ng-if="options.maxRowCount === 10"&gt;&lt;/div&gt;
+	The "skeleton-container" class is used for loading placeholders.
+--&gt;
+	&lt;div class="skeleton-container"&gt;
+	&lt;!-- Header Skeleton --&gt;
+	&lt;div class="skeleton-box skeleton-header"&gt;&lt;/div&gt;
+	&lt;!-- Body Skeleton --&gt;
+	&lt;div class="skeleton-box skeleton-line"&gt;&lt;/div&gt;
+	&lt;div class="skeleton-box skeleton-line small"&gt;&lt;/div&gt;
+	&lt;div class="skeleton-box skeleton-line medium"&gt;&lt;/div&gt;
+&lt;/div&gt;</placeholder_template>
+    <preserve_placeholder_size>false</preserve_placeholder_size>
+    <roles/>
+    <short_description/>
+    <size>md</size>
+    <sp_column>082362640f2f071008dd5ee530d1b27c</sp_column>
+    <sp_widget>bfc162a00f2f071008dd5ee530d1b274</sp_widget>
+    <title/>
+    <url/>
+    <widget_parameters/>
+  </sp_instance>
+<sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</application>
+        <file_path/>
+        <instance_id>aa3df1ef2b5c72502fdcfcd2ce91bfd3</instance_id>
+        <instance_name>demoalectriallflp129491</instance_name>
+        <name>sp_instance_1623a2640f2f071008dd5ee530d1b2e2</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_instance">
+  <sp_instance action="INSERT_OR_UPDATE">
+    <sys_id>1623a2640f2f071008dd5ee530d1b2e2</sys_id>
+    <sys_scope display_value="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+    <sys_update_name>sp_instance_1623a2640f2f071008dd5ee530d1b2e2</sys_update_name>
+    <active>true</active>
+    <advanced_placeholder_dimensions>false</advanced_placeholder_dimensions>
+    <async_load>false</async_load>
+    <async_load_device_type>desktop,tablet,mobile</async_load_device_type>
+    <async_load_trigger>viewport</async_load_trigger>
+    <class_name/>
+    <color>default</color>
+    <css/>
+    <glyph/>
+    <id/>
+    <order>2</order>
+    <placeholder_dimensions>{
+	"mobile": {
+		"height": "250px",
+		"width": "100%"
+	},
+	"desktop": {
+		"height": "250px",
+		"width": "100%"
+	},
+	"tablet": {
+		"height": "250px",
+		"width": "100%"
+	}
+}</placeholder_dimensions>
+    <placeholder_dimensions_script>function evaluateConfig(options) { return {
+	"mobile": {
+		"height": "250px",
+		"width": "100%"
+	},
+	"desktop": {
+		"height": "250px",
+		"width": "100%"
+	},
+	"tablet": {
+		"height": "250px",
+		"width": "100%"
+	}
+}; }</placeholder_dimensions_script>
+    <placeholder_template>&lt;!--
+	AngularJS template with configurable options.
+	Use the "options" object to control dynamic behavior.
+	Example: Display an element when max row count is 10:
+	&lt;div ng-if="options.maxRowCount === 10"&gt;&lt;/div&gt;
+	The "skeleton-container" class is used for loading placeholders.
+--&gt;
+	&lt;div class="skeleton-container"&gt;
+	&lt;!-- Header Skeleton --&gt;
+	&lt;div class="skeleton-box skeleton-header"&gt;&lt;/div&gt;
+	&lt;!-- Body Skeleton --&gt;
+	&lt;div class="skeleton-box skeleton-line"&gt;&lt;/div&gt;
+	&lt;div class="skeleton-box skeleton-line small"&gt;&lt;/div&gt;
+	&lt;div class="skeleton-box skeleton-line medium"&gt;&lt;/div&gt;
+&lt;/div&gt;</placeholder_template>
+    <preserve_placeholder_size>false</preserve_placeholder_size>
+    <roles/>
+    <short_description/>
+    <size>md</size>
+    <sp_column>082362640f2f071008dd5ee530d1b27c</sp_column>
+    <sp_widget>bfc162a00f2f071008dd5ee530d1b274</sp_widget>
+    <title/>
+    <url/>
+    <widget_parameters/>
+  </sp_instance>
+</record_update>]]></payload>
+        <payload_hash>1713739988</payload_hash>
+        <record_name/>
+        <reverted_from/>
+        <source>fa593eac2b630710eedef9ffbe91bfe3</source>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 15:39:29</sys_created_on>
+        <sys_id>d0897a202ba30710eedef9ffbe91bf02</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0c9c5aa8d0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 15:39:29</sys_updated_on>
+        <type>Instance</type>
+        <update_guid>1c897a20c9a307104fb10dfcd29e3c01</update_guid>
+        <update_guid_history>1c897a20c9a307104fb10dfcd29e3c01:0,5c7dea686d6f07109eb2d8fd8d381cff:-1853424666,dc7dea68566f07102c66da7e595852df:-1017094555,087dea68db6f07101c9197817417f9af:-1853424666,1a23a2649e2f07104b313bab5733efe6:-1017094555</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="">fb86d0652b670310eedef9ffbe91bf20</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 06:21:30</sys_created_on>
+        <sys_db_object display_value="" name="sp_instance">sp_instance</sys_db_object>
+        <sys_id>270361f797814fe4aacd1520c24e3610</sys_id>
+        <sys_metadata>1623a2640f2f071008dd5ee530d1b2e2</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="Habitat" source="x_snc_habitat">16ba15190f59831008dd5ee530d1b2b4</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Habitat">16ba15190f59831008dd5ee530d1b2b4</sys_scope>
+        <sys_scope_delete display_value="">1405cbe5c11941e7bec83f91e7239299</sys_scope_delete>
+        <sys_update_name>sp_instance_1623a2640f2f071008dd5ee530d1b2e2</sys_update_name>
+        <sys_update_version display_value="sp_instance_1623a2640f2f071008dd5ee530d1b2e2">d0897a202ba30710eedef9ffbe91bf02</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 06:21:30</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>
